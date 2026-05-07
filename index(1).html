@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <button class="btn btn-success btn-sm" onclick="exportPharmaARToExcel()">📥 تحميل Excel الصيدلية</button>
+
+    <button class="btn btn-success btn-sm" onclick="exportClinicARToExcel()">📥 تحميل Excel المجمع</button>
+
+    <script>
+        // ── وظائف تصدير البيانات الجديدة ──────────────────────────────
+
+        // 1. تصدير مستحقات الصيدلية
+        window.exportPharmaARToExcel = function() {
+            if (!window.parCompanies || window.parCompanies.length === 0) {
+                showToast("لا توجد بيانات صيدلية للتصدير", "error");
+                return;
+            }
+
+            const monthName = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][parMonth];
+            
+            const data = window.parCompanies.map(co => {
+                const monthKey = `${parYear}-${String(parMonth + 1).padStart(2, '0')}`;
+                const entry = parEntries[co.id]?.[monthKey] || {};
+                const prevBal = getPrevBalance(co, parMonth, parYear);
+                const currentBal = prevBal + (parseFloat(entry.purchases) || 0) - (parseFloat(entry.paid) || 0);
+
+                return {
+                    "اسم الشركة": co.name,
+                    "الرصيد السابق": prevBal,
+                    "المشتريات (شهري)": entry.purchases || 0,
+                    "المسدد": entry.paid || 0,
+                    "الرصيد الحالي": currentBal,
+                    "تاريخ آخر تحديث": co.updatedAt ? new Date(co.updatedAt).toLocaleDateString('ar-SA') : '—'
+                };
+            });
+
+            downloadExcelFile(data, `مستحقات_الصيدلية_${monthName}_${parYear}`);
+        };
+
+        // 2. تصدير مستحقات المجمع
+        window.exportClinicARToExcel = function() {
+            if (!window.carCompanies || window.carCompanies.length === 0) {
+                showToast("لا توجد بيانات مجمع للتصدير", "error");
+                return;
+            }
+
+            const monthName = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][carMonth];
+
+            const data = window.carCompanies.map(co => {
+                const monthKey = `${carYear}-${String(carMonth + 1).padStart(2, '0')}`;
+                const entry = carEntries[co.id]?.[monthKey] || {};
+                const prevBal = getCarPrevBalance(co, carMonth, carYear);
+                const currentBal = prevBal + (parseFloat(entry.purchases) || 0) - (parseFloat(entry.paid) || 0);
+
+                return {
+                    "اسم الشركة": co.name,
+                    "الرصيد السابق": prevBal,
+                    "المشتريات": entry.purchases || 0,
+                    "المسدد": entry.paid || 0,
+                    "الرصيد الحالي": currentBal,
+                    "الاستحقاق (Due)": entry.due || 0,
+                    "المتوقع (Expected)": entry.expected || 0
+                };
+            });
+
+            downloadExcelFile(data, `مستحقات_المجمع_${monthName}_${carYear}`);
+        };
+
+        // وظيفة مساعدة لإنشاء وتحميل الملف
+        function downloadExcelFile(data, fileName) {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "البيانات");
+
+            // تحسين شكل الملف (دعم اللغة العربية)
+            if(!workbook.Workbook) workbook.Workbook = {};
+            if(!workbook.Workbook.Views) workbook.Workbook.Views = [{}];
+            workbook.Workbook.Views[0].RTL = true;
+
+            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+            showToast("تم تجهيز ملف Excel بنجاح", "success");
+        }
+
+        // ... (بقية الأكواد الأصلية كما هي دون تغيير) ...
+    </script>
+</body>
+</html>
