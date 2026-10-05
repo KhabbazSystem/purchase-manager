@@ -15,6 +15,9 @@
     --line: #e4e8ee; --line-strong: #d3d9e1;
     --accent: #3b48a8; --accent-hover: #2f3a8c; --accent-soft: #eceefb; --accent-text: #2f3a8c; --on-accent: #ffffff;
     --brand-red: #e0384b; --brand-sky: #5fb6ea;
+    /* Chart series (validated reference palette, slots 1–2) and sequential heat ramp */
+    --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
+    --grid: #e6e9ef; --axis: #c9cfd8;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -26,6 +29,8 @@
       --line: #252e39; --line-strong: #323d4a;
       --accent: #8d98f0; --accent-hover: #a5aef4; --accent-soft: #1e2347; --accent-text: #b3bbf7; --on-accent: #10142e;
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
+      --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
+      --grid: #232b36; --axis: #36404d;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -149,6 +154,71 @@
   @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
   .error { color: var(--danger); margin-bottom: 12px; }
+  .small { font-size: 12px; }
+  .btn.sm { height: 28px; padding: 0 10px; font-size: 12px; }
+
+  /* KPI deltas */
+  .delta { font-size: 12px; font-weight: 500; }
+  .delta.up { color: var(--ok); } .delta.down { color: var(--danger); } .delta.flat { color: var(--muted); }
+
+  /* Analytics */
+  .insights { margin: 0; padding: 12px 16px 14px 34px; display: grid; gap: 6px; }
+  .insights li { line-height: 1.5; }
+  .insights b { font-weight: 600; }
+  .chart { padding: 12px 16px 16px; position: relative; }
+  .chart svg { display: block; width: 100%; overflow: visible; }
+  .chart svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
+  .chart .hit { fill: transparent; cursor: default; }
+  .chart .hit:hover + .mark, .chart g.col:hover .seg { opacity: .85; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .hbars { display: grid; gap: 4px; }
+  .hrow { display: grid; grid-template-columns: minmax(0, 190px) 1fr 76px; align-items: center; gap: 12px; padding: 4px 6px;
+          margin: 0 -6px; border-radius: 6px; outline: none; }
+  .hrow:hover, .hrow:focus-visible { background: var(--surface-2); }
+  .hrow .name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hrow .val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .hrow .val small { color: var(--muted); margin-left: 4px; }
+  .htrack { display: flex; gap: 2px; height: 14px; min-width: 0; }
+  .htrack .seg { height: 100%; min-width: 2px; }
+  .htrack .seg:last-child { border-radius: 0 4px 4px 0; }
+  .meter { height: 10px; border-radius: 5px; background: var(--accent-soft); overflow: hidden; }
+  .meter > span { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+  .hrow.flag .meter > span { background: var(--warn); }
+
+  .heat { display: grid; gap: 2px; font-size: 11px; color: var(--muted); }
+  .heat .cell { height: 26px; border-radius: 3px; background: var(--surface-2); outline: none; }
+  .heat .cell:hover, .heat .cell:focus-visible { box-shadow: 0 0 0 2px var(--text) inset; }
+  .heat .rl { display: flex; align-items: center; padding-right: 6px; }
+  .heat .cl { text-align: center; }
+  .heat-legend { display: inline-flex; align-items: center; gap: 6px; }
+  .heat-scale { width: 90px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--heat-lo), var(--heat-hi)); }
+
+  .cols { display: flex; align-items: flex-end; gap: 10px; height: 190px; padding-top: 18px; border-bottom: 1px solid var(--axis); }
+  .cols .c { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; outline: none; }
+  .cols .c b { font-size: 12px; font-weight: 600; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .cols .c span { width: 100%; max-width: 24px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .cols .c:hover span, .cols .c:focus-visible span { opacity: .8; }
+  .col-labels { display: flex; gap: 10px; margin-top: 6px; }
+  .col-labels span { flex: 1; text-align: center; font-size: 11px; color: var(--muted); }
+
+  .split { display: grid; gap: 16px; padding-top: 6px; }
+  .split .row { display: grid; gap: 6px; }
+  .split .row .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .split .row .top b { font-size: 22px; font-weight: 600; }
+
+  #anBody.loading, #statKpis.loading { opacity: .5; transition: opacity .2s; }
+
+  .tip { position: fixed; z-index: 30; pointer-events: none; min-width: 150px; max-width: 280px; padding: 8px 10px;
+         background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px;
+         box-shadow: 0 6px 20px rgba(16, 24, 40, .15); font-size: 12px; }
+  .tip .t { color: var(--muted); margin-bottom: 4px; }
+  .tip .r { display: flex; align-items: center; gap: 8px; line-height: 1.6; }
+  .tip .r i { width: 12px; height: 2px; border-radius: 1px; flex: none; }
+  .tip .r strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tip .r span { color: var(--muted); }
 
   /* Login */
   .login { max-width: 380px; margin: 10vh auto; padding: 28px; }
@@ -249,7 +319,25 @@
       <button class="tab" role="tab" data-tab="insurers" aria-selected="false">Insurers</button>
       <button class="tab" role="tab" data-tab="alerts" aria-selected="false">Alerts<span class="badge hidden" id="alertBadge">0</span></button>
       <button class="tab" role="tab" data-tab="stats" aria-selected="false">Statistics</button>
+      <button class="tab" role="tab" data-tab="analytics" aria-selected="false">Analytics</button>
     </nav>
+
+    <!-- Period filter shared by Statistics and Analytics -->
+    <div class="controls hidden" id="periodBar">
+      <div class="seg" id="rangeSeg" role="group" aria-label="Period">
+        <button data-range="day" aria-pressed="true">Day</button>
+        <button data-range="week" aria-pressed="false">Week</button>
+        <button data-range="month" aria-pressed="false">Month</button>
+        <button data-range="custom" aria-pressed="false">Custom</button>
+      </div>
+      <div class="group hidden" id="customRange">
+        <input class="field" id="rangeFrom" type="date" aria-label="From">
+        <span class="muted">→</span>
+        <input class="field" id="rangeTo" type="date" aria-label="To">
+        <button class="btn primary" id="applyRange">Apply</button>
+      </div>
+      <span class="muted" id="rangeLabel"></span>
+    </div>
 
     <div class="error" id="err"></div>
 
@@ -319,14 +407,6 @@
 
     <!-- Statistics -->
     <div data-panel="stats" class="hidden">
-      <div class="controls">
-        <div class="seg" id="rangeSeg" role="group" aria-label="Period">
-          <button data-range="day" aria-pressed="true">Day</button>
-          <button data-range="week" aria-pressed="false">Week</button>
-          <button data-range="month" aria-pressed="false">Month</button>
-        </div>
-        <span class="muted" id="rangeLabel"></span>
-      </div>
       <div class="kpis" id="statKpis"></div>
       <div class="card" id="trendCard">
         <div class="card-head"><h2>Visits per day</h2></div>
@@ -354,8 +434,95 @@
       </div>
       <div class="empty hidden" id="statEmpty">No data for this period yet.</div>
     </div>
+
+    <!-- Analytics -->
+    <div data-panel="analytics" class="hidden">
+      <div id="anBody">
+        <div class="kpis" id="anKpis"></div>
+
+        <div class="card">
+          <div class="card-head"><h2>Key insights</h2><span class="muted">Generated from the selected period</span></div>
+          <ul class="insights" id="anInsights"></ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2 id="dailyTitle">Visits per day</h2><div class="muted small">Insurance vs cash</div></div>
+            <div class="actions"><div class="legend" id="dailyLegend"></div><button class="btn sm" data-toggle="Daily">Table</button></div>
+          </div>
+          <div class="chart" id="chDaily"></div>
+          <div class="table-wrap hidden" id="tbDaily"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Busiest days and hours</h2><div class="muted small">Visits by weekday and hour of arrival — use it to plan staffing</div></div>
+            <div class="actions"><div class="heat-legend"><span class="muted small">Fewer</span><span class="heat-scale"></span><span class="muted small">More</span></div>
+              <button class="btn sm" data-toggle="Heat">Table</button></div>
+          </div>
+          <div class="chart" id="chHeat"></div>
+          <div class="table-wrap hidden" id="tbHeat"></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <div><h2>Doctor workload</h2><div class="muted small">Visits per doctor, new vs follow-up</div></div>
+              <div class="actions"><div class="legend" id="docLegend"></div><button class="btn sm" data-toggle="Doc">Table</button></div>
+            </div>
+            <div class="chart" id="chDoc"></div>
+            <div class="table-wrap hidden" id="tbDoc"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><h2>UCAF completion by doctor</h2><div class="muted small">Share of visits with a written form · lowest first</div></div>
+              <div class="actions"><button class="btn sm" data-toggle="Done">Table</button></div>
+            </div>
+            <div class="chart" id="chDone"></div>
+            <div class="table-wrap hidden" id="tbDone"></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <div><h2>Insurer mix</h2><div class="muted small">Share of visits</div></div>
+              <div class="actions"><button class="btn sm" data-toggle="Ins">Table</button></div>
+            </div>
+            <div class="chart" id="chIns"></div>
+            <div class="table-wrap hidden" id="tbIns"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><h2>Top diagnoses</h2><div class="muted small">Principal ICD-10 code</div></div>
+              <div class="actions"><button class="btn sm" data-toggle="Dx">Table</button></div>
+            </div>
+            <div class="chart" id="chDx"></div>
+            <div class="table-wrap hidden" id="tbDx"></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <div><h2>Patients by age group</h2><div class="muted small">Unique patients</div></div>
+              <div class="actions"><button class="btn sm" data-toggle="Age">Table</button></div>
+            </div>
+            <div class="chart" id="chAge"></div>
+            <div class="table-wrap hidden" id="tbAge"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h2>Patients by gender</h2><div class="muted small">Unique patients</div></div></div>
+            <div class="chart" id="chSex"></div>
+          </div>
+        </div>
+      </div>
+      <div class="empty hidden" id="anEmpty">No data for this period yet.</div>
+    </div>
   </section>
 </main>
+
+<div class="tip hidden" id="tip" role="tooltip"></div>
 
 <div id="modal" class="overlay hidden" role="dialog" aria-modal="true">
   <div class="overlay-bar">
@@ -461,7 +628,7 @@
     renderVisits();
     renderInsurers();
     renderAlerts();
-    if (tab === "stats") renderStats();
+    renderPeriodViews().catch(showError);
   }
 
   function renderVisits() {
@@ -550,45 +717,80 @@
     $("alertEmpty").classList.toggle("hidden", issues.length > 0);
   }
 
-  // ---------- Statistics ----------
-  function periodFor(date) {
+  // ---------- Period (shared by Statistics and Analytics) ----------
+  const MAX_DAYS = 92; // keeps Firestore reads well inside the free quota
+  const fmtDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5) + 1;
+
+  function currentPeriod() {
+    const date = $("date").value;
     if (range === "day") return { from: date, to: date, label: new Date(date + "T12:00:00").toDateString() };
-    if (range === "week") return { from: addDays(date, -6), to: date, label: `${addDays(date, -6)} → ${date} (last 7 days)` };
+    if (range === "week") return { from: addDays(date, -6), to: date, label: `${fmtDay(addDays(date, -6))} → ${fmtDay(date)} · last 7 days` };
+    if (range === "custom") {
+      const from = $("rangeFrom").value || date, to = $("rangeTo").value || date;
+      return { from, to, label: `${fmtDay(from)} → ${fmtDay(to)} · ${daysBetween(from, to)} days` };
+    }
+    // A month ends today at the latest, so the current month compares like-for-like with the days before it
     const from = date.slice(0, 8) + "01";
-    const end = new Date(+date.slice(0, 4), +date.slice(5, 7), 0);
-    const to = isoDate(end);
-    return { from, to, label: end.toLocaleDateString("en-US", { month: "long", year: "numeric" }) };
+    const end = isoDate(new Date(+date.slice(0, 4), +date.slice(5, 7), 0)), today = isoDate(new Date());
+    const to = end < today ? end : today;
+    const name = new Date(from + "T12:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    return { from, to, label: to === end ? name : `${name} · month to date (${daysBetween(from, to)} days)` };
+  }
+  const previousPeriod = (p) => { const n = daysBetween(p.from, p.to); return { from: addDays(p.from, -n), to: addDays(p.from, -1) }; };
+
+  // Today's live rows when the period is exactly the selected day; otherwise one cached range query.
+  async function loadPeriod(p) {
+    if (p.from === p.to && p.from === $("date").value) return rows;
+    const key = `${p.from}|${p.to}`;
+    if (!rangeCache.has(key)) {
+      const snap = await getDocs(query(collection(db, "ucaf_visits"), where("VisitDate", ">=", p.from), where("VisitDate", "<=", p.to)));
+      rangeCache.set(key, snap.docs.map((d) => d.data()));
+    }
+    return rangeCache.get(key);
+  }
+  // Doctor and insurer filters scope the period views too (search stays a Visits-only tool).
+  const scope = (list) => {
+    const dr = $("doctor").value, ins = $("insurer").value;
+    return list.filter((r) => (!dr || r.Doctor === dr) && (!ins || insurer(r) === ins));
+  };
+
+  let periodToken = 0;
+  async function renderPeriodViews() {
+    if (tab !== "stats" && tab !== "analytics") return;
+    const p = currentPeriod();
+    $("rangeLabel").textContent = p.label;
+    if (daysBetween(p.from, p.to) < 1) return showError("The end date must be after the start date.");
+    if (daysBetween(p.from, p.to) > MAX_DAYS) return showError(`Please choose ${MAX_DAYS} days or fewer.`);
+    $("err").textContent = "";
+    const token = ++periodToken;
+    const body = tab === "stats" ? $("statKpis") : $("anBody");
+    body.classList.add("loading"); // keep the previous render visible while loading
+    try {
+      const list = scope(await loadPeriod(p));
+      const prev = tab === "analytics" ? scope(await loadPeriod(previousPeriod(p))) : null;
+      if (token !== periodToken) return; // the user changed something while we were loading
+      if (tab === "stats") renderStats(p, list); else renderAnalytics(p, list, prev);
+    } finally {
+      if (token === periodToken) body.classList.remove("loading");
+    }
   }
 
-  async function renderStats() {
-    const date = $("date").value;
-    const p = periodFor(date);
-    $("rangeLabel").textContent = p.label;
-    let list;
-    if (range === "day") list = rows;
-    else {
-      const key = `${p.from}|${p.to}`;
-      if (!rangeCache.has(key)) {
-        $("statKpis").innerHTML = kpi("Loading", "…");
-        const snap = await getDocs(query(collection(db, "ucaf_visits"), where("VisitDate", ">=", p.from), where("VisitDate", "<=", p.to)));
-        rangeCache.set(key, snap.docs.map((d) => d.data()));
-      }
-      list = rangeCache.get(key);
-      if (tab !== "stats" || periodFor($("date").value).from !== p.from) return; // user moved on while loading
-    }
+  // ---------- Statistics ----------
+  function renderStats(p, list) {
     const total = list.length, insured = list.filter((r) => r.PaymentCode === "R").length;
     const days = new Set(list.map((r) => r.VisitDate)).size || 1;
     $("statEmpty").classList.toggle("hidden", total > 0);
 
-    let html = kpi("Visits", nf.format(total), range === "day" ? "" : `${nf.format(Math.round(total / days))} per day on average`) +
+    let html = kpi("Visits", nf.format(total), p.from === p.to ? "" : `${nf.format(Math.round(total / days))} per day on average`) +
       kpi("Patients", nf.format(uniquePatients(list))) +
       kpi("Insured", `${pct(insured, total)}%`, `${nf.format(insured)} insured · ${nf.format(total - insured)} cash`) +
       kpi("UCAF missing", nf.format(list.filter(isMissing).length), "", list.some(isMissing) ? "warn" : "");
     $("statKpis").innerHTML = html;
 
     // Daily trend (week / month only)
-    $("trendCard").classList.toggle("hidden", range === "day" || total === 0);
-    if (range !== "day") {
+    $("trendCard").classList.toggle("hidden", p.from === p.to || total === 0);
+    if (p.from !== p.to) {
       const byDay = groupBy(list, (r) => r.VisitDate);
       const daysList = [];
       for (let d = p.from; d <= p.to; d = addDays(d, 1)) daysList.push(d);
@@ -608,6 +810,285 @@
     $("statInsBody").innerHTML = insurerRows(list).map((g) => `<tr><td>${e(g.name)}</td><td class="num">${nf.format(g.visits)}</td>
         <td class="num">${nf.format(g.patients)}</td><td>${shareCell(g.visits, total)}</td></tr>`).join("");
   }
+
+  // ---------- Analytics ----------
+  const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const WEEKDAYS_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const AGE_BANDS = [["0–4", 0, 4], ["5–14", 5, 14], ["15–24", 15, 24], ["25–44", 25, 44], ["45–64", 45, 64], ["65+", 65, 200]];
+  const hourOf = (r) => parseInt(String(r.VisitTime ?? "").slice(0, 2), 10);
+  const weekdayOf = (iso) => new Date(iso + "T12:00:00").getDay();
+  const hh = (h) => `${String(h).padStart(2, "0")}:00`;
+  const S1 = "var(--s1)", S2 = "var(--s2)", ACC = "var(--accent)";
+
+  // Tooltips: marks carry data-tip="<chart>:<index>", the lines live here (never parsed from HTML).
+  const tips = new Map();
+  const tipAttr = (chart, i) => `data-tip="${chart}:${i}" tabindex="0"`;
+  function showTip(target, x, y) {
+    const [chart, i] = target.dataset.tip.split(":");
+    const data = tips.get(chart)?.[+i]; if (!data) return;
+    const tip = $("tip");
+    tip.replaceChildren();
+    const t = document.createElement("div"); t.className = "t"; t.textContent = data.title; tip.append(t);
+    for (const l of data.lines) {
+      const r = document.createElement("div"); r.className = "r";
+      if (l.color) { const k = document.createElement("i"); k.style.background = l.color; r.append(k); }
+      const v = document.createElement("strong"); v.textContent = l.value;
+      const s = document.createElement("span"); s.textContent = l.label;
+      r.append(v, s); tip.append(r);
+    }
+    tip.classList.remove("hidden");
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = `${Math.min(x + 14, innerWidth - w - 8)}px`;
+    tip.style.top = `${y + h + 20 > innerHeight ? y - h - 12 : y + 16}px`;
+  }
+  const hideTip = () => $("tip").classList.add("hidden");
+  document.addEventListener("pointermove", (ev) => {
+    const el = ev.target.closest?.("[data-tip]");
+    if (el) showTip(el, ev.clientX, ev.clientY); else hideTip();
+  });
+  document.addEventListener("focusin", (ev) => {
+    const el = ev.target.closest?.("[data-tip]"); if (!el) return hideTip();
+    const b = el.getBoundingClientRect(); showTip(el, b.left + b.width / 2, b.bottom);
+  });
+
+  // Table view twin for every chart
+  function tableHtml(head, body) {
+    return `<table class="grid"><thead><tr>${head.map((h, i) => `<th${i ? ' class="num"' : ""}>${e(h)}</th>`).join("")}</tr></thead>
+      <tbody>${body.map((r) => `<tr>${r.map((c, i) => `<td${i ? ' class="num"' : ""}>${e(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  document.querySelectorAll("[data-toggle]").forEach((b) => b.addEventListener("click", () => {
+    const name = b.dataset.toggle, showTable = $("tb" + name).classList.contains("hidden");
+    $("tb" + name).classList.toggle("hidden", !showTable);
+    $("ch" + name).classList.toggle("hidden", showTable);
+    b.textContent = showTable ? "Chart" : "Table";
+  }));
+  const legendHtml = (items) => items.map(([name, color]) => `<span><i style="background:${color}"></i>${e(name)}</span>`).join("");
+
+  function niceScale(max, count = 4) {
+    const raw = Math.max(1, max) / count, pow = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, 2.5, 5, 10].find((m) => m * pow >= raw) * pow;
+    return { step, top: Math.ceil(Math.max(1, max) / step) * step };
+  }
+  const topRounded = (x, y, w, h, r) => {
+    r = Math.min(r, w / 2, h);
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  };
+
+  // Stacked columns (insurance + cash) with axis, gridlines and per-column hover
+  function stackedColumns(el, chart, items) {
+    const W = Math.max(320, el.clientWidth - 32), H = 220, m = { l: 36, r: 6, t: 10, b: 26 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const { step, top } = niceScale(Math.max(...items.map((d) => d.a + d.b)));
+    const band = pw / items.length, bw = Math.min(24, band * 0.7);
+    const y = (v) => m.t + ph - (v / top) * ph;
+    const every = Math.ceil(items.length / 16);
+    let s = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="${e(chart)}">`;
+    for (let v = 0; v <= top; v += step) {
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? "var(--grid)" : "var(--axis)"}" stroke-width="1"/>
+            <text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${nf.format(v)}</text>`;
+    }
+    tips.set(chart, items.map((d) => ({ title: d.title, lines: [
+      { value: nf.format(d.a + d.b), label: "visits" },
+      { value: nf.format(d.a), label: "insurance", color: S1 },
+      { value: nf.format(d.b), label: "cash", color: S2 },
+    ] })));
+    items.forEach((d, i) => {
+      const x = m.l + band * i + (band - bw) / 2;
+      const ha = (d.a / top) * ph, hb = (d.b / top) * ph, gap = ha && hb ? 2 : 0;
+      s += `<g class="col">`;
+      if (ha) s += hb ? `<rect class="seg" x="${x}" y="${y(d.a)}" width="${bw}" height="${ha}" fill="${S1}"/>`
+                      : `<path class="seg" d="${topRounded(x, y(d.a), bw, ha, 4)}" fill="${S1}"/>`;
+      if (hb) s += `<path class="seg" d="${topRounded(x, y(d.a + d.b), bw, Math.max(0, hb - gap), 4)}" fill="${S2}"/>`;
+      s += `<rect class="hit" x="${m.l + band * i}" y="${m.t}" width="${band}" height="${ph}" ${tipAttr(chart, i)}/></g>`;
+      if (i % every === 0) s += `<text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle">${e(d.tick)}</text>`;
+    });
+    el.innerHTML = s + "</svg>";
+  }
+
+  // Horizontal bars: single series, or two stacked parts
+  function hbars(el, chart, items, { parts = null, max = null } = {}) {
+    const top = max ?? Math.max(1, ...items.map((d) => d.value));
+    tips.set(chart, items.map((d) => d.tip));
+    el.innerHTML = `<div class="hbars">${items.map((d, i) => `
+      <div class="hrow${d.flag ? " flag" : ""}" ${tipAttr(chart, i)}>
+        <span class="name" title="${e(d.label)}">${e(d.label)}</span>
+        ${d.meter != null ? `<div class="meter"><span style="width:${d.meter}%"></span></div>`
+          : `<div class="htrack">${(parts ? d.parts : [d.value]).map((v, j) =>
+              v ? `<span class="seg" style="width:calc(${(v / top) * 100}% - 2px);background:${parts ? parts[j] : ACC}"></span>` : "").join("")}</div>`}
+        <span class="val">${e(d.text)}${d.sub ? `<small>${e(d.sub)}</small>` : ""}</span>
+      </div>`).join("")}</div>`;
+  }
+
+  function delta(curr, prev, { goodWhenUp = true, unit = "%", isPoints = false } = {}) {
+    if (prev == null || (!isPoints && !prev)) return `<span class="delta flat">No previous data</span>`;
+    const d = isPoints ? curr - prev : ((curr - prev) / prev) * 100;
+    if (Math.abs(d) < 0.5) return `<span class="delta flat">● No change vs previous period</span>`;
+    const good = d > 0 === goodWhenUp;
+    return `<span class="delta ${good ? "up" : "down"}">${d > 0 ? "▲" : "▼"} ${Math.abs(d).toFixed(isPoints ? 1 : 0)}${isPoints ? " pts" : unit} vs previous period</span>`;
+  }
+
+  function renderAnalytics(p, list, prev) {
+    const total = list.length;
+    $("anEmpty").classList.toggle("hidden", total > 0);
+    $("anBody").classList.toggle("hidden", total === 0);
+    if (!total) return;
+    const nDays = daysBetween(p.from, p.to);
+    const share = (l, f) => (l.length ? (l.filter(f).length / l.length) * 100 : 0);
+    const isIns = (r) => r.PaymentCode === "R";
+    const written = (r) => !isMissing(r);
+
+    // KPIs with change vs the previous period of the same length
+    const prevHas = prev && prev.length > 0;
+    $("anKpis").innerHTML =
+      kpi("Visits", nf.format(total), delta(total, prevHas ? prev.length : null)) +
+      kpi("Patients", nf.format(uniquePatients(list)), delta(uniquePatients(list), prevHas ? uniquePatients(prev) : null)) +
+      kpi("Visits per day", nf.format(Math.round(total / Math.max(1, new Set(list.map((r) => r.VisitDate)).size))), "Average on working days") +
+      kpi("Insured share", `${Math.round(share(list, isIns))}%`, delta(share(list, isIns), prevHas ? share(prev, isIns) : null, { isPoints: true })) +
+      kpi("UCAF completion", `${Math.round(share(list, written))}%`, delta(share(list, written), prevHas ? share(prev, written) : null, { isPoints: true }));
+
+    // Daily (or hourly for a single day) visits, insurance vs cash
+    $("dailyLegend").innerHTML = legendHtml([["Insurance", S1], ["Cash", S2]]);
+    let items;
+    if (nDays === 1) {
+      $("dailyTitle").textContent = "Visits per hour";
+      const byH = groupBy(list.filter((r) => !isNaN(hourOf(r))), hourOf);
+      const hs = byH.size ? [...byH.keys()] : [8], lo = Math.min(...hs), hi = Math.max(...hs);
+      items = [];
+      for (let h = lo; h <= hi; h++) {
+        const l = byH.get(h) ?? [];
+        items.push({ tick: String(h), title: `${hh(h)}–${hh(h + 1)}`, a: l.filter(isIns).length, b: l.filter((r) => !isIns(r)).length });
+      }
+    } else {
+      $("dailyTitle").textContent = "Visits per day";
+      const byD = groupBy(list, (r) => r.VisitDate);
+      items = [];
+      for (let d = p.from; d <= p.to; d = addDays(d, 1)) {
+        const l = byD.get(d) ?? [];
+        items.push({ tick: String(+d.slice(8)), title: `${WEEKDAYS[weekdayOf(d)]}, ${fmtDay(d)}`, a: l.filter(isIns).length, b: l.filter((r) => !isIns(r)).length });
+      }
+    }
+    stackedColumns($("chDaily"), "daily", items);
+    $("tbDaily").innerHTML = tableHtml([nDays === 1 ? "Hour" : "Date", "Visits", "Insurance", "Cash"],
+      items.map((d) => [d.title, nf.format(d.a + d.b), nf.format(d.a), nf.format(d.b)]));
+
+    // Weekday × hour heatmap
+    const timed = list.filter((r) => !isNaN(hourOf(r)));
+    const hours = timed.length ? timed.map(hourOf) : [8], hLo = Math.min(...hours), hHi = Math.max(...hours);
+    const dayCount = Array(7).fill(0); // how many of each weekday the period contains
+    for (let d = p.from; d <= p.to; d = addDays(d, 1)) dayCount[weekdayOf(d)]++;
+    const grid = {}; let hmax = 1;
+    for (const r of timed) { const k = `${weekdayOf(r.VisitDate)}-${hourOf(r)}`; grid[k] = (grid[k] ?? 0) + 1; hmax = Math.max(hmax, grid[k]); }
+    const hcols = hHi - hLo + 1, heatTips = [];
+    let hHtml = `<div class="heat" style="grid-template-columns:44px repeat(${hcols}, minmax(18px, 1fr))"><span></span>`;
+    for (let h = hLo; h <= hHi; h++) hHtml += `<span class="cl">${(h - hLo) % 2 ? "" : h}</span>`;
+    const heatRows = [];
+    for (let wd = 0; wd < 7; wd++) {
+      if (!dayCount[wd]) continue;
+      hHtml += `<span class="rl">${WEEKDAYS[wd]}</span>`;
+      const rowVals = [WEEKDAYS_LONG[wd]];
+      for (let h = hLo; h <= hHi; h++) {
+        const n = grid[`${wd}-${h}`] ?? 0, avg = n / dayCount[wd];
+        heatTips.push({ title: `${WEEKDAYS_LONG[wd]} · ${hh(h)}–${hh(h + 1)}`, lines: [
+          { value: nf.format(n), label: "visits in period" }, { value: avg.toFixed(1), label: `per ${WEEKDAYS_LONG[wd]} on average` } ] });
+        const bg = n ? `background:color-mix(in oklab, var(--heat-hi) ${Math.round(12 + (n / hmax) * 88)}%, var(--heat-lo))` : "";
+        hHtml += `<span class="cell" style="${bg}" ${tipAttr("heat", heatTips.length - 1)}></span>`;
+        rowVals.push(nf.format(n));
+      }
+      heatRows.push(rowVals);
+    }
+    tips.set("heat", heatTips);
+    $("chHeat").innerHTML = hHtml + "</div>";
+    $("tbHeat").innerHTML = tableHtml(["Weekday", ...Array.from({ length: hcols }, (_, i) => hh(hLo + i))], heatRows);
+
+    // Doctor workload: new vs follow-up
+    const docs = [...groupBy(list, (r) => r.Doctor || "—")].map(([name, l]) => ({
+      name, total: l.length, nw: l.filter((r) => r.VisitTypeCode === "V").length, patients: uniquePatients(l),
+      done: l.filter(written).length,
+    })).sort((a, b) => b.total - a.total);
+    $("docLegend").innerHTML = legendHtml([["New", S1], ["Follow-up", S2]]);
+    hbars($("chDoc"), "doc", docs.map((d) => ({
+      label: d.name, value: d.total, parts: [d.nw, d.total - d.nw], text: nf.format(d.total), sub: `${pct(d.total, total)}%`,
+      tip: { title: d.name, lines: [{ value: nf.format(d.total), label: "visits" }, { value: nf.format(d.patients), label: "patients" },
+        { value: nf.format(d.nw), label: "new", color: S1 }, { value: nf.format(d.total - d.nw), label: "follow-up", color: S2 }] },
+    })), { parts: [S1, S2] });
+    $("tbDoc").innerHTML = tableHtml(["Doctor", "Visits", "Patients", "New", "Follow-up"],
+      docs.map((d) => [d.name, nf.format(d.total), nf.format(d.patients), nf.format(d.nw), nf.format(d.total - d.nw)]));
+
+    // UCAF completion by doctor (lowest first, below 90% flagged with icon + label)
+    const done = docs.map((d) => ({ ...d, rate: (d.done / d.total) * 100 })).sort((a, b) => a.rate - b.rate || b.total - a.total);
+    hbars($("chDone"), "done", done.map((d) => ({
+      label: d.name, meter: d.rate, flag: d.rate < 90, text: `${Math.floor(d.rate)}%`, sub: d.rate < 90 ? "⚠ low" : "",
+      tip: { title: d.name, lines: [{ value: `${Math.floor(d.rate)}%`, label: "forms written" },
+        { value: nf.format(d.total - d.done), label: "missing UCAF" }, { value: nf.format(d.total), label: "visits" }] },
+    })));
+    $("tbDone").innerHTML = tableHtml(["Doctor", "Completion", "Missing", "Visits"],
+      done.map((d) => [d.name, `${Math.floor(d.rate)}%`, nf.format(d.total - d.done), nf.format(d.total)]));
+
+    // Insurer mix (top 8 + Other)
+    let ins = insurerRows(list);
+    if (ins.length > 9) {
+      const rest = ins.slice(8);
+      ins = [...ins.slice(0, 8), { name: `Other (${rest.length})`, visits: rest.reduce((s, g) => s + g.visits, 0), patients: rest.reduce((s, g) => s + g.patients, 0) }];
+    }
+    hbars($("chIns"), "ins", ins.map((g) => ({
+      label: g.name, value: g.visits, text: `${pct(g.visits, total)}%`, sub: nf.format(g.visits),
+      tip: { title: g.name, lines: [{ value: nf.format(g.visits), label: "visits" }, { value: nf.format(g.patients), label: "patients" },
+        { value: `${pct(g.visits, total)}%`, label: "of all visits" }] },
+    })));
+    $("tbIns").innerHTML = tableHtml(["Insurer", "Visits", "Patients", "Share"], insurerRows(list).map((g) => [g.name, nf.format(g.visits), nf.format(g.patients), `${pct(g.visits, total)}%`]));
+
+    // Top diagnoses by principal code
+    const dxMap = new Map();
+    for (const r of list) {
+      const d0 = J(r.DiagnosesJson)[0]; if (!d0?.Code) continue;
+      const k = d0.Code.toUpperCase(), cur = dxMap.get(k) ?? { code: k, name: d0.Name ?? "", n: 0 };
+      cur.n++; dxMap.set(k, cur);
+    }
+    const dx = [...dxMap.values()].sort((a, b) => b.n - a.n);
+    const coded = dx.reduce((s, d) => s + d.n, 0);
+    hbars($("chDx"), "dx", dx.slice(0, 10).map((d) => ({
+      label: `${d.code} · ${d.name}`, value: d.n, text: nf.format(d.n), sub: `${pct(d.n, coded)}%`,
+      tip: { title: `${d.code} · ${d.name}`, lines: [{ value: nf.format(d.n), label: "visits" }, { value: `${pct(d.n, coded)}%`, label: "of coded visits" }] },
+    })));
+    $("tbDx").innerHTML = tableHtml(["Diagnosis", "Visits", "Share"], dx.slice(0, 30).map((d) => [`${d.code} · ${d.name}`, nf.format(d.n), `${pct(d.n, coded)}%`]));
+
+    // Unique patients by age group and gender
+    const pts = [...groupBy(list, patientKey).values()].map((l) => l[0]);
+    const ages = AGE_BANDS.map(([label, lo, hi]) => ({ label, n: pts.filter((r) => typeof r.Age === "number" && r.Age >= lo && r.Age <= hi).length }));
+    const amax = Math.max(1, ...ages.map((a) => a.n));
+    tips.set("age", ages.map((a) => ({ title: `Age ${a.label}`, lines: [{ value: nf.format(a.n), label: "patients" }, { value: `${pct(a.n, pts.length)}%`, label: "of patients" }] })));
+    $("chAge").innerHTML = `<div class="cols">${ages.map((a, i) => `<div class="c" ${tipAttr("age", i)}><b>${nf.format(a.n)}</b><span style="height:${(a.n / amax) * 85}%"></span></div>`).join("")}</div>
+      <div class="col-labels">${ages.map((a) => `<span>${a.label}</span>`).join("")}</div>`;
+    $("tbAge").innerHTML = tableHtml(["Age group", "Patients", "Share"], ages.map((a) => [a.label, nf.format(a.n), `${pct(a.n, pts.length)}%`]));
+    const male = pts.filter((r) => r.Sex === "Male").length, female = pts.filter((r) => r.Sex === "Female").length;
+    $("chSex").innerHTML = `<div class="split">${[["Male", male], ["Female", female]].map(([k, n]) => `
+      <div class="row"><div class="top"><span>${k}</span><span><b>${nf.format(n)}</b> <span class="muted">${pct(n, male + female)}%</span></span></div>
+      <div class="meter"><span style="width:${pct(n, male + female)}%"></span></div></div>`).join("")}
+      <div class="muted small">${nf.format(pts.length)} unique patients in the period${pts.length - male - female ? ` · ${nf.format(pts.length - male - female)} without gender recorded` : ""}</div></div>`;
+
+    // Key insights in plain sentences
+    const out = [];
+    const perWd = WEEKDAYS_LONG.map((name, wd) => ({ name, avg: dayCount[wd] ? list.filter((r) => weekdayOf(r.VisitDate) === wd).length / dayCount[wd] : -1 }));
+    const busiest = perWd.reduce((a, b) => (b.avg > a.avg ? b : a));
+    if (nDays >= 7) out.push(`Busiest weekday is <b>${busiest.name}</b> with about <b>${Math.round(busiest.avg)}</b> visits on average.`);
+    const byHour = groupBy(timed, hourOf), peak = [...byHour].sort((a, b) => b[1].length - a[1].length)[0];
+    if (peak) out.push(`Peak arrival hour is <b>${hh(peak[0])}–${hh(peak[0] + 1)}</b>, with <b>${pct(peak[1].length, timed.length)}%</b> of visits.`);
+    if (docs[0]) out.push(`<b>${e(docs[0].name)}</b> saw the most patients: <b>${nf.format(docs[0].patients)}</b> (${pct(docs[0].total, total)}% of visits).`);
+    const topIns = insurerRows(list).find((g) => g.name !== "Cash");
+    if (topIns) out.push(`Largest insurer is <b>${e(topIns.name)}</b> with <b>${pct(topIns.visits, total)}%</b> of visits; cash is ${pct(list.filter((r) => !isIns(r)).length, total)}%.`);
+    out.push(`Follow-up visits are <b>${Math.round(share(list, (r) => r.VisitTypeCode === "R"))}%</b> of all visits.`);
+    if (prevHas) {
+      const ch = ((total - prev.length) / prev.length) * 100;
+      out.push(`Visits are <b>${ch >= 0 ? "up" : "down"} ${Math.abs(Math.round(ch))}%</b> compared with the previous ${nDays === 1 ? "day" : `${nDays} days`} (${nf.format(prev.length)} → ${nf.format(total)}).`);
+    }
+    const worst = done.find((d) => d.rate < 100);
+    if (worst) out.push(`Lowest UCAF completion: <b>${e(worst.name)}</b> at <b>${Math.floor(worst.rate)}%</b> (${nf.format(worst.total - worst.done)} missing).`);
+    else out.push(`Every visit in this period has a written UCAF form.`);
+    if (dx[0]) out.push(`Most common diagnosis is <b>${e(dx[0].code)}</b> (${e(dx[0].name)}), ${pct(dx[0].n, coded)}% of coded visits.`);
+    $("anInsights").innerHTML = out.map((s) => `<li>${s}</li>`).join("");
+  }
+  let resizeTimer;
+  addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => tab === "analytics" && renderPeriodViews().catch(showError), 200); });
 
   // ---------- UCAF form ----------
   function ucafHtml(r, page, pages) {
@@ -735,14 +1216,22 @@
     tab = t;
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
     document.querySelectorAll("[data-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== t));
-    if (t === "stats") renderStats().catch(showError);
+    $("periodBar").classList.toggle("hidden", t !== "stats" && t !== "analytics");
+    hideTip();
+    renderPeriodViews().catch(showError);
   }
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
   document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
     range = b.dataset.range;
     document.querySelectorAll("#rangeSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    renderStats().catch(showError);
+    $("customRange").classList.toggle("hidden", range !== "custom");
+    if (range === "custom" && !$("rangeFrom").value) { // start from the last 30 days
+      $("rangeTo").value = $("date").value;
+      $("rangeFrom").value = addDays($("date").value, -29);
+    }
+    renderPeriodViews().catch(showError);
   }));
+  $("applyRange").onclick = () => renderPeriodViews().catch(showError);
 
   $("visitHead").addEventListener("click", (ev) => {
     const k = ev.target.closest("th")?.dataset.key; if (!k) return;
@@ -799,7 +1288,7 @@
     unsubVisits = onSnapshot(query(collection(db, "ucaf_visits"), where("VisitDate", "==", date)),
       (snap) => { rows = snap.docs.map((d) => d.data()); fillFilters(); render(); },
       showError);
-    if (tab === "stats") renderStats().catch(showError);
+    renderPeriodViews().catch(showError);
   }
 
   $("loginForm").addEventListener("submit", async (ev) => {
