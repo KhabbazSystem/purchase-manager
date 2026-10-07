@@ -18,6 +18,8 @@
     /* Chart series (validated reference palette, slots 1–2) and sequential heat ramp */
     --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
     --grid: #e6e9ef; --axis: #c9cfd8; --s1-light: #86b6ef; --s3: #1baf7a;
+    /* Tab colors (dark enough for white text when the tab is open) */
+    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --on-tab: #ffffff;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -31,6 +33,7 @@
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
       --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
       --grid: #232b36; --axis: #36404d; --s1-light: #2c5a92; --s3: #199e70;
+      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --on-tab: #10142e;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -82,16 +85,50 @@
   .controls select { max-width: 220px; }
 
   /* Tabs */
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  /* Colored tabs: each tab has its own color (--tc); the open one is filled */
+  .tabs { display: flex; gap: 8px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid var(--line);
+          overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { position: relative; padding: 10px 14px; border: 0; background: none; cursor: pointer; color: var(--muted);
-         font-weight: 500; white-space: nowrap; }
-  .tab:hover { color: var(--text); }
-  .tab[aria-selected="true"] { color: var(--accent-text); }
-  .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px;
-                                      background: var(--accent); border-radius: 2px; }
-  .badge { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 10px; font-size: 12px;
-           line-height: 20px; text-align: center; background: var(--danger-soft); color: var(--danger); }
+  .tab { --tc: var(--t-visits); display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px;
+         border: 1px solid color-mix(in oklab, var(--tc) 25%, transparent); border-radius: 999px; cursor: pointer;
+         background: color-mix(in oklab, var(--tc) 9%, var(--surface)); color: var(--tc); font-weight: 600; white-space: nowrap;
+         transition: background .15s, color .15s; }
+  .tab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .tab:hover { background: color-mix(in oklab, var(--tc) 18%, var(--surface)); }
+  .tab[aria-selected="true"] { background: var(--tc); border-color: var(--tc); color: var(--on-tab);
+                               box-shadow: 0 2px 8px color-mix(in oklab, var(--tc) 35%, transparent); }
+  .tab:focus-visible { outline: 2px solid var(--tc); outline-offset: 2px; }
+  .tab[data-tab="insurers"]  { --tc: var(--t-ins); }
+  .tab[data-tab="alerts"]    { --tc: var(--t-alerts); }
+  .tab[data-tab="stats"]     { --tc: var(--t-stats); }
+  .tab[data-tab="analytics"] { --tc: var(--t-an); }
+  .tab[data-tab="doctors"]   { --tc: var(--t-doc); }
+  .tab[data-tab="edits"]     { --tc: var(--t-edit); }
+
+  /* Edits */
+  #edBody.loading { opacity: .5; transition: opacity .2s; }
+  .edits { display: grid; }
+  .edit { border-bottom: 1px solid var(--line); }
+  .edit:last-child { border-bottom: 0; }
+  .edit summary { display: grid; grid-template-columns: 120px 90px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.6fr) auto; gap: 12px;
+                  align-items: center; padding: 10px 16px; cursor: pointer; list-style: none; font-size: 13px; }
+  .edit summary::-webkit-details-marker { display: none; }
+  .edit summary:hover { background: var(--surface-2); }
+  .edit[open] summary { background: var(--surface-2); }
+  .edit summary .pills { display: flex; flex-wrap: wrap; gap: 4px; }
+  .edit .detail { padding: 6px 16px 16px; display: grid; gap: 12px; }
+  .edit .meta { font-size: 12px; color: var(--muted); }
+  .fdiff h4 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  .fdiff .txt { line-height: 1.7; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); white-space: pre-wrap; }
+  .fdiff del { background: var(--danger-soft); color: var(--danger); text-decoration: line-through; border-radius: 3px; padding: 0 2px; }
+  .fdiff ins { background: var(--ok-soft); color: var(--ok); text-decoration: none; border-radius: 3px; padding: 0 2px; }
+  .fdiff ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  .fdiff li.add { color: var(--ok); } .fdiff li.rem { color: var(--danger); text-decoration: line-through; }
+  .fdiff .same { color: var(--muted); font-size: 12px; }
+  @media (max-width: 900px) { .edit summary { grid-template-columns: 1fr 1fr; } }
+  .badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; font-size: 12px;
+           line-height: 20px; text-align: center; background: var(--danger); color: #fff; }
+  .tab[aria-selected="true"] .badge { background: var(--on-tab); color: var(--tc); }
 
   /* KPI cards */
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
@@ -329,12 +366,13 @@
     </div>
 
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="visits" aria-selected="true">Visits</button>
-      <button class="tab" role="tab" data-tab="insurers" aria-selected="false">Insurers</button>
-      <button class="tab" role="tab" data-tab="alerts" aria-selected="false">Alerts<span class="badge hidden" id="alertBadge">0</span></button>
-      <button class="tab" role="tab" data-tab="stats" aria-selected="false">Statistics</button>
-      <button class="tab" role="tab" data-tab="analytics" aria-selected="false">Analytics</button>
-      <button class="tab" role="tab" data-tab="doctors" aria-selected="false">Doctors</button>
+      <button class="tab" role="tab" data-tab="visits" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Visits</button>
+      <button class="tab" role="tab" data-tab="insurers" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>Insurers</button>
+      <button class="tab" role="tab" data-tab="alerts" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"/></svg>Alerts<span class="badge hidden" id="alertBadge">0</span></button>
+      <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 10h16M4 15h16M10 10v10"/></svg>Statistics</button>
+      <button class="tab" role="tab" data-tab="analytics" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-9M3 20h18"/></svg>Analytics</button>
+      <button class="tab" role="tab" data-tab="doctors" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Doctors</button>
+      <button class="tab" role="tab" data-tab="edits" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/></svg>Edits</button>
     </nav>
 
     <!-- Period filter shared by Statistics and Analytics -->
@@ -592,6 +630,25 @@
       </div>
       <div class="empty hidden" id="drEmpty">No written UCAF forms for this period yet.</div>
     </div>
+
+    <!-- Edits -->
+    <div data-panel="edits" class="hidden">
+      <div id="edBody">
+        <div class="kpis" id="edKpis"></div>
+        <div class="card">
+          <div class="card-head"><div><h2>Edits by doctor</h2><div class="muted small">Late = changed more than 72 hours after the form was first written</div></div></div>
+          <div class="table-wrap" id="edDocs"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h2>All edits</h2><div class="muted small">Newest first · open an edit to see exactly what changed</div></div>
+            <div class="actions"><label class="small muted"><input type="checkbox" id="lateOnly"> Late edits only</label></div>
+          </div>
+          <div class="edits" id="edList"></div>
+        </div>
+      </div>
+      <div class="empty hidden" id="edEmpty">No edits recorded in this period. Tracking starts from the first sync after this feature was installed.</div>
+    </div>
   </section>
 </main>
 
@@ -611,7 +668,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, query, where, onSnapshot, getDocs, doc }
+  import { getFirestore, collection, query, where, onSnapshot, getDocs, getDoc, doc }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -792,7 +849,7 @@
 
   // ---------- Period (shared by Statistics and Analytics) ----------
   const MAX_DAYS = 92; // keeps Firestore reads well inside the free quota
-  const PERIOD_TABS = ["stats", "analytics", "doctors"];
+  const PERIOD_TABS = ["stats", "analytics", "doctors", "edits"];
   const fmtDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5) + 1;
 
@@ -838,9 +895,15 @@
     if (daysBetween(p.from, p.to) > MAX_DAYS) return showError(`Please choose ${MAX_DAYS} days or fewer.`);
     $("err").textContent = "";
     const token = ++periodToken;
-    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody") }[tab];
+    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody"), edits: $("edBody") }[tab];
     body.classList.add("loading"); // keep the previous render visible while loading
     try {
+      if (tab === "edits") {
+        // edits are filtered by the day the change was detected, and never cached (new ones arrive every hour)
+        const snap = await getDocs(query(collection(db, "ucaf_changes"), where("DetectedDate", ">=", p.from), where("DetectedDate", "<=", p.to)));
+        if (token === periodToken) renderEdits(snap.docs.map((d) => d.data()));
+        return;
+      }
       const list = scope(await loadPeriod(p));
       const prev = tab === "analytics" ? scope(await loadPeriod(previousPeriod(p))) : null;
       if (token !== periodToken) return; // the user changed something while we were loading
@@ -1330,6 +1393,121 @@
   }
   $("docPick").addEventListener("change", renderProfile);
 
+  // ---------- Edits: what doctors changed in their forms ----------
+  const FIELD_LABELS = {
+    ChiefComplaint: "Chief complaint", Signs: "Significant signs", PatientHistory: "Patient history", CarePlan: "Care plan",
+    Notes: "Notes", DiagnosesJson: "Diagnosis", ServicesJson: "Services", MedsJson: "Medicines", BP: "Blood pressure",
+    Pulse: "Pulse", Temp: "Temperature", Weight: "Weight", Height: "Height", RR: "Respiratory rate",
+    Duration: "Duration of illness", CafeType: "Form status", ApprovalNo: "Approval no",
+  };
+  const TEXT_FIELDS = new Set(["ChiefComplaint", "Signs", "PatientHistory", "CarePlan", "Notes"]);
+  const LIST_LABEL = {
+    DiagnosesJson: (x) => `${x.Code ?? ""} · ${x.Name ?? ""}`,
+    ServicesJson: (x) => `${x.Description || x.Code || ""}${x.Type ? ` — ${x.Type}` : ""}${x.Qty != null ? ` ×${+x.Qty}` : ""}`,
+    MedsJson: (x) => `${x.Name || x.Code || ""}${x.Type ? ` — ${x.Type}` : ""}${x.Qty != null ? ` ×${+x.Qty}` : ""}`,
+  };
+  const parseTime = (s) => (s ? new Date(String(s).replace(" ", "T")) : null);
+  // The edit happened between the previous sync (Since) and DetectedAt; measure from the earliest possible moment
+  const editedFrom = (c) => c.Since?.toDate?.() ?? c.DetectedAt?.toDate?.();
+  const hoursAfter = (c) => { const w = parseTime(c.FirstWritten), d = editedFrom(c); return w && d ? (d - w) / 36e5 : null; };
+  const isLate = (c) => (hoursAfter(c) ?? 0) > 72;
+  const fmtDT = (d) => (d ? d.toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
+
+  // Word-level diff (longest common subsequence): removed words in red, added words in green
+  function wordDiff(before, after) {
+    const a = String(before).split(/(\s+)/), b = String(after).split(/(\s+)/);
+    if (a.length * b.length > 250000) return `<del>${e(before)}</del>\n<ins>${e(after)}</ins>`;
+    const dp = Array.from({ length: a.length + 1 }, () => new Uint16Array(b.length + 1));
+    for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--)
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const del = (t) => (/^\s*$/.test(t) ? e(t) : `<del>${e(t)}</del>`);
+    const ins = (t) => (/^\s*$/.test(t) ? e(t) : `<ins>${e(t)}</ins>`);
+    let i = 0, j = 0, out = "";
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) { out += e(a[i]); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) out += del(a[i++]);
+      else out += ins(b[j++]);
+    }
+    while (i < a.length) out += del(a[i++]);
+    while (j < b.length) out += ins(b[j++]);
+    return out;
+  }
+
+  function fieldDiffHtml(ch) {
+    const label = FIELD_LABELS[ch.f] ?? ch.f;
+    if (LIST_LABEL[ch.f]) {
+      const fmt = LIST_LABEL[ch.f], before = J(ch.b).map(fmt), after = J(ch.a).map(fmt);
+      const added = after.filter((x) => !before.includes(x)), removed = before.filter((x) => !after.includes(x));
+      const kept = after.length - added.length;
+      return `<div class="fdiff"><h4>${e(label)}</h4><ul>
+        ${added.map((x) => `<li class="add">+ ${e(x)}</li>`).join("")}${removed.map((x) => `<li class="rem">− ${e(x)}</li>`).join("")}
+        ${!added.length && !removed.length ? `<li class="same">Order or details changed</li>` : ""}
+        ${kept ? `<li class="same">${kept} unchanged</li>` : ""}</ul></div>`;
+    }
+    if (TEXT_FIELDS.has(ch.f)) return `<div class="fdiff"><h4>${e(label)}</h4><div class="txt">${wordDiff(ch.b, ch.a)}</div></div>`;
+    return `<div class="fdiff"><h4>${e(label)}</h4><div class="txt"><del>${e(ch.b || "empty")}</del> → <ins>${e(ch.a || "empty")}</ins></div></div>`;
+  }
+
+  let edAll = [], edRaw = [];
+  function renderEdits(all = edRaw) {
+    edRaw = all;
+    const dr = $("doctor").value, q = $("search").value.trim().toLowerCase();
+    edAll = all.filter((c) => (!dr || c.Doctor === dr) &&
+      (!q || [c.PatientName, c.FileNo, c.VisitId, c.Doctor].some((v) => String(v ?? "").toLowerCase().includes(q))))
+      .sort((a, b) => (b.DetectedAt?.toMillis?.() ?? 0) - (a.DetectedAt?.toMillis?.() ?? 0));
+    $("edEmpty").classList.toggle("hidden", edAll.length > 0);
+    $("edBody").classList.toggle("hidden", edAll.length === 0);
+    if (!edAll.length) return;
+
+    const late = edAll.filter(isLate);
+    const forms = new Set(edAll.map((c) => c.VisitId));
+    const fieldCount = new Map();
+    for (const c of edAll) for (const ch of J(c.Changes)) fieldCount.set(ch.f, (fieldCount.get(ch.f) ?? 0) + 1);
+    const topField = [...fieldCount].sort((a, b) => b[1] - a[1])[0];
+    $("edKpis").innerHTML =
+      kpi("Edits", nf.format(edAll.length), `${nf.format(forms.size)} forms edited`) +
+      kpi("Doctors editing", nf.format(new Set(edAll.map((c) => c.Doctor)).size)) +
+      kpi("Late edits", nf.format(late.length), "More than 72 hours after writing", late.length ? "poor" : "good") +
+      kpi("Most edited field", topField ? e(FIELD_LABELS[topField[0]] ?? topField[0]) : "—", topField ? `${nf.format(topField[1])} times` : "");
+
+    const byDoc = [...groupBy(edAll, (c) => c.Doctor || "—")].map(([name, l]) => {
+      const fc = new Map(); for (const c of l) for (const ch of J(c.Changes)) fc.set(ch.f, (fc.get(ch.f) ?? 0) + 1);
+      const tf = [...fc].sort((a, b) => b[1] - a[1])[0];
+      return { name, edits: l.length, forms: new Set(l.map((c) => c.VisitId)).size, late: l.filter(isLate).length, top: tf ? FIELD_LABELS[tf[0]] ?? tf[0] : "—" };
+    }).sort((a, b) => b.edits - a.edits);
+    $("edDocs").innerHTML = `<table class="grid"><thead><tr><th>Doctor</th><th class="num">Edits</th><th class="num">Forms edited</th>
+      <th class="num">Late edits</th><th>Most edited field</th></tr></thead><tbody>${byDoc.map((d) => `<tr>
+      <td>${e(d.name)}</td><td class="num">${nf.format(d.edits)}</td><td class="num">${nf.format(d.forms)}</td>
+      <td class="num">${d.late ? `<span class="pill danger">⚠ ${d.late}</span>` : "0"}</td><td>${e(d.top)}</td></tr>`).join("")}</tbody></table>`;
+
+    const list = $("lateOnly").checked ? late : edAll;
+    $("edList").innerHTML = list.length ? list.map((c, i) => {
+      const changes = J(c.Changes), h = hoursAfter(c);
+      return `<details class="edit" data-i="${i}">
+        <summary>
+          <span>${fmtDT(c.DetectedAt?.toDate?.())}</span>
+          <span>${e(c.VisitId)}</span>
+          <span class="cut" title="${e(c.PatientName)}">${e(c.PatientName)}</span>
+          <span class="cut" title="${e(c.Doctor)}">${e(c.Doctor)}</span>
+          <span class="pills">${changes.map((ch) => `<span class="pill neutral">${e(FIELD_LABELS[ch.f] ?? ch.f)}</span>`).join("")}</span>
+          <span>${isLate(c) ? `<span class="pill danger">⚠ Late · ${Math.round(h)}h</span>` : h != null ? `<span class="pill ok">✓ ${Math.round(h)}h</span>` : ""}</span>
+        </summary>
+        <div class="detail">
+          <div class="meta">Visit ${e(c.VisitDate)} ${e(c.VisitTime)} · file ${e(c.FileNo)} · form first written ${fmtDT(parseTime(c.FirstWritten))}
+            · edited ${c.Since ? `between ${fmtDT(c.Since.toDate())} and ${fmtDT(c.DetectedAt?.toDate?.())}` : `before ${fmtDT(c.DetectedAt?.toDate?.())}`}
+            · <button class="btn sm" data-open="${e(c.VisitId)}">Open current UCAF</button></div>
+          ${changes.map(fieldDiffHtml).join("")}
+        </div></details>`;
+    }).join("") : `<div class="empty">No late edits in this period.</div>`;
+  }
+  $("lateOnly").addEventListener("change", () => renderEdits());
+  $("edList").addEventListener("click", async (ev) => {
+    const b = ev.target.closest("[data-open]"); if (!b) return;
+    ev.preventDefault();
+    const snap = await getDoc(doc(db, "ucaf_visits", b.dataset.open));
+    if (snap.exists()) openForm(snap.data()); else alert("This visit is no longer in the system (it may have been cancelled).");
+  });
+
   // ---------- UCAF form ----------
   function ucafHtml(r, page, pages) {
     const tick = (b) => (b ? "✔" : "&nbsp;&nbsp;");
@@ -1457,6 +1635,13 @@
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
     document.querySelectorAll("[data-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== t));
     $("periodBar").classList.toggle("hidden", !PERIOD_TABS.includes(t));
+    // the period controls take the open tab's color
+    const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", edits: "--t-edit" }[t];
+    if (tabColor) {
+      $("periodBar").style.setProperty("--accent", `var(${tabColor})`);
+      $("periodBar").style.setProperty("--accent-hover", `var(${tabColor})`);
+      $("periodBar").style.setProperty("--on-accent", "var(--on-tab)");
+    }
     hideTip();
     renderPeriodViews().catch(showError);
   }
