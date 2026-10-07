@@ -296,7 +296,7 @@
   .ucaf .row { display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .ucaf .pre { white-space: pre-line; font-weight: bold; padding-left: 10px; }
   .ucaf .ar { direction: rtl; text-align: center; }
-  .ucaf .note { color: #1a5fb4; padding-left: 10px; }
+  .ucaf .note { color: #000; padding-left: 10px; }
   .ucaf table { width: 100%; border-collapse: collapse; margin-top: 3px; }
   .ucaf th, .ucaf td { border: 1px solid #000; padding: 2px 4px; text-align: left; vertical-align: top; white-space: normal; }
   .ucaf th { font-weight: normal; }
@@ -779,6 +779,10 @@
       return w ? `<td><span class="cut" style="max-width:${w}px" title="${e(c.get(r))}">${e(c.get(r))}</span></td>` : `<td>${e(c.get(r))}</td>`;
     }).join("") + "</tr>").join("");
     $("visitEmpty").classList.toggle("hidden", shown.length > 0);
+    const filtering = $("search").value.trim() || $("doctor").value || $("insurer").value;
+    $("visitEmpty").textContent = !rows.length ? "No visits for this day."
+      : filtering ? `No visits match your search or filters on ${fmtDay($("date").value)}. Search looks at the selected day only — change the date, or use the Edits tab with Week / Month to search across days.`
+      : "No visits for this day.";
     $("visitsTitle").textContent = `Visits (${nf.format(shown.length)})`;
 
     const insured = shown.filter((r) => r.PaymentCode === "R").length;
