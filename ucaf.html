@@ -17,7 +17,7 @@
     --brand-red: #e0384b; --brand-sky: #5fb6ea;
     /* Chart series (validated reference palette, slots 1–2) and sequential heat ramp */
     --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
-    --grid: #e6e9ef; --axis: #c9cfd8;
+    --grid: #e6e9ef; --axis: #c9cfd8; --s1-light: #86b6ef; --s3: #1baf7a;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -30,7 +30,7 @@
       --accent: #8d98f0; --accent-hover: #a5aef4; --accent-soft: #1e2347; --accent-text: #b3bbf7; --on-accent: #10142e;
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
       --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
-      --grid: #232b36; --axis: #36404d;
+      --grid: #232b36; --axis: #36404d; --s1-light: #2c5a92; --s3: #199e70;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -99,7 +99,9 @@
   .kpi .label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
   .kpi .value { font-size: 24px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .kpi .hint { font-size: 12px; color: var(--muted); }
-  .kpi.warn .value { color: var(--warn); }
+  .kpi.warn .value, .kpi.fair .value { color: var(--warn); }
+  .kpi.good .value { color: var(--ok); }
+  .kpi.poor .value { color: var(--danger); }
 
   /* Cards & tables */
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
@@ -209,7 +211,19 @@
   .split .row .top { display: flex; justify-content: space-between; align-items: baseline; }
   .split .row .top b { font-size: 22px; font-weight: 600; }
 
-  #anBody.loading, #statKpis.loading { opacity: .5; transition: opacity .2s; }
+  #anBody.loading, #statKpis.loading, #drBody.loading { opacity: .5; transition: opacity .2s; }
+  .three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 4px 16px 16px; }
+  @media (max-width: 1000px) { .three-col { grid-template-columns: 1fr; } }
+  .three-col .hrow { grid-template-columns: minmax(0, 1fr) 70px 56px; }
+  .sub-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .profile-kpis { padding: 12px 16px 0; margin-bottom: 8px; }
+  .profile-kpis .kpi { box-shadow: none; background: var(--surface-2); }
+  .profile-kpis .kpi .value { font-size: 20px; }
+  td .cut { max-width: 240px; }
+  td .cut.sm { max-width: 170px; }
+  td .share-of { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  .mini-meter { display: inline-flex; align-items: center; gap: 8px; }
+  .mini-meter .meter { width: 70px; height: 6px; }
 
   .tip { position: fixed; z-index: 30; pointer-events: none; min-width: 150px; max-width: 280px; padding: 8px 10px;
          background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px;
@@ -320,6 +334,7 @@
       <button class="tab" role="tab" data-tab="alerts" aria-selected="false">Alerts<span class="badge hidden" id="alertBadge">0</span></button>
       <button class="tab" role="tab" data-tab="stats" aria-selected="false">Statistics</button>
       <button class="tab" role="tab" data-tab="analytics" aria-selected="false">Analytics</button>
+      <button class="tab" role="tab" data-tab="doctors" aria-selected="false">Doctors</button>
     </nav>
 
     <!-- Period filter shared by Statistics and Analytics -->
@@ -518,6 +533,64 @@
         </div>
       </div>
       <div class="empty hidden" id="anEmpty">No data for this period yet.</div>
+    </div>
+
+    <!-- Doctors -->
+    <div data-panel="doctors" class="hidden">
+      <div id="drBody">
+        <div class="kpis" id="drKpis"></div>
+
+        <div class="card">
+          <div class="card-head"><h2>Key insights</h2><span class="muted">Documentation and prescribing in the selected period</span></div>
+          <ul class="insights" id="drInsights"></ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Chief complaint quality</h2><div class="muted small">Written UCAF forms · detailed = 3+ words, brief = 1–2 words, empty = blank or 0</div></div>
+            <div class="actions"><div class="legend" id="ccLegend"></div><button class="btn sm" data-toggle="Cc">Table</button></div>
+          </div>
+          <div class="chart" id="chCc"></div>
+          <div class="table-wrap hidden" id="tbCc"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Documentation score by doctor</h2><div class="muted small">Average of: detailed chief complaint, detailed signs, vital signs recorded · lowest first · green 75%+ good, orange 50–75% fair, red under 50% poor</div></div>
+          </div>
+          <div class="table-wrap" id="tbQuality"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Most used by each doctor</h2><div class="muted small">Top diagnosis, service and medicine · share of that doctor's written forms</div></div>
+          </div>
+          <div class="table-wrap" id="tbTop"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Antibiotic prescribing</h2><div class="muted small">Visits with a systemic antibiotic (matched by medicine name) · green up to 25%, orange 25–40%, red over 40% · colds, URTI and acute bronchitis = J00, J06, J20</div></div>
+            <div class="actions"><button class="btn sm" data-toggle="Abx">Table</button></div>
+          </div>
+          <div class="chart" id="chAbx"></div>
+          <div class="table-wrap hidden" id="tbAbx"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Doctor profile</h2><div class="muted small" id="profileSub"></div></div>
+            <div class="actions"><select class="field" id="docPick" aria-label="Doctor for profile"></select></div>
+          </div>
+          <div class="kpis profile-kpis" id="profileKpis"></div>
+          <div class="three-col">
+            <div><h3 class="sub-h">Top diagnoses</h3><div id="chPdx"></div></div>
+            <div><h3 class="sub-h">Top services</h3><div id="chPsv"></div></div>
+            <div><h3 class="sub-h">Top medicines</h3><div id="chPmd"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="empty hidden" id="drEmpty">No written UCAF forms for this period yet.</div>
     </div>
   </section>
 </main>
@@ -719,6 +792,7 @@
 
   // ---------- Period (shared by Statistics and Analytics) ----------
   const MAX_DAYS = 92; // keeps Firestore reads well inside the free quota
+  const PERIOD_TABS = ["stats", "analytics", "doctors"];
   const fmtDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5) + 1;
 
@@ -757,20 +831,22 @@
 
   let periodToken = 0;
   async function renderPeriodViews() {
-    if (tab !== "stats" && tab !== "analytics") return;
+    if (!PERIOD_TABS.includes(tab)) return;
     const p = currentPeriod();
     $("rangeLabel").textContent = p.label;
     if (daysBetween(p.from, p.to) < 1) return showError("The end date must be after the start date.");
     if (daysBetween(p.from, p.to) > MAX_DAYS) return showError(`Please choose ${MAX_DAYS} days or fewer.`);
     $("err").textContent = "";
     const token = ++periodToken;
-    const body = tab === "stats" ? $("statKpis") : $("anBody");
+    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody") }[tab];
     body.classList.add("loading"); // keep the previous render visible while loading
     try {
       const list = scope(await loadPeriod(p));
       const prev = tab === "analytics" ? scope(await loadPeriod(previousPeriod(p))) : null;
       if (token !== periodToken) return; // the user changed something while we were loading
-      if (tab === "stats") renderStats(p, list); else renderAnalytics(p, list, prev);
+      if (tab === "stats") renderStats(p, list);
+      else if (tab === "analytics") renderAnalytics(p, list, prev);
+      else renderDoctors(p, list);
     } finally {
       if (token === periodToken) body.classList.remove("loading");
     }
@@ -906,15 +982,15 @@
   }
 
   // Horizontal bars: single series, or two stacked parts
-  function hbars(el, chart, items, { parts = null, max = null } = {}) {
+  function hbars(el, chart, items, { parts = null, max = null, color = ACC } = {}) {
     const top = max ?? Math.max(1, ...items.map((d) => d.value));
     tips.set(chart, items.map((d) => d.tip));
     el.innerHTML = `<div class="hbars">${items.map((d, i) => `
       <div class="hrow${d.flag ? " flag" : ""}" ${tipAttr(chart, i)}>
         <span class="name" title="${e(d.label)}">${e(d.label)}</span>
-        ${d.meter != null ? `<div class="meter"><span style="width:${d.meter}%"></span></div>`
+        ${d.meter != null ? `<div class="meter"><span style="width:${d.meter}%${d.color ? `;background:${d.color}` : ""}"></span></div>`
           : `<div class="htrack">${(parts ? d.parts : [d.value]).map((v, j) =>
-              v ? `<span class="seg" style="width:calc(${(v / top) * 100}% - 2px);background:${parts ? parts[j] : ACC}"></span>` : "").join("")}</div>`}
+              v ? `<span class="seg" style="width:calc(${(v / top) * 100}% - 2px);background:${parts ? parts[j] : color}"></span>` : "").join("")}</div>`}
         <span class="val">${e(d.text)}${d.sub ? `<small>${e(d.sub)}</small>` : ""}</span>
       </div>`).join("")}</div>`;
   }
@@ -1090,6 +1166,170 @@
   let resizeTimer;
   addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => tab === "analytics" && renderPeriodViews().catch(showError), 200); });
 
+  // ---------- Doctors: documentation quality, habits, antibiotics ----------
+  const words = (s) => String(s ?? "").trim().split(/\s+/).filter((w) => w && !/^[0.\-]+$/.test(w)).length;
+  const textLevel = (s) => { const n = words(s); return n === 0 ? "empty" : n < 3 ? "brief" : "detailed"; };
+  const hasVitals = (r) => String(r.BP ?? "").replace(/[0\s/.]/g, "") !== "" && Number(r.Temp) > 0 && Number(r.Pulse) > 0;
+  const ANTIBIOTIC = /AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
+  const VIRAL_RTI = /^(J00|J06|J20)/; // common cold, acute URTI, acute bronchitis
+  const topN = (counts, n) => [...counts].sort((a, b) => b[1].n - a[1].n).slice(0, n);
+  function countInto(map, key, label) { if (!key) return; const c = map.get(key) ?? { label, n: 0 }; c.n++; map.set(key, c); }
+
+  // One pass over the forms: per-doctor stats used by every card in the tab
+  function doctorStats(forms) {
+    const docs = new Map();
+    for (const r of forms) {
+      const name = r.Doctor || "—";
+      if (!docs.has(name)) docs.set(name, { name, forms: 0, cc: { detailed: 0, brief: 0, empty: 0 }, signsDetailed: 0, vitals: 0,
+        codes: 0, meds: 0, withSvc: 0, abx: 0, rti: 0, rtiAbx: 0, follow: 0, patients: new Set(), hours: new Map(),
+        dx: new Map(), svc: new Map(), med: new Map() });
+      const d = docs.get(name);
+      const diags = J(r.DiagnosesJson), svcs = J(r.ServicesJson), meds = J(r.MedsJson);
+      d.forms++; d.patients.add(patientKey(r));
+      d.cc[textLevel(r.ChiefComplaint)]++;
+      if (textLevel(r.Signs) === "detailed") d.signsDetailed++;
+      if (hasVitals(r)) d.vitals++;
+      d.codes += diags.length; d.meds += meds.length;
+      if (svcs.length) d.withSvc++;
+      if (r.VisitTypeCode === "R") d.follow++;
+      const h = hourOf(r); if (!isNaN(h)) d.hours.set(h, (d.hours.get(h) ?? 0) + 1);
+      const p = String(diags[0]?.Code ?? "").toUpperCase();
+      countInto(d.dx, p, `${p} · ${diags[0]?.Name ?? ""}`);
+      for (const s of svcs) { const label = String(s.Description || s.Code || "").trim(); countInto(d.svc, label.toUpperCase(), label); }
+      const seenMed = new Set();
+      for (const m of meds) {
+        const generic = String(m.Name ?? "").split(":")[0].trim() || String(m.Code);
+        if (!seenMed.has(generic)) { seenMed.add(generic); countInto(d.med, generic, generic); }
+      }
+      const abx = meds.some((m) => ANTIBIOTIC.test(String(m.Name ?? "")));
+      if (abx) d.abx++;
+      if (VIRAL_RTI.test(p)) { d.rti++; if (abx) d.rtiAbx++; }
+    }
+    for (const d of docs.values()) {
+      d.ccDetailedPct = (d.cc.detailed / d.forms) * 100;
+      d.signsPct = (d.signsDetailed / d.forms) * 100;
+      d.vitalsPct = (d.vitals / d.forms) * 100;
+      d.score = (d.ccDetailedPct + d.signsPct + d.vitalsPct) / 3;
+      d.abxPct = (d.abx / d.forms) * 100;
+    }
+    return [...docs.values()];
+  }
+
+  const pctTxt = (v) => `${Math.round(v)}%`;
+  // Traffic-light levels; the word always travels with the color so meaning never rests on color alone
+  const LEVELS = { good: ["var(--ok)", "ok", "Good"], fair: ["var(--warn)", "warn", "Fair"], poor: ["var(--danger)", "danger", "Poor"] };
+  const levelOf = (v) => (v >= 75 ? "good" : v >= 50 ? "fair" : "poor");           // higher is better
+  const abxLevel = (v) => (v <= 25 ? "good" : v <= 40 ? "fair" : "poor");           // lower is better
+  const meterCell = (v, level = levelOf(v)) =>
+    `<span class="mini-meter" title="${LEVELS[level][2]}"><span class="meter"><span style="width:${Math.round(v)}%;background:${LEVELS[level][0]}"></span></span>${pctTxt(v)}</span>`;
+  const levelPill = (v, level = levelOf(v)) => `<span class="pill ${LEVELS[level][1]}">${level === "good" ? "✓" : "⚠"} ${LEVELS[level][2]} · ${pctTxt(v)}</span>`;
+  const topCell = (map, forms) => {
+    const [k, c] = topN(map, 1)[0] ?? [];
+    return k ? `<span class="cut" title="${e(c.label)}">${e(c.label)}</span><span class="share-of">${pct(c.n, forms)}%</span>` : `<span class="muted">—</span>`;
+  };
+
+  let drDocs = [];
+  function renderDoctors(p, list) {
+    // Every opened form counts here, including ones with an empty / 0 chief complaint (they are what this tab measures)
+    const forms = list.filter((r) => !notWritten(r));
+    $("drEmpty").classList.toggle("hidden", forms.length > 0);
+    $("drBody").classList.toggle("hidden", forms.length === 0);
+    if (!forms.length) return;
+    drDocs = doctorStats(forms).sort((a, b) => b.forms - a.forms);
+    const all = doctorStats(forms.map((r) => ({ ...r, Doctor: "all" })))[0];
+
+    $("drKpis").innerHTML =
+      kpi("Written forms", nf.format(forms.length), `${nf.format(list.length - forms.length)} not written in period`) +
+      kpi("Detailed chief complaint", pctTxt(all.ccDetailedPct), `${LEVELS[levelOf(all.ccDetailedPct)][2]} · ${nf.format(all.cc.empty)} empty · ${nf.format(all.cc.brief)} brief`, levelOf(all.ccDetailedPct)) +
+      kpi("Vital signs recorded", pctTxt(all.vitalsPct), `${LEVELS[levelOf(all.vitalsPct)][2]} · BP, temperature and pulse`, levelOf(all.vitalsPct)) +
+      kpi("ICD codes per visit", (all.codes / all.forms).toFixed(1), `${(all.meds / all.forms).toFixed(1)} medicines per visit`) +
+      kpi("Antibiotic rate", pctTxt(all.abxPct), `${LEVELS[abxLevel(all.abxPct)][2]}${all.rti ? ` · ${pct(all.rtiAbx, all.rti)}% of cold / URTI / bronchitis visits` : ""}`, abxLevel(all.abxPct));
+
+    // Chief complaint quality: detailed / brief / empty per doctor
+    const ccColors = ["var(--s1)", "var(--s1-light)", "var(--warn)"];
+    $("ccLegend").innerHTML = legendHtml([["Detailed", ccColors[0]], ["Brief", ccColors[1]], ["Empty / 0", ccColors[2]]]);
+    const byCc = drDocs.slice().sort((a, b) => a.ccDetailedPct - b.ccDetailedPct);
+    hbars($("chCc"), "cc", byCc.map((d) => ({
+      label: d.name, value: d.forms, parts: [d.cc.detailed, d.cc.brief, d.cc.empty], text: pctTxt(d.ccDetailedPct), sub: "detailed",
+      tip: { title: d.name, lines: [
+        { value: nf.format(d.cc.detailed), label: "detailed", color: ccColors[0] }, { value: nf.format(d.cc.brief), label: "brief", color: ccColors[1] },
+        { value: nf.format(d.cc.empty), label: "empty or 0", color: ccColors[2] }, { value: nf.format(d.forms), label: "written forms" }] },
+    })), { parts: ccColors, max: Math.max(...byCc.map((d) => d.forms)) });
+    $("tbCc").innerHTML = tableHtml(["Doctor", "Forms", "Detailed", "Brief", "Empty / 0"],
+      byCc.map((d) => [d.name, nf.format(d.forms), nf.format(d.cc.detailed), nf.format(d.cc.brief), nf.format(d.cc.empty)]));
+
+    // Documentation score
+    const byScore = drDocs.slice().sort((a, b) => a.score - b.score);
+    $("tbQuality").innerHTML = `<table class="grid"><thead><tr><th>Doctor</th><th class="num">Forms</th><th>Chief complaint detailed</th>
+        <th>Signs detailed</th><th>Vitals recorded</th><th class="num">ICD codes / visit</th><th>Score</th></tr></thead><tbody>${
+      byScore.map((d) => `<tr><td><span class="cut sm" title="${e(d.name)}">${e(d.name)}</span></td><td class="num">${nf.format(d.forms)}</td>
+        <td>${meterCell(d.ccDetailedPct)}</td><td>${meterCell(d.signsPct)}</td><td>${meterCell(d.vitalsPct)}</td>
+        <td class="num">${(d.codes / d.forms).toFixed(1)}</td>
+        <td>${levelPill(d.score)}</td></tr>`).join("")}</tbody></table>`;
+
+    // Most used per doctor
+    $("tbTop").innerHTML = `<table class="grid"><thead><tr><th>Doctor</th><th class="num">Forms</th><th>Top diagnosis</th><th>Top service</th>
+        <th>Top medicine</th><th class="num">Medicines / visit</th></tr></thead><tbody>${
+      drDocs.map((d) => `<tr><td><span class="cut sm" title="${e(d.name)}">${e(d.name)}</span></td><td class="num">${nf.format(d.forms)}</td>
+        <td>${topCell(d.dx, d.forms)}</td><td>${topCell(d.svc, d.forms)}</td><td>${topCell(d.med, d.forms)}</td>
+        <td class="num">${(d.meds / d.forms).toFixed(1)}</td></tr>`).join("")}</tbody></table>`;
+
+    // Antibiotics
+    const byAbx = drDocs.slice().sort((a, b) => b.abxPct - a.abxPct);
+    hbars($("chAbx"), "abx", byAbx.map((d) => ({
+      label: d.name, meter: d.abxPct, color: LEVELS[abxLevel(d.abxPct)][0], text: pctTxt(d.abxPct),
+      sub: { good: "✓ low", fair: "⚠ watch", poor: "⚠ high" }[abxLevel(d.abxPct)],
+      tip: { title: d.name, lines: [{ value: pctTxt(d.abxPct), label: "of visits with an antibiotic" },
+        { value: nf.format(d.abx), label: `of ${nf.format(d.forms)} forms` },
+        { value: d.rti ? `${pct(d.rtiAbx, d.rti)}%` : "—", label: `of ${nf.format(d.rti)} cold / URTI / bronchitis visits` }] },
+    })));
+    $("tbAbx").innerHTML = tableHtml(["Doctor", "Antibiotic rate", "Visits with antibiotic", "Cold / URTI / bronchitis visits", "…of which with antibiotic"],
+      byAbx.map((d) => [d.name, pctTxt(d.abxPct), nf.format(d.abx), nf.format(d.rti), d.rti ? `${pct(d.rtiAbx, d.rti)}%` : "—"]));
+
+    // Doctor profile picker: keeps the choice; defaults to the doctor filter or the busiest doctor
+    const pick = $("docPick"), keep = pick.value || $("doctor").value;
+    pick.innerHTML = drDocs.map((d) => `<option>${e(d.name)}</option>`).join("");
+    pick.value = drDocs.some((d) => d.name === keep) ? keep : drDocs[0].name;
+    renderProfile();
+
+    // Insights
+    const out = [];
+    const worstCc = byCc[0], bestScore = byScore[byScore.length - 1];
+    if (worstCc && worstCc.ccDetailedPct < 80)
+      out.push(`<b>${e(worstCc.name)}</b> writes the shortest chief complaints: only <b>${pctTxt(worstCc.ccDetailedPct)}</b> detailed, ${nf.format(worstCc.cc.empty)} empty or 0.`);
+    if (bestScore) out.push(`Best documentation score: <b>${e(bestScore.name)}</b> at <b>${pctTxt(bestScore.score)}</b>.`);
+    const lowVitals = drDocs.filter((d) => d.vitalsPct < 50);
+    if (lowVitals.length) out.push(`Vital signs are missing in most forms of <b>${lowVitals.map((d) => e(d.name)).join(", ")}</b>.`);
+    if (byAbx[0] && byAbx[0].abx) out.push(`Highest antibiotic rate: <b>${e(byAbx[0].name)}</b> at <b>${pctTxt(byAbx[0].abxPct)}</b> of visits.`);
+    if (all.rti) out.push(`Antibiotics were prescribed in <b>${pct(all.rtiAbx, all.rti)}%</b> of cold / URTI / bronchitis visits (${nf.format(all.rtiAbx)} of ${nf.format(all.rti)}) — a common reason for insurer rejections.`);
+    const [topDx, topDxC] = topN(all.dx, 1)[0] ?? [];
+    if (topDx) out.push(`Most used diagnosis overall: <b>${e(topDxC.label)}</b> in ${pct(topDxC.n, all.forms)}% of forms.`);
+    const [, topMedC] = topN(all.med, 1)[0] ?? [];
+    if (topMedC) out.push(`Most prescribed medicine: <b>${e(topMedC.label)}</b> in ${pct(topMedC.n, all.forms)}% of forms.`);
+    $("drInsights").innerHTML = out.map((s) => `<li>${s}</li>`).join("");
+  }
+
+  function renderProfile() {
+    const d = drDocs.find((x) => x.name === $("docPick").value); if (!d) return;
+    const peak = [...d.hours].sort((a, b) => b[1] - a[1])[0];
+    $("profileSub").textContent = `${nf.format(d.forms)} written forms · ${nf.format(d.patients.size)} patients`;
+    $("profileKpis").innerHTML =
+      kpi("Follow-up visits", pctTxt((d.follow / d.forms) * 100)) +
+      kpi("Visits with services", pctTxt((d.withSvc / d.forms) * 100)) +
+      kpi("Medicines / visit", (d.meds / d.forms).toFixed(1)) +
+      kpi("Antibiotic rate", levelPill(d.abxPct, abxLevel(d.abxPct))) +
+      kpi("Documentation score", levelPill(d.score)) +
+      kpi("Busiest hour", peak ? `${hh(peak[0])}` : "—");
+    const list = (id, map, color) => {
+      const top = topN(map, 8);
+      if (!top.length) { $(id).innerHTML = `<div class="muted small">None in this period.</div>`; return; }
+      hbars($(id), id, top.map(([, c]) => ({ label: c.label, value: c.n, text: nf.format(c.n), sub: `${pct(c.n, d.forms)}%`,
+        tip: { title: c.label, lines: [{ value: nf.format(c.n), label: "visits", color }, { value: `${pct(c.n, d.forms)}%`, label: `of ${d.name}'s forms` }] } })), { color });
+    };
+    list("chPdx", d.dx, "var(--s1)"); list("chPsv", d.svc, "var(--s2)"); list("chPmd", d.med, "var(--s3)");
+  }
+  $("docPick").addEventListener("change", renderProfile);
+
   // ---------- UCAF form ----------
   function ucafHtml(r, page, pages) {
     const tick = (b) => (b ? "✔" : "&nbsp;&nbsp;");
@@ -1216,7 +1456,7 @@
     tab = t;
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
     document.querySelectorAll("[data-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== t));
-    $("periodBar").classList.toggle("hidden", t !== "stats" && t !== "analytics");
+    $("periodBar").classList.toggle("hidden", !PERIOD_TABS.includes(t));
     hideTip();
     renderPeriodViews().catch(showError);
   }
