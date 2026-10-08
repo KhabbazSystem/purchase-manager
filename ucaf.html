@@ -19,7 +19,7 @@
     --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
     --grid: #e6e9ef; --axis: #c9cfd8; --s1-light: #86b6ef; --s3: #1baf7a;
     /* Tab colors (dark enough for white text when the tab is open) */
-    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-users: #4b5563; --on-tab: #ffffff;
+    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-names: #0e7490; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-users: #4b5563; --on-tab: #ffffff;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -33,7 +33,7 @@
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
       --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
       --grid: #232b36; --axis: #36404d; --s1-light: #2c5a92; --s3: #199e70;
-      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-users: #c3cad5; --on-tab: #10142e;
+      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-names: #4fc3dc; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-users: #c3cad5; --on-tab: #10142e;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -100,6 +100,7 @@
   .tab:focus-visible { outline: 2px solid var(--tc); outline-offset: 2px; }
   .tab[data-tab="insurers"]  { --tc: var(--t-ins); }
   .tab[data-tab="alerts"]    { --tc: var(--t-alerts); }
+  .tab[data-tab="names"]     { --tc: var(--t-names); }
   .tab[data-tab="stats"]     { --tc: var(--t-stats); }
   .tab[data-tab="analytics"] { --tc: var(--t-an); }
   .tab[data-tab="doctors"]   { --tc: var(--t-doc); }
@@ -314,6 +315,7 @@
   .ucaf .pre { white-space: pre-line; font-weight: bold; padding-left: 10px; }
   .ucaf .ar { direction: rtl; text-align: center; }
   .ucaf .note { color: #000; padding-left: 10px; }
+  .ucaf .name-warn { background: #fdecea; color: #b42318; border: 1px solid #b42318; border-radius: 4px; padding: 2px 6px; margin: 2px 0; font-weight: bold; font-size: 12px; }
   .ucaf table { width: 100%; border-collapse: collapse; margin-top: 3px; }
   .ucaf th, .ucaf td { border: 1px solid #000; padding: 2px 4px; text-align: left; vertical-align: top; white-space: normal; }
   .ucaf th { font-weight: normal; }
@@ -332,6 +334,7 @@
     body.printing-forms #printArea { display: block; }
     .ucaf { padding: 0; margin: 0; max-width: none; page-break-after: always; break-after: page; }
     .ucaf:last-child { page-break-after: auto; break-after: auto; }
+    .ucaf .name-warn { display: none !important; }
   }
   @media (max-width: 600px) {
     .topbar { padding: 10px 16px; }
@@ -389,6 +392,7 @@
       <button class="tab" role="tab" data-tab="visits" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Visits</button>
       <button class="tab" role="tab" data-tab="insurers" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>Insurers</button>
       <button class="tab" role="tab" data-tab="alerts" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"/></svg>Alerts<span class="badge hidden" id="alertBadge">0</span></button>
+      <button class="tab" role="tab" data-tab="names" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM7 10h4M7 14h6M15 10h2M15 14h2"/></svg>Names<span class="badge hidden" id="namesBadge">0</span></button>
       <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 10h16M4 15h16M10 10v10"/></svg>Statistics</button>
       <button class="tab" role="tab" data-tab="analytics" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-9M3 20h18"/></svg>Analytics</button>
       <button class="tab" role="tab" data-tab="doctors" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Doctors</button>
@@ -480,6 +484,21 @@
     </div>
 
     <!-- Statistics -->
+    <!-- Names -->
+    <div data-panel="names" class="hidden">
+      <div class="kpis" id="namesKpis"></div>
+      <div class="card">
+        <div class="card-head"><h2>Patient names to fix</h2></div>
+        <div class="table-wrap">
+          <table class="grid">
+            <thead><tr><th>Time</th><th>Visit</th><th>File no</th><th>Name (English)</th><th>Name (Arabic)</th><th>Payment</th><th>Issue</th></tr></thead>
+            <tbody id="namesBody"></tbody>
+          </table>
+          <div class="empty hidden" id="namesEmpty">All patient names are written correctly.</div>
+        </div>
+      </div>
+    </div>
+
     <div data-panel="stats" class="hidden">
       <div class="kpis" id="statKpis"></div>
       <div class="card" id="trendCard">
@@ -767,6 +786,10 @@
     "Not written, or chief complaint empty / 0": "غير مكتوب، أو الشكوى الرئيسية فارغة / 0", "Form written without ICD-10 code": "نموذج مكتوب بدون كود ICD-10",
     "Complete": "مكتمل", "{p}% of visits": "{p}% من الزيارات", "UCAF not written": "UCAF غير مكتوب",
     "UCAF missing · chief complaint empty or 0": "UCAF ناقص · الشكوى الرئيسية فارغة أو 0", "No diagnosis code": "بدون كود تشخيص",
+    "Names": "الأسماء", "Patient names to fix": "أسماء مرضى تحتاج تصحيح", "Name (English)": "الاسم (إنجليزي)", "Name (Arabic)": "الاسم (عربي)",
+    "Name problems": "أسماء بها مشكلة", "Names OK": "أسماء سليمة", "All patient names are written correctly.": "كل أسماء المرضى مكتوبة صح.",
+    "Arabic name missing or not in Arabic": "الاسم العربي ناقص أو مكتوب بغير العربي",
+    "Arabic name missing": "الاسم العربي غير مكتوب", "Second name is not in Arabic": "الاسم الثاني مش مكتوب بالعربي", "First name is not in English": "الاسم الأول مش مكتوب بالإنجليزي",
     "Visits per day": "الزيارات يوميًا", "Insured": "تأمين", "Share": "النسبة", "By insurer": "حسب شركة التأمين",
     "No data for this period yet.": "لا توجد بيانات لهذه الفترة بعد.", "{n} per day on average": "{n} يوميًا في المتوسط",
     "{a} insured · {b} cash": "{a} تأمين · {b} نقدي", "{d}: {n} visits": "{d}: {n} زيارة",
@@ -904,6 +927,15 @@
   const emptyComplaint = (r) => !notWritten(r) && /^[\s0.]*$/.test(String(r.ChiefComplaint ?? ""));
   const isMissing = (r) => notWritten(r) || emptyComplaint(r);
   const noDiagnosis = (r) => !isMissing(r) && !String(r.Diagnosis ?? "").trim();
+  // UCAF insured name: line 1 English, line 2 Arabic (checked for every visit, cash included)
+  const AR_CHARS = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
+  function nameIssue(r) {
+    const ar = String(r.PatientName2 ?? "").trim();
+    if (!ar) return "Arabic name missing";
+    if (!AR_CHARS.test(ar) || /[A-Za-z]/.test(ar)) return "Second name is not in Arabic";
+    if (AR_CHARS.test(String(r.PatientName ?? ""))) return "First name is not in English";
+    return "";
+  }
   const visitType = (r) => t({ V: "New", R: "Follow-up" }[r.VisitTypeCode] ?? r.VisitTypeCode ?? "");
   const payment = (r) => t({ C: "Cash", R: "Insurance" }[r.PaymentCode] ?? r.PaymentCode ?? "");
   // insurer() returns a stable key ("Cash" stays "Cash" for filtering); insurerLabel() is what people read
@@ -967,6 +999,7 @@
     renderVisits();
     renderInsurers();
     renderAlerts();
+    renderNames();
     renderPeriodViews().catch(showError);
   }
 
@@ -1057,6 +1090,20 @@
           : emptyComplaint(r) ? `<span class="pill warn">${t("UCAF missing · chief complaint empty or 0")}</span>`
           : `<span class="pill danger">${t("No diagnosis code")}</span>`}</td></tr>`).join("");
     $("alertEmpty").classList.toggle("hidden", issues.length > 0);
+  }
+
+  function renderNames() {
+    const bad = shown.filter(nameIssue);
+    const badge = $("namesBadge");
+    badge.textContent = bad.length; badge.classList.toggle("hidden", bad.length === 0);
+    $("namesKpis").innerHTML = kpi(t("Name problems"), nf.format(bad.length), t("Arabic name missing or not in Arabic"), bad.length ? "warn" : "") +
+      kpi(t("Names OK"), nf.format(shown.length - bad.length), t("{p}% of visits", { p: pct(shown.length - bad.length, shown.length) }));
+    const sorted = bad.slice().sort((a, b) => String(a.VisitTime).localeCompare(String(b.VisitTime)));
+    $("namesBody").innerHTML = sorted.map((r) => `<tr class="clickable" data-id="${e(r.VisitId)}">
+        <td>${e(r.VisitTime)}</td><td>${e(r.VisitId)}</td><td>${e(r.FileNo)}</td>
+        <td>${e(r.PatientName)}</td><td dir="auto">${e(r.PatientName2)}</td><td>${e(payment(r))}</td>
+        <td><span class="pill danger">${t(nameIssue(r))}</span></td></tr>`).join("");
+    $("namesEmpty").classList.toggle("hidden", bad.length > 0);
   }
 
   // ---------- Period (shared by Statistics and Analytics) ----------
@@ -1772,6 +1819,7 @@
         <div>
           Policy Holder: ${e(r.PolicyHolder)}<br>
           Policy No: ${e(r.PolicyNo)} &nbsp; MemberShip No: ${e(r.MembershipNo)}<br>
+          ${nameIssue(r) ? `<div class="name-warn">⚠ ${e(t(nameIssue(r)))}</div>` : ""}
           Incured Name: ${e(r.PatientName)}<br>
           <div class="ar" dir="auto">${e(r.PatientName2)}</div>
           ID. No: ${e(r.IdNo)} &nbsp; Sex: ${e(r.Sex)} &nbsp; Age: ${e(r.Age)} Y<br>
@@ -1995,6 +2043,7 @@
     render();
   });
   $("visitBody").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-i]"); if (tr) openForm(shown[+tr.dataset.i]); });
+  $("namesBody").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openForm(rows.find((r) => r.VisitId === tr.dataset.id)); });
   $("alertBody").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openForm(rows.find((r) => r.VisitId === tr.dataset.id)); });
   $("insurerBody").addEventListener("click", (ev) => {
     const tr = ev.target.closest("tr[data-ins]"); if (!tr) return;
