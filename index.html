@@ -140,6 +140,8 @@ nav{flex:1;padding:12px 0;overflow-y:auto}
 .sav-sum-card:hover{transform:translateY(-2px)}
 .sav-sum-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:800}
 .sav-sum-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px}
+.sav-sum-place{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.22)}
+.sav-sum-title{font-size:18px;font-weight:900;line-height:1.4;overflow-wrap:anywhere}
 .sav-sum-value{font-size:28px;font-weight:900;letter-spacing:-0.03em;line-height:1.1}
 .sav-sum-value small{font-size:12px;font-weight:700;opacity:.85}
 .sav-sum-target{font-size:12px;font-weight:700;opacity:.9}
@@ -178,7 +180,23 @@ nav{flex:1;padding:12px 0;overflow-y:auto}
 .sav-goal-box .value{font-size:13px;font-weight:800;color:#0f172a}
 .sav-goal-date{font-size:12px;color:#475569}
 .sav-goal-date strong{color:#0f172a}
-.sav-goal-note{padding-top:8px;border-top:1px solid rgba(148,163,184,0.18);font-size:11px;line-height:1.7;color:#475569;white-space:pre-wrap}
+.sav-goal-note{padding-top:8px;border-top:1px solid rgba(148,163,184,0.18);font-size:12px;line-height:1.7;color:#334155;white-space:pre-wrap}
+.sav-sum-note{font-size:12px;font-weight:600;line-height:1.6;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,0.18);white-space:pre-wrap;overflow-wrap:anywhere}
+.sav-ov{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;padding:18px 20px;margin-bottom:20px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:0 6px 18px rgba(15,23,42,0.05)}
+.sav-ov-main{flex:0 0 220px;display:flex;flex-direction:column;justify-content:center;gap:6px;padding-left:20px;border-left:1px solid var(--border)}
+.sav-ov-label{font-size:13px;font-weight:700;color:var(--text2)}
+.sav-ov-total{font-size:32px;font-weight:900;letter-spacing:-0.03em;color:var(--text);line-height:1.1}
+.sav-ov-total small,.sav-ov-pval small{font-size:12px;font-weight:700;color:var(--text2)}
+.sav-ov-sub{font-size:12px;color:var(--text2)}
+.sav-ov-places{flex:1;min-width:260px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media(max-width:1100px){.sav-ov-places{grid-template-columns:repeat(2,minmax(0,1fr))}.sav-ov-main{flex-basis:100%;border-left:0;padding-left:0}}
+.sav-ov-place{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:var(--bg3)}
+.sav-ov-pname{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--text)}
+.sav-ov-dot{width:9px;height:9px;border-radius:50%;background:var(--goal-color)}
+.sav-ov-pval{font-size:18px;font-weight:900;color:var(--text)}
+.sav-ov-pmeta{font-size:11px;color:var(--text2)}
+.sav-ov-share{height:5px;border-radius:999px;background:var(--border);overflow:hidden;margin-top:2px}
+.sav-ov-share>div{height:100%;border-radius:999px;background:var(--goal-color)}
 .sav-goal-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:2px}
 #view-dashboard .dashboard-quick-cards{display:grid !important;grid-template-columns:repeat(4,minmax(180px,1fr)) !important;gap:16px !important;margin-bottom:20px !important}
 #view-dashboard .dashboard-quick-card{background:linear-gradient(135deg,#ffffff,#f8fafc);border:1px solid rgba(148,163,184,0.24);border-radius:18px;padding:20px 18px;box-shadow:0 12px 28px rgba(15,23,42,0.08);display:flex;align-items:center;justify-content:space-between;min-height:118px;position:relative;overflow:hidden}
@@ -1603,6 +1621,7 @@ table { width: 100%; min-width: 0; }
           <button class="btn btn-primary" onclick="savOpenGoalForm()">➕ إضافة هدف</button>
         </div>
         <div id="sav-legacy-banner"></div>
+        <div id="sav-overview"></div>
         <div id="sav-summary" class="sav-summary"></div>
         <div id="sav-groups"></div>
       </div>
@@ -4233,36 +4252,46 @@ function savDaysLeft(goalDate){
   return Math.round((target - today) / 86400000);
 }
 
-function savGoalCard(g, acc){
+function savGoalInfo(g){
   const target = parseFloat(g.target) || 0;
   const current = parseFloat(g.current) || 0;
+  const hasTarget = target > 0;
   const remaining = Math.max(target - current, 0);
-  const pct = target > 0 ? Math.min(Math.round(current / target * 100), 100) : 0;
-  const done = target > 0 && current >= target;
+  const pct = hasTarget ? Math.min(Math.round(current / target * 100), 100) : 0;
+  const done = hasTarget && current >= target;
   const days = savDaysLeft(g.goalDate);
-  let status;
-  if(done) status = `<span class="sav-goal-status done">✓ مكتمل</span>`;
-  else if(days === null) status = `<span class="sav-goal-status">بدون تاريخ</span>`;
-  else if(days < 0) status = `<span class="sav-goal-status late">⚠️ متأخر ${-days} يوم</span>`;
-  else if(days === 0) status = `<span class="sav-goal-status soon">⏰ اليوم</span>`;
-  else status = `<span class="sav-goal-status${days <= 30 ? ' soon' : ''}">⏳ باقي ${days} يوم</span>`;
+  let status, cls = '';
+  if(done){ status = '✓ مكتمل'; cls = 'done'; }
+  else if(days === null) status = 'بدون تاريخ';
+  else if(days < 0){ status = hasTarget ? `⚠️ متأخر ${-days} يوم` : '📅 انتهى التاريخ'; cls = hasTarget ? 'late' : ''; }
+  else if(days === 0){ status = '⏰ اليوم'; cls = 'soon'; }
+  else { status = `⏳ باقي ${days} يوم`; cls = days <= 30 ? 'soon' : ''; }
+  return { target, current, hasTarget, remaining, pct, done, status, cls };
+}
 
-  return `<div class="sav-goal-card${done ? ' is-done' : ''}" style="--goal-color:${acc.color}">
+function savGoalCard(g, acc){
+  const i = savGoalInfo(g);
+  return `<div class="sav-goal-card${i.done ? ' is-done' : ''}" id="sav-goal-${g.id}" style="--goal-color:${acc.color}">
     <div class="sav-goal-top">
       <div class="sav-goal-tag">${acc.icon} ${acc.label}</div>
-      ${status}
+      <span class="sav-goal-status ${i.cls}">${i.status}</span>
     </div>
     <div class="sav-goal-title">${savEsc(g.title)}</div>
+    ${i.hasTarget ? `
     <div class="sav-goal-amounts">
-      <div class="sav-goal-total">${savNum(current)} <span>/ ${savNum(target)} SAR</span></div>
-      <div class="sav-goal-pct">${pct}%</div>
+      <div class="sav-goal-total">${savNum(i.current)} <span>/ ${savNum(i.target)} SAR</span></div>
+      <div class="sav-goal-pct">${i.pct}%</div>
     </div>
-    <div class="sav-goal-bar"><div style="width:${pct}%"></div></div>
+    <div class="sav-goal-bar"><div style="width:${i.pct}%"></div></div>
     <div class="sav-goal-meta">
-      <div class="sav-goal-box"><div class="label">🎯 المستهدف</div><div class="value">${savNum(target)}</div></div>
-      <div class="sav-goal-box"><div class="label">💰 الحالي</div><div class="value">${savNum(current)}</div></div>
-      <div class="sav-goal-box"><div class="label">📉 المتبقي</div><div class="value">${savNum(remaining)}</div></div>
+      <div class="sav-goal-box"><div class="label">🎯 المستهدف</div><div class="value">${savNum(i.target)}</div></div>
+      <div class="sav-goal-box"><div class="label">💰 الحالي</div><div class="value">${savNum(i.current)}</div></div>
+      <div class="sav-goal-box"><div class="label">📉 المتبقي</div><div class="value">${savNum(i.remaining)}</div></div>
+    </div>` : `
+    <div class="sav-goal-amounts">
+      <div class="sav-goal-total">${savNum(i.current)} <span>SAR</span></div>
     </div>
+    <div class="sav-goal-box"><div class="label">💰 ادخار مفتوح</div><div class="value">بدون مبلغ مستهدف</div></div>`}
     <div class="sav-goal-date">📅 تاريخ الهدف: <strong>${g.goalDate ? fmtDate(g.goalDate) : 'غير محدد'}</strong></div>
     ${g.note ? `<div class="sav-goal-note">${savEsc(g.note)}</div>` : ''}
     <div class="sav-goal-actions">
@@ -4271,6 +4300,8 @@ function savGoalCard(g, acc){
     </div>
   </div>`;
 }
+
+const savByDate = (a, b) => (a.goalDate || '9999').localeCompare(b.goalDate || '9999');
 
 async function renderSavings(){
   await loadSavings();
@@ -4283,34 +4314,59 @@ async function renderSavings(){
       </div>`
     : '';
 
-  document.getElementById('sav-summary').innerHTML = SAV_ACCOUNTS.map(acc => {
-    const goals = allSavGoals.filter(g => g.place === acc.id);
-    const sumTarget = goals.reduce((s, g) => s + (parseFloat(g.target) || 0), 0);
-    const sumCurrent = goals.reduce((s, g) => s + (parseFloat(g.current) || 0), 0);
-    const doneCount = goals.filter(g => (parseFloat(g.target) || 0) > 0 && (parseFloat(g.current) || 0) >= parseFloat(g.target)).length;
-    const pct = sumTarget > 0 ? Math.min(Math.round(sumCurrent / sumTarget * 100), 100) : 0;
-    return `<div class="sav-sum-card" style="--goal-color:${acc.color}" onclick="document.getElementById('sav-group-${acc.id}')?.scrollIntoView({behavior:'smooth',block:'start'})">
-      <div class="sav-sum-head">
-        <span>${acc.label}</span>
-        <span class="sav-sum-icon">${acc.icon}</span>
+  const sumOf = (goals, key) => goals.reduce((s, g) => s + (parseFloat(g[key]) || 0), 0);
+  const allCurrent = sumOf(allSavGoals, 'current');
+  const allTarget = sumOf(allSavGoals, 'target');
+  document.getElementById('sav-overview').innerHTML = `
+    <div class="sav-ov">
+      <div class="sav-ov-main">
+        <div class="sav-ov-label">💰 إجمالي الادخار</div>
+        <div class="sav-ov-total">${savNum(allCurrent)} <small>SAR</small></div>
+        <div class="sav-ov-sub">${allSavGoals.length} هدف${allTarget ? ` · إجمالي المستهدف ${savNum(allTarget)} SAR` : ''}</div>
       </div>
-      <div class="sav-sum-value">${savNum(sumCurrent)} <small>SAR</small></div>
-      <div class="sav-sum-target">من ${savNum(sumTarget)} SAR — ${pct}%</div>
-      <div class="sav-sum-bar"><div style="width:${pct}%"></div></div>
-      <div class="sav-sum-foot"><span>🎯 ${goals.length} هدف</span><span>✓ ${doneCount} مكتمل</span></div>
+      <div class="sav-ov-places">
+        ${SAV_ACCOUNTS.map(acc => {
+          const goals = allSavGoals.filter(g => g.place === acc.id);
+          const cur = sumOf(goals, 'current'), tgt = sumOf(goals, 'target');
+          const share = allCurrent > 0 ? Math.round(cur / allCurrent * 100) : 0;
+          return `<div class="sav-ov-place" style="--goal-color:${acc.color}">
+            <div class="sav-ov-pname"><span class="sav-ov-dot"></span>${acc.label}</div>
+            <div class="sav-ov-pval">${savNum(cur)} <small>SAR</small></div>
+            <div class="sav-ov-pmeta">${goals.length} هدف${tgt ? ` · مستهدف ${savNum(tgt)}` : ''}</div>
+            <div class="sav-ov-share"><div style="width:${share}%"></div></div>
+            <div class="sav-ov-pmeta">${share}% من الإجمالي</div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>`;
-  }).join('');
+
+  const topGoals = SAV_ACCOUNTS.flatMap(acc => allSavGoals.filter(g => g.place === acc.id).sort(savByDate).map(g => ({ g, acc })));
+  document.getElementById('sav-summary').innerHTML = topGoals.length
+    ? topGoals.map(({ g, acc }) => {
+        const i = savGoalInfo(g);
+        return `<div class="sav-sum-card" style="--goal-color:${acc.color}" onclick="document.getElementById('sav-goal-${g.id}')?.scrollIntoView({behavior:'smooth',block:'center'})">
+          <div class="sav-sum-head">
+            <span class="sav-sum-place">${acc.label}</span>
+            <span class="sav-sum-icon">${acc.icon}</span>
+          </div>
+          <div class="sav-sum-title">${savEsc(g.title)}</div>
+          <div class="sav-sum-value">${savNum(i.current)} <small>SAR</small></div>
+          <div class="sav-sum-target">${i.hasTarget ? `من ${savNum(i.target)} SAR — ${i.pct}%` : 'ادخار مفتوح — بدون مبلغ مستهدف'}</div>
+          ${i.hasTarget ? `<div class="sav-sum-bar"><div style="width:${i.pct}%"></div></div>` : ''}
+          ${g.note ? `<div class="sav-sum-note">📝 ${savEsc(g.note)}</div>` : ''}
+          <div class="sav-sum-foot"><span>📅 ${g.goalDate ? fmtDate(g.goalDate) : 'بدون تاريخ'}</span><span>${i.status}</span></div>
+        </div>`;
+      }).join('')
+    : `<div class="sav-group-empty">لا توجد أهداف بعد — اضغط "➕ إضافة هدف" لإضافة أول هدف</div>`;
 
   document.getElementById('sav-groups').innerHTML = SAV_ACCOUNTS.map(acc => {
-    const goals = allSavGoals
-      .filter(g => g.place === acc.id)
-      .sort((a, b) => (a.goalDate || '9999').localeCompare(b.goalDate || '9999'));
+    const goals = allSavGoals.filter(g => g.place === acc.id).sort(savByDate);
     const sumTarget = goals.reduce((s, g) => s + (parseFloat(g.target) || 0), 0);
     const sumCurrent = goals.reduce((s, g) => s + (parseFloat(g.current) || 0), 0);
     return `<div class="sav-group" id="sav-group-${acc.id}" style="--goal-color:${acc.color}">
       <div class="sav-group-head">
         <div class="sav-group-name"><span class="sav-group-icon">${acc.icon}</span> ${acc.label} <span class="sav-group-count">${goals.length} هدف</span></div>
-        <div class="sav-group-sum">${savNum(sumCurrent)} / ${savNum(sumTarget)} SAR</div>
+        <div class="sav-group-sum">${savNum(sumCurrent)}${sumTarget ? ` / ${savNum(sumTarget)}` : ''} SAR</div>
         <button class="btn btn-ghost btn-sm" onclick="savOpenGoalForm(null,'${acc.id}')">➕ هدف لـ ${acc.label}</button>
       </div>
       <div class="sav-group-cards">
@@ -4340,7 +4396,7 @@ window.savOpenGoalForm = function(id = null, place = null){
             </select>
           </div>
           <div class="form-group full"><label>اسم الهدف *</label><input class="form-input" id="savg-title" placeholder="مثال: شراء ثلاجة أدوية" value="${savEsc(g.title)}"/></div>
-          <div class="form-group"><label>المبلغ المستهدف *</label><input class="form-input" id="savg-target" type="number" min="0" step="0.01" placeholder="0.00" value="${g.target ?? ''}"/></div>
+          <div class="form-group"><label>المبلغ المستهدف (اختياري)</label><input class="form-input" id="savg-target" type="number" min="0" step="0.01" placeholder="0.00" value="${g.target ?? ''}"/></div>
           <div class="form-group"><label>المبلغ الحالي</label><input class="form-input" id="savg-current" type="number" min="0" step="0.01" placeholder="0.00" value="${g.current ?? 0}"/></div>
           <div class="form-group full"><label>تاريخ الهدف *</label><input class="form-input" id="savg-date" type="date" value="${g.goalDate || ''}"/></div>
           <div class="form-group full"><label>ملاحظات</label><textarea class="form-input" id="savg-note" rows="2" placeholder="اختياري">${savEsc(g.note)}</textarea></div>
@@ -4360,14 +4416,14 @@ window.savOpenGoalForm = function(id = null, place = null){
 window.savSaveGoal = async function(){
   const place = document.getElementById('savg-place').value;
   const title = document.getElementById('savg-title').value.trim();
-  const target = parseFloat(document.getElementById('savg-target').value);
+  const target = parseFloat(document.getElementById('savg-target').value) || 0;
   const current = parseFloat(document.getElementById('savg-current').value) || 0;
   const goalDate = document.getElementById('savg-date').value;
   const note = document.getElementById('savg-note').value.trim();
   const err = document.getElementById('savg-err');
   const fail = msg => { err.style.display = 'block'; err.textContent = msg; };
   if(!title) return fail('اسم الهدف مطلوب');
-  if(!target || target <= 0) return fail('المبلغ المستهدف مطلوب');
+  if(target < 0) return fail('المبلغ المستهدف لا يمكن أن يكون سالباً');
   if(current < 0) return fail('المبلغ الحالي لا يمكن أن يكون سالباً');
   if(!goalDate) return fail('تاريخ الهدف مطلوب');
   err.style.display = 'none';
