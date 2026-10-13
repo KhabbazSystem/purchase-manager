@@ -1436,13 +1436,8 @@ table { width: 100%; min-width: 0; }
           <div style="position:absolute;top:-20px;left:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%"></div>
           <div style="position:absolute;bottom:-30px;left:60px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
 
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-            <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع الأرصدة الكلي</div>
-            <button onclick="showView('savings')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:white;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18)">
-              <span>↗</span>
-              <span>حساب الادخار</span>
-            </button>
-          </div>
+          <!-- العنوان الرئيسي: مجموع الأرصدة -->
+          <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع الأرصدة الكلي</div>
           <div id="bal-grand-total" style="font-size:42px;font-weight:900;letter-spacing:-1px;margin-bottom:16px">—</div>
 
           <!-- فاصل -->
@@ -1502,13 +1497,7 @@ table { width: 100%; min-width: 0; }
         <div id="sav-total-card" style="background:linear-gradient(135deg,#0f766e,#0ea5e9);border-radius:var(--r);padding:24px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
           <div style="position:absolute;top:-20px;left:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%"></div>
           <div style="position:absolute;bottom:-30px;left:60px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-            <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع حساب الادخار</div>
-            <button onclick="showView('balances')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:white;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18)">
-              <span>↗</span>
-              <span>الأرصدة</span>
-            </button>
-          </div>
+          <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع حساب الادخار</div>
           <div id="sav-grand-total" style="font-size:42px;font-weight:900;letter-spacing:-1px;margin-bottom:16px">—</div>
           <div style="border-top:1px solid rgba(255,255,255,0.2);margin-bottom:16px"></div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
@@ -4121,183 +4110,6 @@ function renderBalHistory(){
       </td>
     </tr>`;
   }).join('');
-}
-
-const SAV_ACCOUNTS = [
-  { id:'total', label:'المجمع', icon:'🏨', color:'#0f766e', ownerKey:'totalOwner', defaultOwner:'المجمع' },
-  { id:'pharm1', label:'صيدلية 1', icon:'💊', color:'#0ea5e9', ownerKey:'pharm1Owner', defaultOwner:'مسؤول صيدلية 1' },
-  { id:'pharm2', label:'صيدلية 2', icon:'💊', color:'#7c3aed', ownerKey:'pharm2Owner', defaultOwner:'مسؤول صيدلية 2' },
-  { id:'pharm3', label:'صيدلية 3', icon:'💊', color:'#f59e0b', ownerKey:'pharm3Owner', defaultOwner:'مسؤول صيدلية 3' },
-];
-
-function getSavingsOwner(record, accountId){
-  return (record && record.owners && record.owners[accountId]) ? String(record.owners[accountId]).trim() : 'غير محدد';
-}
-
-function getSavingsDate(record, accountId){
-  if(record && record.dates && record.dates[accountId]) return String(record.dates[accountId]).trim();
-  if(record && record.savedAt) return String(record.savedAt).slice(0,10);
-  return 'غير محدد';
-}
-
-async function loadSavings(){
-  const snap = await getDocs(query(collection(db, C.savings), orderBy('savedAt','desc')));
-  allSavings = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-}
-
-async function renderSavings(){
-  await loadSavings();
-  const latest = allSavings[0] || null;
-
-  const pharmIds = ['pharm1','pharm2','pharm3'];
-  const pharmTotal = latest ? pharmIds.reduce((s,id)=>s+(parseFloat(latest[id])||0),0) : null;
-  const mainTotal  = latest ? (parseFloat(latest['total'])||0) : null;
-  const grandTotal = (pharmTotal!==null&&mainTotal!==null) ? pharmTotal + mainTotal : null;
-
-  document.getElementById('sav-grand-total').textContent = grandTotal!==null ? grandTotal.toLocaleString('en-US') + ' SAR' : '—';
-  document.getElementById('sav-clinic-total').textContent = mainTotal!==null ? mainTotal.toLocaleString('en-US') + ' SAR' : '—';
-  document.getElementById('sav-pharm-total').textContent = pharmTotal!==null ? pharmTotal.toLocaleString('en-US') + ' SAR' : '—';
-  document.getElementById('sav-last-update').textContent = latest ? 'آخر تحديث: ' + fmtDateTime(latest.savedAt) : 'لم يُحدَّث بعد';
-
-  document.getElementById('sav-cards').innerHTML = SAV_ACCOUNTS.map(a => {
-    const val = latest ? (parseFloat(latest[a.id])||0) : null;
-    const prev = allSavings[1] ? (parseFloat(allSavings[1][a.id])||0) : null;
-    const diff = (val!==null && prev!==null) ? val - prev : null;
-    const diffHtml = diff!==null ? `<div style="font-size:12px;margin-top:4px;color:${diff>=0?'rgba(16,185,129,0.9)':'rgba(239,68,68,0.9)'};font-weight:600">${diff>=0?'↑':'↓'} ${Math.abs(diff).toLocaleString()}</div>` : '';
-    const owner = latest ? getSavingsOwner(latest, a.id) : 'غير محدد';
-    const dateText = latest ? getSavingsDate(latest, a.id) : 'غير محدد';
-    return `<div style="background:linear-gradient(135deg, rgba(255,255,255,0.96), ${a.color}16);border:1px solid ${a.color}66;border-radius:16px;padding:18px;position:relative;overflow:hidden;transition:all .2s;box-shadow:0 12px 24px rgba(26,50,80,0.08)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 16px 30px rgba(26,50,80,0.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 12px 24px rgba(26,50,80,0.08)'">
-      <div style="position:absolute;top:0;right:0;left:0;height:4px;background:linear-gradient(90deg,${a.color},rgba(255,255,255,0.9))"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
-          <div style="width:36px;height:36px;border-radius:12px;background:${a.color}22;display:flex;align-items:center;justify-content:center;font-size:18px">${a.icon}</div>
-          <div style="font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.label}</div>
-        </div>
-        <span style="font-size:10px;font-weight:700;padding:4px 8px;border-radius:999px;background:${a.color}18;color:${a.color};border:1px solid ${a.color}30;white-space:nowrap">حساب</span>
-      </div>
-      <div style="font-size:28px;font-weight:900;color:var(--text)">${val!==null ? val.toLocaleString() : '—'}</div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(148,163,184,0.22)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">الهدف</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">${owner}</div>
-      </div>
-      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <div style="font-size:10px;color:var(--text3)">تاريخ الهدف</div>
-        <div style="font-size:11px;font-weight:700;color:${a.color}">${dateText}</div>
-      </div>
-      ${diffHtml}
-    </div>`;
-  }).join('') + (latest ? `<div style="background:linear-gradient(135deg,rgba(14,165,233,0.12),rgba(124,58,237,0.12));border:1px solid var(--border2);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;grid-column:1/-1">
-      <div style="position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,#0ea5e9,#7c3aed,#f59e0b)"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:10px;background:rgba(14,165,233,0.15);display:flex;align-items:center;justify-content:center;font-size:20px">💊</div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text2)">مجموع الصيدليات الثلاثة</div>
-            <div style="font-size:11px;color:var(--text3)">صيدلية 1 + صيدلية 2 + صيدلية 3</div>
-          </div>
-        </div>
-        <div style="font-size:30px;font-weight:900;color:var(--text)">${pharmTotal!==null ? pharmTotal.toLocaleString('en-US') : '—'} <span style="font-size:14px;color:var(--text2)">SAR</span></div>
-      </div>
-    </div>` : '');
-
-  document.getElementById('sav-inputs').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">` +
-    SAV_ACCOUNTS.map(a => `
-      <div class="form-group" style="margin:0;background:linear-gradient(135deg,rgba(255,255,255,0.86),rgba(239,246,255,0.9));border:1px solid ${a.color}33;border-radius:12px;padding:12px;">
-        <label style="display:flex;align-items:center;gap:8px;font-weight:800;color:var(--text)">${a.icon} ${a.label}</label>
-        <input class="form-input" id="sav-input-${a.id}" type="number" min="0" step="0.01" placeholder="0.00" value="${latest ? (parseFloat(latest[a.id]) || '') : ''}" style="background:white;border-color:${a.color}44" />
-        <input class="form-input" id="sav-owner-${a.id}" type="text" placeholder="الغرض من هذا الحساب" value="${latest ? getSavingsOwner(latest, a.id) : ''}" style="margin-top:8px;background:white;border-color:${a.color}44" />
-        <label style="margin-top:8px;font-size:11px;font-weight:700;color:var(--text2);">تاريخ الهدف</label>
-        <input class="form-input" id="sav-date-${a.id}" type="date" value="${latest ? getSavingsDate(latest, a.id) : ''}" style="background:white;border-color:${a.color}44" />
-      </div>
-    `).join('') + `</div>`;
-
-  renderSavHistory();
-}
-
-function renderSavHistory(){
-  const tbody = document.getElementById('sav-history-tbody');
-  const empty = document.getElementById('sav-history-empty');
-  if(!allSavings.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-
-  tbody.innerHTML = allSavings.slice(0,20).map(b => {
-    const grand = SAV_ACCOUNTS.reduce((s,a)=>s + (parseFloat(b[a.id]) || 0), 0);
-    return `<tr>
-      <td style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;white-space:nowrap">${fmtDateTime(b.savedAt)}</td>
-      ${SAV_ACCOUNTS.map(a => `
-        <td class="amount" style="font-size:13px;vertical-align:middle">
-          ${(parseFloat(b[a.id]) || 0).toLocaleString()}
-          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.4">الهدف: ${getSavingsOwner(b, a.id)}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4">تاريخ الهدف: ${getSavingsDate(b, a.id)}</div>
-        </td>
-      `).join('')}
-      <td class="amount" style="font-weight:800;color:var(--accent2)">${grand.toLocaleString()}</td>
-      <td style="text-align:center;padding:6px">
-        <button onclick="deleteSavEntry('${b.id}')"
-          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red2);border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:all .15s"
-          onmouseenter="this.style.background='rgba(239,68,68,0.2)'"
-          onmouseleave="this.style.background='rgba(239,68,68,0.1)'"
-          title="حذف هذا السجل">✕</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-window.saveSavings = async function(){
-  const pass = prompt('🔐 أدخل كلمة المرور لتحديث أهداف حساب الادخار:');
-  if(pass === null) return;
-  if(pass !== '1212309'){ showToast('❌ كلمة المرور غير صحيحة','error'); return; }
-
-  const data = { savedAt: new Date().toISOString(), savedBy: currentUser.id, owners: {}, dates: {} };
-  SAV_ACCOUNTS.forEach(a => {
-    const val = parseFloat(document.getElementById(`sav-input-${a.id}`)?.value) || 0;
-    const owner = (document.getElementById(`sav-owner-${a.id}`)?.value || '').trim() || 'غير محدد';
-    const dateVal = (document.getElementById(`sav-date-${a.id}`)?.value || '').trim();
-    data[a.id] = val;
-    data.owners[a.id] = owner;
-    data.dates[a.id] = dateVal || new Date().toISOString().slice(0,10);
-  });
-
-  try {
-    await addDoc(collection(db, C.savings), data);
-    showToast('تم حفظ حساب الادخار ✓','success');
-    await loadSavings();
-    renderSavings();
-  } catch (e) {
-    showToast('خطأ: ' + e.message,'error');
-  }
-}
-
-window.clearSavHistory = async function(){
-  const pass = prompt('🔐 أدخل كلمة المرور لمسح كل سجل حساب الادخار:');
-  if(pass === null) return;
-  if(pass !== '1212309'){ showToast('❌ كلمة المرور غير صحيحة','error'); return; }
-  if(!confirm('⚠️ سيتم مسح كل سجل حساب الادخار نهائياً — هل أنت متأكد؟')) return;
-
-  try {
-    const snap = await getDocs(collection(db, C.savings));
-    for(const d of snap.docs) await deleteDoc(doc(db, C.savings, d.id));
-    allSavings = [];
-    showToast('تم مسح سجل حساب الادخار','warn');
-    renderSavings();
-  } catch (e) {
-    showToast('خطأ: ' + e.message,'error');
-  }
-}
-
-window.deleteSavEntry = async function(id){
-  const pass = prompt('🔐 أدخل كلمة المرور لحذف هذا السجل:');
-  if(pass === null) return;
-  if(pass !== '1212309'){ showToast('❌ كلمة المرور غير صحيحة','error'); return; }
-
-  try {
-    await deleteDoc(doc(db, C.savings, id));
-    showToast('تم حذف السجل','warn');
-    await loadSavings();
-    renderSavings();
-  } catch (e) {
-    showToast('خطأ: ' + e.message,'error');
-  }
 }
 
 window.saveBalances = async function(){
