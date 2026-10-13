@@ -4233,6 +4233,10 @@ function renderSavHistory(){
 }
 
 window.saveSavings = async function(){
+  const pass = prompt('🔐 أدخل كلمة المرور لتحديث أهداف حساب الادخار:');
+  if(pass === null) return;
+  if(pass !== '1212309'){ showToast('❌ كلمة المرور غير صحيحة','error'); return; }
+
   const data = { savedAt: new Date().toISOString(), savedBy: currentUser.id, owners: {}, dates: {} };
   SAV_ACCOUNTS.forEach(a => {
     const val = parseFloat(document.getElementById(`sav-input-${a.id}`)?.value) || 0;
