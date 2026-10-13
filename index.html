@@ -1436,8 +1436,13 @@ table { width: 100%; min-width: 0; }
           <div style="position:absolute;top:-20px;left:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%"></div>
           <div style="position:absolute;bottom:-30px;left:60px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
 
-          <!-- العنوان الرئيسي: مجموع الأرصدة -->
-          <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع الأرصدة الكلي</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+            <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع الأرصدة الكلي</div>
+            <button onclick="showView('savings')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:white;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18)">
+              <span>↗</span>
+              <span>حساب الادخار</span>
+            </button>
+          </div>
           <div id="bal-grand-total" style="font-size:42px;font-weight:900;letter-spacing:-1px;margin-bottom:16px">—</div>
 
           <!-- فاصل -->
@@ -1497,7 +1502,13 @@ table { width: 100%; min-width: 0; }
         <div id="sav-total-card" style="background:linear-gradient(135deg,#0f766e,#0ea5e9);border-radius:var(--r);padding:24px;margin-bottom:20px;color:white;position:relative;overflow:hidden">
           <div style="position:absolute;top:-20px;left:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%"></div>
           <div style="position:absolute;bottom:-30px;left:60px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
-          <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع حساب الادخار</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+            <div style="font-size:13px;opacity:0.75;margin-bottom:4px;font-weight:600;letter-spacing:0.5px">💰 مجموع حساب الادخار</div>
+            <button onclick="showView('balances')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:white;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18)">
+              <span>↗</span>
+              <span>الأرصدة</span>
+            </button>
+          </div>
           <div id="sav-grand-total" style="font-size:42px;font-weight:900;letter-spacing:-1px;margin-bottom:16px">—</div>
           <div style="border-top:1px solid rgba(255,255,255,0.2);margin-bottom:16px"></div>
           <div style="display:flex;gap:24px;flex-wrap:wrap">
