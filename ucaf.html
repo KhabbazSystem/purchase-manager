@@ -208,6 +208,10 @@
   .lang-btn { min-width: 70px; }
 
   /* Users */
+  .tab-picks { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 16px 14px; }
+  .tab-picks label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .tabs-edit td { background: var(--surface-2); white-space: normal; }
+  .tabs-edit .tab-picks { padding: 6px 0 10px; }
   .user-form { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1fr) auto; gap: 8px; padding: 14px 16px; align-items: center; }
   @media (max-width: 800px) { .user-form { grid-template-columns: 1fr; } }
   .user-msg { padding: 0 16px 14px; font-size: 13px; }
@@ -270,6 +274,7 @@
   #anBody.loading, #statKpis.loading, #drBody.loading { opacity: .5; transition: opacity .2s; }
   .three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 4px 16px 16px; }
   @media (max-width: 1000px) { .three-col { grid-template-columns: 1fr; } }
+  #chIncome .hrow { grid-template-columns: minmax(0, 190px) 1fr 132px; }
   .three-col .hrow { grid-template-columns: minmax(0, 1fr) 70px 56px; }
   .sub-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
   .profile-kpis { padding: 12px 16px 0; margin-bottom: 8px; }
@@ -421,6 +426,7 @@
     </div>
 
     <div class="error" id="err"></div>
+    <div class="empty hidden" id="noTabs">No tabs are shared with you yet. Ask an admin for access.</div>
 
     <!-- Visits -->
     <div data-panel="visits">
@@ -686,6 +692,13 @@
         </div>
         <div class="kpis" id="inKpis"></div>
         <div class="card">
+          <div class="card-head">
+            <div><h2>Income chart</h2><div class="muted small">Highest first · hover a doctor for the details</div></div>
+            <div class="actions"><div class="legend" id="inLegend"></div></div>
+          </div>
+          <div class="chart" id="chIncome"></div>
+        </div>
+        <div class="card">
           <div class="card-head"><div><h2>Income by doctor</h2><div class="muted small">Net after discount, cancelled invoices excluded (same numbers as the doctors income report in the clinic program)</div></div></div>
           <div class="table-wrap">
             <table class="grid">
@@ -705,7 +718,7 @@
       <div id="edBody">
         <div class="kpis" id="edKpis"></div>
         <div class="card">
-          <div class="card-head"><div><h2>Edits by doctor</h2><div class="muted small">Late = changed more than 72 hours after the form was first written</div></div></div>
+          <div class="card-head"><div><h2>Edits by doctor</h2><div class="muted small">Only edits made more than 24 hours after the form was first written · Late = more than 72 hours</div></div></div>
           <div class="table-wrap" id="edDocs"></div>
         </div>
         <div class="card">
@@ -729,10 +742,12 @@
           <select class="field" id="newRole" aria-label="Role"><option value="viewer">Viewer</option><option value="admin">Admin</option></select>
           <button class="btn primary" type="submit" id="addUserBtn">Add</button>
         </form>
+        <div class="muted small" style="padding: 0 16px 6px" id="newTabsLabel">Tabs this user can see (admins always see everything):</div>
+        <div class="tab-picks" id="newTabs"></div>
         <div class="user-msg" id="userMsg"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h2>People with access</h2><div class="muted small">Admins can add and remove people. Removing access hides all data from that person.</div></div></div>
+        <div class="card-head"><div><h2>People with access</h2><div class="muted small">Admins can add and remove people, and choose which tabs each person sees. Removing access hides all data from that person.</div></div></div>
         <div class="table-wrap" id="usersTable"></div>
       </div>
     </div>
@@ -755,7 +770,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, query, where, onSnapshot, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp }
+  import { getFirestore, collection, query, where, onSnapshot, getDocs, getDoc, doc, setDoc, deleteDoc, deleteField, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -815,7 +830,14 @@
     "Not written, or chief complaint empty / 0": "غير مكتوب، أو الشكوى الرئيسية فارغة / 0", "Form written without ICD-10 code": "نموذج مكتوب بدون كود ICD-10",
     "Complete": "مكتمل", "{p}% of visits": "{p}% من الزيارات", "UCAF not written": "UCAF غير مكتوب",
     "UCAF missing · chief complaint empty or 0": "UCAF ناقص · الشكوى الرئيسية فارغة أو 0", "No diagnosis code": "بدون كود تشخيص",
-    "Income": "الإيرادات", "Year": "سنة", "Medical (without medicines)": "الطبي (بدون الأدوية)", "All (with medicines)": "الجميع (بالأدوية)",
+    "Income": "الإيرادات", "Tabs": "التبويبات", "All tabs": "كل التبويبات", "No tabs": "بدون تبويبات", "Save": "حفظ",
+    "Tabs this user can see (admins always see everything):": "التبويبات التي يمكن للمستخدم رؤيتها (المسؤول يرى كل شيء):",
+    "Choose at least one tab.": "اختر تبويبًا واحدًا على الأقل.", "Tabs {email} can see:": "التبويبات التي يمكن لـ {email} رؤيتها:",
+    "Tabs saved for {email}. They see the change the next time they open the site.": "تم حفظ التبويبات لـ {email}. سيظهر التغيير عند فتح الموقع مرة أخرى.",
+    "No tabs are shared with you yet. Ask an admin for access.": "لا توجد تبويبات متاحة لك بعد. اطلب الصلاحية من المسؤول.",
+    "Admins can add and remove people, and choose which tabs each person sees. Removing access hides all data from that person.": "يمكن للمسؤولين إضافة الأشخاص وإزالتهم وتحديد التبويبات التي يراها كل شخص. إزالة الصلاحية تخفي كل البيانات عن هذا الشخص.", "Income chart": "رسم الإيرادات", "Highest first · hover a doctor for the details": "الأعلى أولًا · مرّر على الطبيب لعرض التفاصيل",
+    "total": "الإجمالي", "credit": "آجل", "services": "خدمات",
+    "Only edits made more than 24 hours after the form was first written · Late = more than 72 hours": "التعديلات بعد أكثر من 24 ساعة من كتابة النموذج فقط · المتأخر = أكثر من 72 ساعة", "Year": "سنة", "Medical (without medicines)": "الطبي (بدون الأدوية)", "All (with medicines)": "الجميع (بالأدوية)",
     "Income by doctor": "الإيرادات حسب الطبيب", "Consultations": "الكشفيات", "Follow-ups": "الإعادة", "Credit": "الآجل",
     "Total income": "إجمالي الإيرادات", "With medicines": "شامل الأدوية", "Without medicines": "بدون الأدوية",
     "{p}% of income": "{p}% من الإيرادات", "{a} consultations · {b} follow-ups": "{a} كشفية · {b} إعادة", "Last income sync: {t}": "آخر تحديث للإيرادات: {t}",
@@ -1261,6 +1283,19 @@
         <td class="num">${nf.format(T.visits)}</td><td class="num">${nf.format(T.serv)}</td><td class="num">${money.format(T.cash)}</td>
         <td class="num">${money.format(T.credit)}</td><td class="num">${money.format(T.total)}</td><td></td></tr>` : "";
     $("inEmpty").classList.toggle("hidden", list.length > 0);
+
+    $("inLegend").innerHTML = legendHtml([["Cash", S1], ["Credit", S2]]);
+    hbars($("chIncome"), "income", list.map((a) => ({
+      label: a.name, value: a.total, parts: [a.cash, a.credit], text: money.format(a.total), sub: `${pct(a.total, T.total)}%`,
+      tip: { title: a.name, lines: [
+        { value: money.format(a.total), label: t("total") },
+        { value: money.format(a.cash), label: t("cash"), color: S1 },
+        { value: money.format(a.credit), label: t("credit"), color: S2 },
+        { value: nf.format(a.visits), label: t("visits") },
+        { value: nf.format(a.serv), label: t("services") },
+      ] },
+    })), { parts: [S1, S2] });
+    $("chIncome").closest(".card").classList.toggle("hidden", list.length === 0);
   }
 
   // ---------- Statistics ----------
@@ -1772,6 +1807,9 @@
   const editedFrom = (c) => c.Since?.toDate?.() ?? c.DetectedAt?.toDate?.();
   const hoursAfter = (c) => { const w = parseTime(c.FirstWritten), d = editedFrom(c); return w && d ? (d - w) / 36e5 : null; };
   const isLate = (c) => (hoursAfter(c) ?? 0) > 72;
+  // Edits in the first 24 hours are normal finishing-off; the sync stops recording them, and older records are hidden the same way
+  const EDIT_GRACE_HOURS = 24;
+  const afterGrace = (c) => { const h = hoursAfter(c); return h == null || h > EDIT_GRACE_HOURS; };
   const fmtDT = (d) => (d ? d.toLocaleString(LOC(), { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
 
   // Word-level diff (longest common subsequence): removed words in red, added words in green
@@ -1818,7 +1856,7 @@
   function renderEdits(all = edRaw) {
     edRaw = all;
     const dr = $("doctor").value, q = $("search").value.trim().toLowerCase();
-    edAll = all.filter((c) => shownChanges(c).length > 0 && (!dr || c.Doctor === dr) &&
+    edAll = all.filter((c) => afterGrace(c) && shownChanges(c).length > 0 && (!dr || c.Doctor === dr) &&
       (!q || [c.PatientName, c.FileNo, c.VisitId, c.Doctor].some((v) => String(v ?? "").toLowerCase().includes(q))))
       .sort((a, b) => (b.DetectedAt?.toMillis?.() ?? 0) - (a.DetectedAt?.toMillis?.() ?? 0));
     $("edEmpty").classList.toggle("hidden", edAll.length > 0);
@@ -2021,33 +2059,63 @@
   const OWNER_EMAIL = "manshester15@yahoo.com";
   const BUILTIN_USERS = [{ email: OWNER_EMAIL, role: "admin" }, { email: "saeed.khabaz@gmail.com", role: "viewer" }];
   let isAdmin = false;
-  async function checkAdmin(user) {
+  // Tabs a person may see. No "tabs" list on the user = every tab (how everyone worked before), and admins always see everything.
+  // Income and Edits are also enforced in the Firestore rules; the other tabs share the visits data, so for them hiding the tab is the control.
+  const DATA_TABS = () => [...document.querySelectorAll(".tab[data-tab]")].map((b) => b.dataset.tab).filter((x) => x !== "users");
+  const tabLabel = (id) => document.querySelector(`.tab[data-tab="${id}"]`)?.textContent.replace(/\d+$/, "").trim() ?? id;
+  async function checkAccess(user) {
     const email = String(user.email ?? "").toLowerCase();
-    if (email === OWNER_EMAIL) return true;
-    try { const s = await getDoc(doc(db, "ucaf_users", email)); return s.exists() && s.data().role === "admin"; } catch { return false; }
+    if (email === OWNER_EMAIL) return { admin: true, tabs: null };
+    try {
+      const s = await getDoc(doc(db, "ucaf_users", email));
+      const d = s.exists() ? s.data() : {};
+      return { admin: d.role === "admin", tabs: d.role === "admin" || !Array.isArray(d.tabs) ? null : d.tabs };
+    } catch { return { admin: false, tabs: null }; }
   }
+  function applyTabAccess(tabs) {
+    const allowed = tabs ?? DATA_TABS();
+    document.querySelectorAll(".tab[data-tab]").forEach((b) => {
+      if (b.dataset.tab !== "users") b.classList.toggle("hidden", !allowed.includes(b.dataset.tab));
+    });
+    $("noTabs").classList.toggle("hidden", allowed.length > 0);
+    if (tab !== "users" && !allowed.includes(tab)) {
+      if (allowed.length) setTab(allowed[0]);
+      else document.querySelectorAll("[data-panel]").forEach((p) => p.classList.add("hidden"));
+    }
+  }
+  const tabPicks = (checked) => DATA_TABS().map((id) =>
+    `<label><input type="checkbox" value="${id}" ${!checked || checked.includes(id) ? "checked" : ""}> ${e(tabLabel(id))}</label>`).join("");
+  const pickedTabs = (el) => [...el.querySelectorAll("input[type=checkbox]:checked")].map((c) => c.value);
   const userMsg = (text, ok) => { $("userMsg").textContent = text; $("userMsg").className = `user-msg ${ok ? "ok" : "bad"}`; };
 
+  let usersList = [];
   async function renderUsers() {
     if (!isAdmin) return;
+    $("newTabs").innerHTML = tabPicks(null);
     let list;
     try { list = (await getDocs(collection(db, "ucaf_users"))).docs.map((d) => ({ id: d.id, ...d.data() })); }
     catch (err) { $("usersTable").innerHTML = `<div class="empty">${e(t("Could not complete: {msg}", { msg: err.message }))}</div>`; return; }
     const me = String(auth.currentUser?.email ?? "").toLowerCase();
     const all = [...BUILTIN_USERS.filter((b) => !list.some((u) => u.id === b.email)).map((b) => ({ id: b.email, ...b, builtin: true })), ...list]
       .sort((a, b) => (b.role === "admin") - (a.role === "admin") || a.id.localeCompare(b.id));
-    $("usersTable").innerHTML = `<table class="grid"><thead><tr><th>${t("Email")}</th><th>${t("Role")}</th><th>${t("Added by")}</th>
-      <th>${t("Added")}</th><th>${t("Actions")}</th></tr></thead><tbody>${all.map((u) => `<tr>
+    usersList = all;
+    const tabsCell = (u) => u.role === "admin" || !Array.isArray(u.tabs) ? `<span class="pill neutral">${t("All tabs")}</span>`
+      : u.tabs.length ? u.tabs.map((id) => `<span class="pill ok">${e(tabLabel(id))}</span>`).join(" ") : `<span class="pill danger">${t("No tabs")}</span>`;
+    $("usersTable").innerHTML = `<table class="grid"><thead><tr><th>${t("Email")}</th><th>${t("Role")}</th><th>${t("Tabs")}</th><th>${t("Added by")}</th>
+      <th>${t("Added")}</th><th>${t("Actions")}</th></tr></thead><tbody>${all.map((u) => `<tr data-user="${e(u.id)}">
       <td dir="ltr">${e(u.id)}${u.id === me ? ` <span class="pill info">${t("You")}</span>` : ""}</td>
       <td>${u.builtin ? `<span class="pill neutral">${t("Built-in")}</span> ` : ""}<span class="pill ${u.role === "admin" ? "warn" : "ok"}">${t(u.role === "admin" ? "Admin" : "Viewer")}</span></td>
+      <td style="white-space: normal">${tabsCell(u)}</td>
       <td dir="ltr">${e(u.addedBy ?? "—")}</td><td>${u.addedAt?.toDate ? fmtDT(u.addedAt.toDate()) : "—"}</td>
-      <td><div class="row-actions"><button class="btn sm" data-reset="${e(u.id)}">${t("Send reset email")}</button>
+      <td><div class="row-actions">${u.role === "admin" ? "" : `<button class="btn sm" data-tabs="${e(u.id)}">${t("Tabs")}</button>`}
+        <button class="btn sm" data-reset="${e(u.id)}">${t("Send reset email")}</button>
         ${u.builtin || u.id === me ? "" : `<button class="btn sm" data-remove="${e(u.id)}">${t("Remove access")}</button>`}</div></td></tr>`).join("")}</tbody></table>`;
   }
 
   $("userForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const email = $("newEmail").value.trim().toLowerCase(), password = $("newPassword").value, role = $("newRole").value;
+    if (role !== "admin" && !pickedTabs($("newTabs")).length) return userMsg(t("Choose at least one tab."), false);
     if (password.length < 6) return userMsg(t("Password must be at least 6 characters."), false);
     $("addUserBtn").disabled = true;
     try {
@@ -2062,10 +2130,14 @@
         if (code.startsWith("WEAK_PASSWORD")) return userMsg(t("Password must be at least 6 characters."), false);
         return userMsg(t("Could not complete: {msg}", { msg: code }), false);
       }
-      await setDoc(doc(db, "ucaf_users", email), { email, role, addedBy: auth.currentUser.email, addedAt: serverTimestamp() });
+      const tabs = pickedTabs($("newTabs"));
+      const data = { email, role, addedBy: auth.currentUser.email, addedAt: serverTimestamp() };
+      if (role !== "admin" && tabs.length < DATA_TABS().length) data.tabs = tabs;
+      await setDoc(doc(db, "ucaf_users", email), data);
       userMsg(existed ? t("{email} already had an account, so access was granted. They sign in with their existing password, or you can send them a reset email.", { email })
                       : t("{email} can now sign in.", { email }), true);
       $("userForm").reset();
+      $("newTabs").innerHTML = tabPicks(null);
       renderUsers();
     } catch (err) {
       userMsg(t("Could not complete: {msg}", { msg: err.message }), false);
@@ -2076,8 +2148,27 @@
 
   $("usersTable").addEventListener("click", async (ev) => {
     const reset = ev.target.closest("[data-reset]"), remove = ev.target.closest("[data-remove]");
+    const edit = ev.target.closest("[data-tabs]"), save = ev.target.closest("[data-save-tabs]");
     try {
-      if (reset) {
+      if (edit) {
+        const tr = edit.closest("tr"), open = tr.nextElementSibling?.classList.contains("tabs-edit");
+        document.querySelectorAll("#usersTable .tabs-edit").forEach((r) => r.remove());
+        if (open) return; // second click closes it
+        const u = usersList.find((x) => x.id === edit.dataset.tabs);
+        tr.insertAdjacentHTML("afterend", `<tr class="tabs-edit"><td colspan="6">
+          <div class="muted small">${t("Tabs {email} can see:", { email: e(u.id) })}</div>
+          <div class="tab-picks">${tabPicks(Array.isArray(u.tabs) ? u.tabs : null)}</div>
+          <button class="btn primary sm" data-save-tabs="${e(u.id)}">${t("Save")}</button></td></tr>`);
+      } else if (save) {
+        const tabs = pickedTabs(save.closest("td"));
+        if (!tabs.length) return userMsg(t("Choose at least one tab."), false);
+        const u = usersList.find((x) => x.id === save.dataset.saveTabs);
+        // every tab ticked = no list, so tabs added later show up for this person too
+        await setDoc(doc(db, "ucaf_users", u.id), { email: u.id, role: u.role ?? "viewer",
+          tabs: tabs.length === DATA_TABS().length ? deleteField() : tabs }, { merge: true });
+        userMsg(t("Tabs saved for {email}. They see the change the next time they open the site.", { email: u.id }), true);
+        renderUsers();
+      } else if (reset) {
         await sendPasswordResetEmail(auth, reset.dataset.reset);
         userMsg(t("A password reset email was sent to {email}.", { email: reset.dataset.reset }), true);
       } else if (remove) {
@@ -2205,11 +2296,11 @@
     if (unsubMeta) { unsubMeta(); unsubMeta = null; }
     rows = []; rangeCache.clear(); closeForm();
     lastSyncAt = null; showLastSync();
-    isAdmin = false; $("usersTab").classList.add("hidden");
+    isAdmin = false; $("usersTab").classList.add("hidden"); applyTabAccess(null);
     if (tab === "users") setTab("visits");
     if (!user) return;
     $("userEmail").textContent = user.email;
-    checkAdmin(user).then((a) => { isAdmin = a; $("usersTab").classList.toggle("hidden", !a); });
+    checkAccess(user).then((a) => { isAdmin = a.admin; $("usersTab").classList.toggle("hidden", !a.admin); applyTabAccess(a.tabs); });
     unsubMeta = onSnapshot(doc(db, "ucaf_meta", "lastSync"), (s) => {
       const m = s.data(); if (!m) return;
       lastSyncAt = m.at.toDate(); showLastSync();
