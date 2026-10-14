@@ -131,6 +131,53 @@ nav{flex:1;padding:12px 0;overflow-y:auto}
 #view-dashboard .summary-pill.red{background:linear-gradient(135deg,#fff3f3,#fde8e8) !important}
 #view-dashboard .summary-pill.red::before{background:linear-gradient(180deg,#ef4444,#f87171)}
 #view-dashboard .summary-pill.red .mini-icon{background:rgba(239,68,68,0.12);color:#dc2626}
+.rpt-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.rpt-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rpt-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.rpt-kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.rpt-kpi-label{font-size:12px;font-weight:700;color:var(--text2)}
+.rpt-kpi-value{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-0.02em;line-height:1.1}
+.rpt-kpi-value small{font-size:12px;font-weight:700;color:var(--text2)}
+.rpt-kpi-sub{font-size:11px;color:var(--text2);line-height:1.6}
+.rpt-chg{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;background:var(--bg3);color:var(--text2)}
+.rpt-chg.up{background:rgba(16,185,129,0.12);color:#059669}
+.rpt-chg.down{background:rgba(239,68,68,0.12);color:#dc2626}
+.rpt-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:18px}
+.rpt-card h3{margin:0 0 12px;font-size:15px;font-weight:800;color:var(--text)}
+.rpt-scroll{overflow-x:auto}
+.rpt-table{width:100%;border-collapse:collapse;font-size:13px}
+.rpt-table th{background:var(--bg3);padding:9px 12px;font-size:11px;font-weight:700;color:var(--text2);text-align:right;white-space:nowrap;border-bottom:1px solid var(--border)}
+.rpt-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+.rpt-table tfoot td{font-weight:800;background:var(--bg3)}
+.rpt-table tbody tr:last-child td{border-bottom:0}
+.rpt-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:7px;vertical-align:middle}
+.rpt-share{display:inline-block;width:70px;height:6px;border-radius:999px;background:var(--bg3);overflow:hidden;margin-left:8px;vertical-align:middle}
+.rpt-share>div{height:100%;border-radius:999px}
+.rpt-chart{position:relative;height:260px;margin-bottom:14px}
+.rpt-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.rpt-grid3 .rpt-card{margin-bottom:18px}
+.rpt-muted{font-size:11px;color:var(--text2)}
+.rpt-empty{text-align:center;color:var(--text2)}
+.rpt-missing{display:flex;flex-direction:column;gap:8px}
+.rpt-miss{border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.rpt-miss summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--text)}
+.rpt-bad{color:#dc2626}
+.rpt-good{color:#059669}
+.rpt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.rpt-chips span{font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;background:rgba(239,68,68,0.08);color:#b91c1c}
+.rpt-chips small{font-weight:600;opacity:.75}
+@media print{
+  body.rpt-printing > *:not(#app),
+  body.rpt-printing .sidebar,
+  body.rpt-printing .topbar,
+  body.rpt-printing .content > .view:not(#view-reports),
+  body.rpt-printing .rpt-noprint{display:none !important}
+  body.rpt-printing .main{margin:0 !important}
+  body.rpt-printing .content{padding:0 !important}
+  body.rpt-printing .rpt-card,body.rpt-printing .rpt-kpi{break-inside:avoid;box-shadow:none}
+  body.rpt-printing details.rpt-miss{display:block}
+  body.rpt-printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 .sav-legacy{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;margin-bottom:16px;border-radius:12px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:13px;font-weight:700}
 .sav-del{color:var(--red2) !important;border-color:rgba(239,68,68,0.3) !important;background:rgba(239,68,68,0.06) !important}
 .sav-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
@@ -1397,22 +1444,40 @@ table { width: 100%; min-width: 0; }
       <!-- Reports View -->
       <div id="view-reports" class="view">
 
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div class="rpt-head">
           <div>
-            <h2 style="margin:0;font-size:22px;font-weight:900;color:var(--text)">📑 التقارير والتحليلات</h2>
-            <div style="font-size:12px;color:var(--text3);margin-top:3px">تقارير مالية وتشغيلية محدّثة — مبنية على بيانات حقيقية</div>
+            <h2 style="margin:0;font-size:22px;font-weight:900;color:var(--text)">📑 تقرير الدخل</h2>
+            <div id="rpt-range-label" style="font-size:12px;color:var(--text2);margin-top:3px"></div>
           </div>
-          <div style="display:flex;gap:8px">
-            <select id="rpt-year" class="filter-sel" onchange="renderReports()" style="min-width:90px"></select>
-            <button class="btn btn-ghost btn-sm" onclick="renderReports()">🔄 تحديث</button>
+          <div class="rpt-filters rpt-noprint">
+            <select id="rpt-period" class="filter-sel" onchange="rptOnPeriod()">
+              <option value="month">الشهر الحالي</option>
+              <option value="lastMonth">الشهر الماضي</option>
+              <option value="quarter">الربع الحالي</option>
+              <option value="year">السنة الحالية</option>
+              <option value="lastYear">السنة الماضية</option>
+              <option value="custom">فترة مخصصة</option>
+            </select>
+            <span id="rpt-custom" style="display:none;gap:6px;align-items:center">
+              <input type="date" id="rpt-from" class="filter-sel" onchange="renderReports()"/>
+              <span style="color:var(--text2);font-size:12px">إلى</span>
+              <input type="date" id="rpt-to" class="filter-sel" onchange="renderReports()"/>
+            </span>
+            <select id="rpt-entity" class="filter-sel" onchange="renderReports()">
+              <option value="all">كل المنشآت</option>
+              <option value="majma">المجمع</option>
+              <option value="pharm1">صيدلية 1</option>
+              <option value="pharm2">صيدلية 2</option>
+              <option value="pharm3">صيدلية 3</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="renderReports(true)">🔄 تحديث</button>
+            <button class="btn btn-primary btn-sm" onclick="rptPrint()">🖨️ طباعة / PDF</button>
           </div>
         </div>
 
-        <!-- Report cards grid -->
         <div id="rpt-loading" style="text-align:center;padding:40px;color:var(--text3)">
           <div style="font-size:32px;margin-bottom:8px">⏳</div>
-          <div>جاري تحميل التقارير...</div>
+          <div>جاري تحميل التقرير...</div>
         </div>
         <div id="rpt-container" style="display:none"></div>
 
@@ -7631,425 +7696,266 @@ function fmtDateTime(dateStr){
 
 
 // ══════════════════════════════════════════════════════════════
-// 📑  REPORTS ENGINE — 10 Professional Reports
+// 📑  REPORTS — Income Report
 // ══════════════════════════════════════════════════════════════
-let rptYear = new Date().getFullYear();
-let rptCharts = {};
-const RPT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const RPT_ENTITIES = [
+  { id:'majma',  label:'المجمع',   color:'#0f766e' },
+  { id:'pharm1', label:'صيدلية 1', color:'#10b981' },
+  { id:'pharm2', label:'صيدلية 2', color:'#8b5cf6' },
+  { id:'pharm3', label:'صيدلية 3', color:'#f59e0b' }
+];
+const RPT_MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const RPT_WEEKDAYS = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+let rptIncome = null, rptChart = null;
 
-function destroyCharts(){
-  Object.values(rptCharts).forEach(c=>{ try{c.destroy();}catch{} });
-  rptCharts={};
+const rptNum = n => (Math.round((parseFloat(n) || 0) * 100) / 100).toLocaleString('en-US');
+const rptYmd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const rptParse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const rptAddDays = (s, n) => { const d = rptParse(s); d.setDate(d.getDate() + n); return rptYmd(d); };
+function rptAddMonths(s, n){
+  const d = rptParse(s), day = d.getDate();
+  const t = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  t.setDate(Math.min(day, new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate()));
+  return rptYmd(t);
+}
+function rptDays(from, to){
+  const out = [];
+  for(let s = from; s <= to; s = rptAddDays(s, 1)) out.push(s);
+  return out;
+}
+function rptChange(cur, prev){
+  if(!prev) return `<span class="rpt-chg">—</span>`;
+  const p = Math.round((cur - prev) / prev * 1000) / 10;
+  return `<span class="rpt-chg ${p >= 0 ? 'up' : 'down'}">${p >= 0 ? '▲' : '▼'} ${Math.abs(p)}%</span>`;
 }
 
-function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||name; }
-
-const CHART_PALETTE = ['#1a6ed8','#059669','#7c3aed','#d97706','#dc2626','#ec4899','#0891b2','#ca8a04','#10b981','#6366f1'];
-
-async function renderReports(){
-  destroyCharts();
-  const loading=document.getElementById('rpt-loading');
-  const container=document.getElementById('rpt-container');
-  loading.style.display='block'; container.style.display='none';
-
-  const yrSel=document.getElementById('rpt-year');
-  if(yrSel&&!yrSel.querySelector('option')){
-    [2024,2025,2026,2027].forEach(y=>{
-      const o=document.createElement('option');
-      o.value=y; o.textContent=y; if(y===rptYear) o.selected=true;
-      yrSel.appendChild(o);
-    });
-    yrSel.onchange=()=>{rptYear=parseInt(yrSel.value);renderReports();};
+// Returns {from, to, prevFrom, prevTo} as YYYY-MM-DD
+function rptRange(){
+  const today = rptYmd(new Date());
+  const t = rptParse(today), y = t.getFullYear(), m = t.getMonth();
+  const period = document.getElementById('rpt-period').value;
+  let from, to, shift;
+  if(period === 'month'){ from = rptYmd(new Date(y, m, 1)); to = today; shift = 1; }
+  else if(period === 'lastMonth'){ from = rptYmd(new Date(y, m - 1, 1)); to = rptYmd(new Date(y, m, 0)); shift = 1; }
+  else if(period === 'quarter'){ from = rptYmd(new Date(y, Math.floor(m / 3) * 3, 1)); to = today; shift = 3; }
+  else if(period === 'year'){ from = `${y}-01-01`; to = today; shift = 12; }
+  else if(period === 'lastYear'){ from = `${y - 1}-01-01`; to = `${y - 1}-12-31`; shift = 12; }
+  else {
+    from = document.getElementById('rpt-from').value || rptYmd(new Date(y, m, 1));
+    to = document.getElementById('rpt-to').value || today;
+    if(from > to) [from, to] = [to, from];
   }
-  rptYear=parseInt(yrSel?.value||rptYear);
+  let prevFrom, prevTo;
+  if(shift){
+    prevFrom = rptAddMonths(from, -shift);
+    prevTo = period === 'lastMonth' ? rptYmd(new Date(y, m - 1, 0)) : rptAddMonths(to, -shift);
+  } else {
+    const len = rptDays(from, to).length;
+    prevTo = rptAddDays(from, -1);
+    prevFrom = rptAddDays(prevTo, -(len - 1));
+  }
+  return { from, to, prevFrom, prevTo };
+}
 
-  // ── Load data ─────────────────────────────────────────────
-  const [pSnap,uSnap,lSnap,balSnap,resSnap,reqSnap] = await Promise.all([
-    getDocs(query(collection(db,C.purchases),orderBy('createdAt','desc'))),
-    getDocs(query(collection(db,C.utils),orderBy('createdAt','desc'))),
-    getDocs(query(collection(db,C.leases),orderBy('createdAt','desc'))),
-    getDocs(query(collection(db,C.balances),orderBy('savedAt','desc'))),
-    getDocs(query(collection(db,C.residencies),orderBy('renewalDate','asc'))),
-    getDocs(query(collection(db,C.reqs),orderBy('createdAt','desc'))),
-  ]);
-  const purchases   = pSnap.docs.map(d=>({...d.data(),id:d.id}));
-  const utils       = uSnap.docs.map(d=>({...d.data(),id:d.id}));
-  const leases      = lSnap.docs.map(d=>({...d.data(),id:d.id}));
-  const balances    = balSnap.docs.map(d=>({...d.data(),id:d.id}));
-  const residencies = resSnap.docs.map(d=>({...d.data(),id:d.id}));
-  const reqs        = reqSnap.docs.map(d=>({...d.data(),id:d.id}));
+window.rptOnPeriod = function(){
+  const custom = document.getElementById('rpt-period').value === 'custom';
+  document.getElementById('rpt-custom').style.display = custom ? 'inline-flex' : 'none';
+  if(custom){
+    const t = new Date();
+    const f = document.getElementById('rpt-from'), to = document.getElementById('rpt-to');
+    if(!f.value) f.value = rptYmd(new Date(t.getFullYear(), t.getMonth(), 1));
+    if(!to.value) to.value = rptYmd(t);
+  }
+  renderReports();
+};
 
-  // Load income data
-  const incomeData={};
-  for(const eid of ['majma','pharm1','pharm2','pharm3']){
-    const snap=await getDocs(collection(db,C.incomeStmt,eid,'entries'));
-    incomeData[eid]={};
-    snap.docs.forEach(d=>{incomeData[eid][d.id]=d.data();});
+// Income for one entity on one day
+function rptDay(eid, day){
+  const e = rptIncome[eid]?.[day];
+  if(!e) return null;
+  const cash = parseFloat(e.cash) || 0, machine = parseFloat(e.machine) || 0;
+  return { cash, machine, total: cash + machine, insurance: parseFloat(e.insurance) || 0 };
+}
+
+function rptSum(ents, days){
+  const r = { cash:0, machine:0, total:0, insurance:0, recorded:0 };
+  for(const day of days){
+    let dayTotal = 0;
+    for(const ent of ents){
+      const v = rptDay(ent.id, day);
+      if(!v) continue;
+      r.cash += v.cash; r.machine += v.machine; r.total += v.total; r.insurance += v.insurance;
+      dayTotal += v.total;
+    }
+    if(dayTotal > 0) r.recorded++;
+  }
+  return r;
+}
+
+async function renderReports(reload = false){
+  const loading = document.getElementById('rpt-loading');
+  const container = document.getElementById('rpt-container');
+  if(!rptIncome || reload){
+    loading.style.display = 'block'; container.style.display = 'none';
+    try{
+      const snaps = await Promise.all(RPT_ENTITIES.map(e => getDocs(collection(db, C.incomeStmt, e.id, 'entries'))));
+      rptIncome = {};
+      RPT_ENTITIES.forEach((e, i) => { rptIncome[e.id] = {}; snaps[i].docs.forEach(d => { rptIncome[e.id][d.id] = d.data(); }); });
+    }catch(e){
+      loading.innerHTML = `<div style="color:var(--red2)">خطأ في تحميل البيانات: ${e.message}</div>`;
+      return;
+    }
   }
 
-  const yrStr=String(rptYear);
-  const yrPurch=purchases.filter(p=>p.dueDate?.startsWith(yrStr)||p.createdAt?.startsWith(yrStr));
+  const { from, to, prevFrom, prevTo } = rptRange();
+  const entSel = document.getElementById('rpt-entity').value;
+  const ents = entSel === 'all' ? RPT_ENTITIES : RPT_ENTITIES.filter(e => e.id === entSel);
+  const single = ents.length === 1;
+  const showIns = ents.some(e => e.id === 'majma');
+  const days = rptDays(from, to);
+  const prevDays = rptDays(prevFrom, prevTo);
+  const cur = rptSum(ents, days);
+  const prev = rptSum(ents, prevDays);
+  const avg = cur.recorded ? cur.total / cur.recorded : 0;
+  const prevAvg = prev.recorded ? prev.total / prev.recorded : 0;
+  const pctOf = (a, b) => b ? Math.round(a / b * 100) : 0;
 
-  // Monthly purchase totals
-  const mPurch=RPT_MONTHS.map((_,i)=>{
-    const mk=`${rptYear}-${String(i+1).padStart(2,'0')}`;
-    return yrPurch.filter(p=>(p.dueDate||p.createdAt||'').startsWith(mk)).reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
+  document.getElementById('rpt-range-label').textContent =
+    `${single ? ents[0].label : 'كل المنشآت'} · من ${fmtDate(from)} إلى ${fmtDate(to)} · مقارنة بـ ${fmtDate(prevFrom)} إلى ${fmtDate(prevTo)}`;
+
+  // ── 1. Summary KPIs
+  const kpi = (label, value, sub) => `<div class="rpt-kpi"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${value}</div><div class="rpt-kpi-sub">${sub}</div></div>`;
+  const kpis = `<div class="rpt-kpis">
+    ${kpi('💰 إجمالي الدخل', `${rptNum(cur.total)} <small>SAR</small>`, `${rptChange(cur.total, prev.total)} عن الفترة السابقة (${rptNum(prev.total)})`)}
+    ${kpi('💵 كاش', `${rptNum(cur.cash)} <small>SAR</small>`, `${pctOf(cur.cash, cur.total)}% من الدخل · ${rptChange(cur.cash, prev.cash)}`)}
+    ${kpi('💳 شبكة', `${rptNum(cur.machine)} <small>SAR</small>`, `${pctOf(cur.machine, cur.total)}% من الدخل · ${rptChange(cur.machine, prev.machine)}`)}
+    ${kpi('📊 متوسط اليوم', `${rptNum(avg)} <small>SAR</small>`, `على ${cur.recorded} يوم مسجّل · ${rptChange(avg, prevAvg)}`)}
+    ${showIns ? kpi('🛡️ تأمين المجمع', `${rptNum(cur.insurance)} <small>SAR</small>`, `غير محسوب في الإجمالي · ${rptChange(cur.insurance, prev.insurance)}`) : ''}
+  </div>`;
+
+  // ── 2. Entities comparison (all entities only)
+  let entTable = '';
+  if(!single){
+    const rows = RPT_ENTITIES.map(e => {
+      const c = rptSum([e], days), p = rptSum([e], prevDays);
+      const share = pctOf(c.total, cur.total);
+      return `<tr>
+        <td><span class="rpt-dot" style="background:${e.color}"></span>${e.label}</td>
+        <td>${rptNum(c.cash)}</td><td>${rptNum(c.machine)}</td>
+        <td><strong>${rptNum(c.total)}</strong></td>
+        <td><div class="rpt-share"><div style="width:${share}%;background:${e.color}"></div></div>${share}%</td>
+        <td>${rptNum(c.recorded ? c.total / c.recorded : 0)}</td>
+        <td>${rptNum(p.total)}</td><td>${rptChange(c.total, p.total)}</td>
+        <td>${e.id === 'majma' ? rptNum(c.insurance) : '—'}</td>
+      </tr>`;
+    }).join('');
+    entTable = `<div class="rpt-card">
+      <h3>🏢 مقارنة المنشآت</h3>
+      <div class="rpt-scroll"><table class="rpt-table">
+        <thead><tr><th>المنشأة</th><th>كاش</th><th>شبكة</th><th>الإجمالي</th><th>النسبة</th><th>متوسط اليوم</th><th>الفترة السابقة</th><th>التغيير</th><th>تأمين</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td>الإجمالي</td><td>${rptNum(cur.cash)}</td><td>${rptNum(cur.machine)}</td><td>${rptNum(cur.total)}</td><td>100%</td><td>${rptNum(avg)}</td><td>${rptNum(prev.total)}</td><td>${rptChange(cur.total, prev.total)}</td><td>${showIns ? rptNum(cur.insurance) : '—'}</td></tr></tfoot>
+      </table></div>
+    </div>`;
+  }
+
+  // ── 3. Months
+  const months = [];
+  for(let mk = from.slice(0, 7); mk <= to.slice(0, 7); ){
+    const [y, m] = mk.split('-').map(Number);
+    const mDays = days.filter(d => d.startsWith(mk));
+    months.push({ key: mk, label: `${RPT_MONTH_NAMES[m - 1]} ${y}`, days: mDays });
+    mk = rptYmd(new Date(y, m, 1)).slice(0, 7);
+  }
+  let prevMonthTotal = null;
+  const monthRows = months.map(mo => {
+    const s = rptSum(ents, mo.days);
+    const chg = prevMonthTotal === null ? '<span class="rpt-chg">—</span>' : rptChange(s.total, prevMonthTotal);
+    prevMonthTotal = s.total;
+    const cells = single
+      ? `<td>${rptNum(s.cash)}</td><td>${rptNum(s.machine)}</td>`
+      : RPT_ENTITIES.map(e => `<td>${rptNum(rptSum([e], mo.days).total)}</td>`).join('');
+    return `<tr><td>${mo.label}</td>${cells}<td><strong>${rptNum(s.total)}</strong></td><td>${s.recorded}</td><td>${rptNum(s.recorded ? s.total / s.recorded : 0)}</td><td>${chg}</td>${showIns ? `<td>${rptNum(s.insurance)}</td>` : ''}</tr>`;
+  }).join('');
+  const monthHead = single ? '<th>كاش</th><th>شبكة</th>' : RPT_ENTITIES.map(e => `<th>${e.label}</th>`).join('');
+  const monthTable = `<div class="rpt-card">
+    <h3>📅 الدخل شهر بشهر</h3>
+    ${months.length > 1 ? `<div class="rpt-chart"><canvas id="rpt-month-chart"></canvas></div>` : ''}
+    <div class="rpt-scroll"><table class="rpt-table">
+      <thead><tr><th>الشهر</th>${monthHead}<th>الإجمالي</th><th>أيام مسجّلة</th><th>متوسط اليوم</th><th>عن الشهر السابق</th>${showIns ? '<th>تأمين</th>' : ''}</tr></thead>
+      <tbody>${monthRows}</tbody>
+    </table></div>
+  </div>`;
+
+  // ── 4. Days analysis
+  const dayTotals = days.map(d => ({ d, total: ents.reduce((s, e) => s + (rptDay(e.id, d)?.total || 0), 0) })).filter(x => x.total > 0);
+  const sorted = [...dayTotals].sort((a, b) => b.total - a.total);
+  const dayList = list => list.length
+    ? list.map(x => `<tr><td>${fmtDate(x.d)}</td><td>${RPT_WEEKDAYS[rptParse(x.d).getDay()]}</td><td><strong>${rptNum(x.total)}</strong></td></tr>`).join('')
+    : `<tr><td colspan="3" class="rpt-empty">لا توجد بيانات</td></tr>`;
+  const wd = [6, 0, 1, 2, 3, 4, 5].map(i => {
+    const list = dayTotals.filter(x => rptParse(x.d).getDay() === i);
+    return { name: RPT_WEEKDAYS[i], count: list.length, avg: list.length ? list.reduce((s, x) => s + x.total, 0) / list.length : 0 };
   });
+  const wdMax = Math.max(...wd.map(w => w.avg), 1);
+  const daysSection = `<div class="rpt-grid3">
+    <div class="rpt-card"><h3>🔝 أعلى 5 أيام</h3><table class="rpt-table"><thead><tr><th>التاريخ</th><th>اليوم</th><th>الدخل</th></tr></thead><tbody>${dayList(sorted.slice(0, 5))}</tbody></table></div>
+    <div class="rpt-card"><h3>🔻 أقل 5 أيام</h3><table class="rpt-table"><thead><tr><th>التاريخ</th><th>اليوم</th><th>الدخل</th></tr></thead><tbody>${dayList(sorted.slice(-5).reverse())}</tbody></table></div>
+    <div class="rpt-card"><h3>📆 متوسط كل يوم في الأسبوع</h3><table class="rpt-table"><thead><tr><th>اليوم</th><th>المتوسط</th><th></th></tr></thead><tbody>
+      ${wd.map(w => `<tr><td>${w.name} <span class="rpt-muted">(${w.count})</span></td><td><strong>${rptNum(w.avg)}</strong></td><td style="width:40%"><div class="rpt-share"><div style="width:${Math.round(w.avg / wdMax * 100)}%;background:var(--accent)"></div></div></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
 
-  // Monthly utilities totals (by dueDate)
-  const mUtil=RPT_MONTHS.map((_,i)=>{
-    const mk=`${rptYear}-${String(i+1).padStart(2,'0')}`;
-    return utils.filter(u=>(u.dueDate||'').startsWith(mk)).reduce((s,u)=>s+(parseFloat(u.amount)||0),0);
-  });
+  // ── 5. Missing days (up to today)
+  const today = rptYmd(new Date());
+  const checkDays = days.filter(d => d <= today);
+  const missing = ents.map(e => ({ e, list: checkDays.filter(d => !(rptDay(e.id, d)?.total > 0)) }));
+  const missingSection = `<div class="rpt-card">
+    <h3>⚠️ الأيام الناقصة (لم يُسجَّل لها دخل)</h3>
+    <div class="rpt-missing">
+      ${missing.map(({ e, list }) => `<details class="rpt-miss" ${list.length && single ? 'open' : ''}>
+        <summary><span class="rpt-dot" style="background:${e.color}"></span>${e.label}: <strong class="${list.length ? 'rpt-bad' : 'rpt-good'}">${list.length ? list.length + ' يوم ناقص' : '✓ كل الأيام مسجّلة'}</strong></summary>
+        ${list.length ? `<div class="rpt-chips">${list.map(d => `<span>${fmtDate(d)} <small>${RPT_WEEKDAYS[rptParse(d).getDay()]}</small></span>`).join('')}</div>` : ''}
+      </details>`).join('')}
+    </div>
+  </div>`;
 
-  // Monthly income per entity
-  const entityNames={majma:'Clinic',pharm1:'Pharmacy 1',pharm2:'Pharmacy 2',pharm3:'Pharmacy 3'};
-  const mIncome={};
-  ['majma','pharm1','pharm2','pharm3'].forEach(eid=>{
-    mIncome[eid]=RPT_MONTHS.map((_,i)=>{
-      const mk=`${rptYear}-${String(i+1).padStart(2,'0')}`;
-      return Object.entries(incomeData[eid]||{}).filter(([k])=>k.startsWith(mk))
-        .reduce((s,[,v])=>s+(parseFloat(v.cash)||0)+(parseFloat(v.machine)||0)+(parseFloat(v.insurance)||0),0);
+  container.innerHTML = kpis + entTable + monthTable + daysSection + missingSection;
+  loading.style.display = 'none';
+  container.style.display = 'block';
+
+  // Chart
+  if(rptChart){ try{ rptChart.destroy(); }catch{} rptChart = null; }
+  const canvas = document.getElementById('rpt-month-chart');
+  if(canvas && window.Chart){
+    const datasets = single
+      ? [
+          { label:'كاش', data: months.map(mo => rptSum(ents, mo.days).cash), backgroundColor:'#0ea5e9' },
+          { label:'شبكة', data: months.map(mo => rptSum(ents, mo.days).machine), backgroundColor:'#6366f1' }
+        ]
+      : RPT_ENTITIES.map(e => ({ label: e.label, data: months.map(mo => rptSum([e], mo.days).total), backgroundColor: e.color }));
+    rptChart = new Chart(canvas, {
+      type:'bar',
+      data:{ labels: months.map(mo => mo.label), datasets: datasets.map(d => ({ ...d, borderRadius:4, maxBarThickness:46 })) },
+      options:{
+        responsive:true, maintainAspectRatio:false, animation:false,
+        scales:{ x:{ stacked:true, grid:{ display:false } }, y:{ stacked:true, ticks:{ callback: v => v.toLocaleString('en-US') } } },
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{ family:'IBM Plex Sans Arabic' } } },
+          tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${rptNum(c.parsed.y)} SAR` } } }
+      }
     });
-  });
-  const mTotalIncome=RPT_MONTHS.map((_,i)=>['majma','pharm1','pharm2','pharm3'].reduce((s,e)=>s+mIncome[e][i],0));
-
-  // Status breakdown
-  const paidAmt   =purchases.filter(p=>p.status==='Paid').reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-  const pendAmt   =purchases.filter(p=>p.status==='Pending').reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-  const ovAmt     =purchases.filter(p=>p.status==='Overdue').reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-
-  // Vendor top 8
-  const vendorMap={};
-  purchases.forEach(p=>{vendorMap[p.vendor||'—']=(vendorMap[p.vendor||'—']||0)+(parseFloat(p.amount)||0);});
-  const topVendors=Object.entries(vendorMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-
-  // Dept spending
-  const deptMap={};
-  purchases.forEach(p=>{const d=p.dept||'غير محدد';deptMap[d]=(deptMap[d]||0)+(parseFloat(p.amount)||0);});
-
-  // Utils by type
-  const utilMap={};
-  utils.forEach(u=>{utilMap[u.type||'أخرى']=(utilMap[u.type||'أخرى']||0)+(parseFloat(u.amount)||0);});
-
-  // Lease totals
-  const activeLeases=leases.filter(l=>l.status==='نشط');
-  const totalRent=activeLeases.reduce((s,l)=>s+(parseFloat(l.monthly)||0),0);
-  const totalUnpaidRent=leases.reduce((s,l)=>s+calcUnpaid(l).unpaid,0);
-
-  // Residency status
-  const today2=new Date();
-  const resExp=residencies.filter(r=>new Date(r.renewalDate)<today2).length;
-  const resSoon=residencies.filter(r=>{const d=Math.ceil((new Date(r.renewalDate)-today2)/86400000);return d>=0&&d<=5;}).length;
-  const resOk=residencies.length-resExp-resSoon;
-
-  // Balance trend
-  const bal10=balances.slice(0,10).reverse();
-
-  // Annual totals
-  const annIncome=mTotalIncome.reduce((s,v)=>s+v,0);
-  const annPurch=mPurch.reduce((s,v)=>s+v,0);
-  const annUtil=utils.filter(u=>u.dueDate?.startsWith(yrStr)).reduce((s,u)=>s+(parseFloat(u.amount)||0),0);
-  const annRent=totalRent*12;
-  const netProfit=annIncome-annPurch-annUtil-annRent;
-
-  // ── Chart defaults ────────────────────────────────────────
-  const gridColor='rgba(128,128,128,0.08)';
-  const tickFmt=v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v;
-  const baseOpts=(title='')=>({
-    responsive:true, maintainAspectRatio:false,
-    plugins:{
-      legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.y?.toLocaleString()||ctx.parsed.toLocaleString()+' SAR'}},
-      title:title?{display:true,text:title,font:{size:13,weight:'700'},color:'#666',padding:{bottom:12}}:{display:false}
-    },
-    scales:{
-      x:{grid:{display:false},ticks:{font:{size:10}}},
-      y:{grid:{color:gridColor},ticks:{font:{size:10},callback:tickFmt}}
-    }
-  });
-
-  // ══ Build HTML ════════════════════════════════════════════
-  const card=(id,icon,title,sub,color,body)=>`
-    <div class="table-card" style="margin-bottom:20px;overflow:hidden;border-top:3px solid ${color}">
-      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:22px">${icon}</span>
-          <div>
-            <div style="font-weight:800;font-size:14px;color:var(--text)">${title}</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:1px">${sub}</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button onclick="rptDownPDF('${id}')" class="btn btn-ghost btn-sm" style="font-size:10px">📄 PDF</button>
-          <button onclick="rptDownXLS('${id}')" class="btn btn-ghost btn-sm" style="font-size:10px">📊 Excel</button>
-        </div>
-      </div>
-      <div id="rpt-${id}" style="padding:18px">${body}</div>
-    </div>`;
-
-  const ch=(id,h=260)=>`<div style="position:relative;height:${h}px"><canvas id="chart-${id}"></canvas></div>`;
-
-  // KPI bar
-  const kpiBar=`
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px">
-      ${[
-        {l:'إجمالي الدخل',v:annIncome.toLocaleString(),c:'#059669',i:'📈',sub:'دخل المجمع + صيدلية 1 + صيدلية 2 + صيدلية 3'},
-        {l:'إجمالي المصروفات (مشتريات + مدفوعات أساسية)',v:(annPurch+annUtil).toLocaleString(),c:'#dc2626',i:'🧾',sub:'يشمل المشتريات + المرافق/الفواتير'},
-        {l:'صافي الربح',v:(netProfit>=0?'+':'')+netProfit.toLocaleString(),c:netProfit>=0?'#059669':'#dc2626',i:'💰'},
-        {l:'عقود إيجار نشطة',v:activeLeases.length,c:'#7c3aed',i:'🏢'},
-        {l:'إقامات منتهية',v:resExp,c:'#d97706',i:'🪪'},
-        {l:'مدفوعات متأخرة',v:purchases.filter(p=>p.status==='Overdue').length,c:'#dc2626',i:'⚠️'},
-      ].map(k=>`<div style="background:var(--card);border:1px solid ${k.c}30;border-right:4px solid ${k.c};border-radius:var(--r);padding:12px">
-        <div style="font-size:18px">${k.i}</div>
-        <div style="font-size:19px;font-weight:900;color:${k.c};font-family:'IBM Plex Mono',monospace;margin-top:2px">${k.v}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:1px">${k.l}</div>
-        ${k.sub?`<div style="font-size:10px;color:var(--text2);margin-top:4px;line-height:1.45">${k.sub}</div>`:''}
-      </div>`).join('')}
-    </div>`;
-
-  // R1: Income by entity stacked (operations view)
-  const r2=card('r2','🏪','الدخل حسب الفرع','المجمع + الصيدليات (شهرياً)','#059669',ch('r2',260));
-
-  // R2: Monthly Income vs Purchases (+ utilities) trend
-  const r1=card('r1','📊','الدخل مقابل المصروفات الشهرية',`مقارنة شهرية — ${rptYear} (مشتريات + مرافق)`,'#1a6ed8',ch('r1',280));
-
-  // R3: Purchase status donut + table
-  const r3=card('r3','🛒','حالة المشتريات','مدفوع / بانتظار / متأخر — قراءة سريعة للمخاطر','#dc2626',`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-      ${ch('r3',220)}
-      <div>
-        ${[['✅ مدفوع',paidAmt,'var(--green2)'],['⏳ بانتظار',pendAmt,'var(--orange2)'],['🔴 متأخر',ovAmt,'var(--red2)']].map(([l,v,c])=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px">
-            <span style="font-size:13px;font-weight:600">${l}</span>
-            <span style="font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:15px;color:${c}">${v.toLocaleString()}</span>
-          </div>`).join('')}
-        <div style="margin-top:12px;padding:10px 14px;background:rgba(26,110,216,0.06);border-radius:var(--r2);text-align:center">
-          <div style="font-size:11px;color:var(--text3)">إجمالي المشتريات</div>
-          <div style="font-size:20px;font-weight:900;color:var(--accent2);font-family:'IBM Plex Mono',monospace">${(paidAmt+pendAmt+ovAmt).toLocaleString()}</div>
-        </div>
-      </div>
-    </div>`);
-
-  // R4: Top vendors horizontal bar
-  const r4=card('r4','🏆','أعلى الموردين إنفاقاً','ترتيب الموردين حسب إجمالي المشتريات','#d97706',ch('r4',280));
-
-  // R5: Dept spending pie
-  const r5=card('r5','🏢','الإنفاق حسب القسم','توزيع المشتريات على الأقسام','#7c3aed',`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-      ${ch('r5',220)}
-      <div style="overflow-x:auto"><table style="width:100%;font-size:12px">
-        <thead><tr style="background:var(--bg3)">
-          <th style="padding:6px 10px;text-align:right">القسم</th>
-          <th style="padding:6px 10px;text-align:right">الإجمالي</th>
-          <th style="padding:6px 10px;text-align:right">%</th>
-        </tr></thead>
-        <tbody>${Object.entries(deptMap).sort((a,b)=>b[1]-a[1]).map(([d,a],i)=>{
-          const tot=Object.values(deptMap).reduce((s,v)=>s+v,0);
-          return`<tr style="${i%2?'background:var(--bg2)':''}"><td style="padding:5px 10px;font-weight:600">${d}</td>
-          <td style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;color:var(--accent2)">${a.toLocaleString()}</td>
-          <td style="padding:5px 10px;color:var(--text3)">${Math.round(a/tot*100)}%</td></tr>`;
-        }).join('')}</tbody>
-      </table></div>
-    </div>`);
-
-  // R6: Utilities by type
-  const r6=card('r6','⚡','المدفوعات الأساسية حسب النوع','تفصيل الفواتير والمرافق','#ca8a04',`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-      ${ch('r6',220)}
-      <div style="overflow-x:auto"><table style="width:100%;font-size:12px">
-        <thead><tr style="background:var(--bg3)">
-          <th style="padding:6px 10px;text-align:right">النوع</th>
-          <th style="padding:6px 10px;text-align:right">الإجمالي</th>
-        </tr></thead>
-        <tbody>${Object.entries(utilMap).sort((a,b)=>b[1]-a[1]).map(([t,a],i)=>
-          `<tr style="${i%2?'background:var(--bg2)':''}"><td style="padding:5px 10px;font-weight:600">${t}</td>
-          <td style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;color:var(--orange2)">${a.toLocaleString()}</td></tr>`
-        ).join('')}</tbody>
-      </table></div>
-    </div>`);
-
-  // R7: Lease summary
-  const r7=card('r7','🏢','ملخص الإيجارات','الإيجار الشهري والمتأخرات لكل عقد','#7c3aed',`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="padding:12px;background:rgba(124,58,237,0.08);border-radius:var(--r2);text-align:center">
-        <div style="font-size:22px;font-weight:900;color:var(--purple)">${totalRent.toLocaleString()}</div>
-        <div style="font-size:11px;color:var(--text3)">الإيجار الشهري الكلي</div>
-      </div>
-      <div style="padding:12px;background:${totalUnpaidRent>0?'rgba(239,68,68,0.08)':'rgba(5,150,105,0.08)'};border-radius:var(--r2);text-align:center">
-        <div style="font-size:22px;font-weight:900;color:${totalUnpaidRent>0?'var(--red2)':'var(--green2)'}">${totalUnpaidRent>0?totalUnpaidRent.toLocaleString():'✅ مسدد'}</div>
-        <div style="font-size:11px;color:var(--text3)">إجمالي المتأخرات</div>
-      </div>
-    </div>
-    ${ch('r7',200)}`);
-
-  // R8: Balance trend
-  const r8=card('r8','💰','تطور الأرصدة عبر الزمن','رصيد المجمع + الصيدليات الثلاثة','#059669',ch('r8',260));
-
-  // R9: Residency status
-  const r9=card('r9','🪪','حالة الإقامات','سارية / تنتهي قريباً / منتهية','#d97706',`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-      ${ch('r9',200)}
-      <div>
-        ${[[`✅ سارية`,resOk,'var(--green2)'],[`⚠️ تنتهي قريباً`,resSoon,'var(--orange2)'],[`🔴 منتهية`,resExp,'var(--red2)']].map(([l,v,c])=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px">
-            <span style="font-size:13px;font-weight:600">${l}</span>
-            <span style="font-family:'IBM Plex Mono',monospace;font-weight:900;font-size:18px;color:${c}">${v}</span>
-          </div>`).join('')}
-      </div>
-    </div>`);
-
-  // R10: Annual P&L summary
-  const r10=card('r10','📋','الملخص المالي السنوي',`صافي الربح والخسارة — ${rptYear}`,'#1a6ed8',`
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
-      ${[
-        ['📈 إجمالي الإيرادات',annIncome,'#059669'],
-        ['🛒 إجمالي المشتريات',-annPurch,'#dc2626'],
-        ['⚡ مصاريف المرافق',-annUtil,'#d97706'],
-        ['🏢 الإيجارات السنوية',-annRent,'#7c3aed'],
-      ].map(([l,v,c])=>`
-        <div style="padding:14px;background:${c}11;border:1px solid ${c}30;border-radius:var(--r2)">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${l}</div>
-          <div style="font-size:20px;font-weight:900;color:${c};font-family:'IBM Plex Mono',monospace">${Math.abs(v).toLocaleString()}</div>
-        </div>`).join('')}
-    </div>
-    <div style="padding:20px;background:${netProfit>=0?'rgba(5,150,105,0.08)':'rgba(239,68,68,0.08)'};border:2px solid ${netProfit>=0?'rgba(5,150,105,0.3)':'rgba(239,68,68,0.3)'};border-radius:var(--r);text-align:center;margin-bottom:16px">
-      <div style="font-size:12px;color:var(--text2);font-weight:600">صافي الربح / الخسارة ${rptYear}</div>
-      <div style="font-size:40px;font-weight:900;color:${netProfit>=0?'var(--green2)':'var(--red2)'};font-family:'IBM Plex Mono',monospace;margin-top:4px">
-        ${netProfit>=0?'+':''}${netProfit.toLocaleString()}
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px">SAR</div>
-    </div>
-    ${ch('r10',200)}`);
-
-  loading.style.display='none';
-  container.innerHTML = kpiBar + `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">${r2}${r1}${r3}${r4}${r5}${r6}${r8}${r7}${r9}${r10}</div>`;
-  container.style.display='block';
-
-  // ══ Draw Charts ═══════════════════════════════════════════
-  // R1: Income vs Purchases line
-  rptCharts.r1=new Chart(document.getElementById('chart-r1'),{type:'bar',data:{
-    labels:RPT_MONTHS,
-    datasets:[
-      {label:'الدخل',data:mTotalIncome,backgroundColor:'#05966933',borderColor:'#059669',borderWidth:2,borderRadius:4,type:'line',fill:true,tension:0.4,pointRadius:3},
-      {label:'المشتريات + المرافق',data:mPurch.map((v,i)=>v+(mUtil[i]||0)),backgroundColor:'#dc262644',borderColor:'#dc2626',borderWidth:2,borderRadius:4,type:'bar'},
-    ]
-  },options:{...baseOpts(),plugins:{...baseOpts().plugins,legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12}}}}});
-
-  // R2: Income by entity stacked bar
-  rptCharts.r2=new Chart(document.getElementById('chart-r2'),{type:'bar',data:{
-    labels:RPT_MONTHS,
-    datasets:Object.entries(mIncome).map(([eid,vals],i)=>({
-      label:entityNames[eid],data:vals,
-      backgroundColor:CHART_PALETTE[i]+'88',borderColor:CHART_PALETTE[i],borderWidth:1,borderRadius:2
-    }))
-  },options:{...baseOpts(),plugins:{...baseOpts().plugins,legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:gridColor},ticks:{callback:tickFmt}}}}});
-
-  // R3: Donut status
-  rptCharts.r3=new Chart(document.getElementById('chart-r3'),{type:'doughnut',data:{
-    labels:['مدفوع','بانتظار','متأخر'],
-    datasets:[{data:[paidAmt,pendAmt,ovAmt],backgroundColor:['#05966988','#d9770688','#dc262688'],borderColor:['#059669','#d97706','#dc2626'],borderWidth:2,hoverOffset:6}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.toLocaleString()+' SAR'}}},cutout:'65%'}});
-
-  // R4: Top vendors horizontal
-  rptCharts.r4=new Chart(document.getElementById('chart-r4'),{type:'bar',data:{
-    labels:topVendors.map(([v])=>v.length>18?v.slice(0,18)+'…':v),
-    datasets:[{label:'الإجمالي',data:topVendors.map(([,a])=>a),backgroundColor:CHART_PALETTE.map(c=>c+'99'),borderColor:CHART_PALETTE,borderWidth:1,borderRadius:4}]
-  },options:{...baseOpts(),indexAxis:'y',plugins:{...baseOpts().plugins,legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{callback:tickFmt}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
-
-  // R5: Dept pie
-  const depts=Object.entries(deptMap).sort((a,b)=>b[1]-a[1]);
-  rptCharts.r5=new Chart(document.getElementById('chart-r5'),{type:'pie',data:{
-    labels:depts.map(([d])=>d),
-    datasets:[{data:depts.map(([,a])=>a),backgroundColor:CHART_PALETTE.map(c=>c+'bb'),borderColor:'var(--card)',borderWidth:2,hoverOffset:6}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.toLocaleString()+' SAR'}}}}});
-
-  // R6: Utils donut
-  const utArr=Object.entries(utilMap).sort((a,b)=>b[1]-a[1]);
-  rptCharts.r6=new Chart(document.getElementById('chart-r6'),{type:'doughnut',data:{
-    labels:utArr.map(([t])=>t),
-    datasets:[{data:utArr.map(([,a])=>a),backgroundColor:CHART_PALETTE.map(c=>c+'bb'),borderColor:'var(--card)',borderWidth:2,hoverOffset:6}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.toLocaleString()+' SAR'}}},cutout:'60%'}});
-
-  // R7: Lease bar
-  rptCharts.r7=new Chart(document.getElementById('chart-r7'),{type:'bar',data:{
-    labels:leases.map(l=>(l.tenant||l.owner||'—').slice(0,12)),
-    datasets:[
-      {label:'الإيجار الشهري',data:leases.map(l=>parseFloat(l.monthly)||0),backgroundColor:'#7c3aed55',borderColor:'#7c3aed',borderWidth:1,borderRadius:4},
-      {label:'المتأخر',data:leases.map(l=>calcUnpaid(l).unpaid),backgroundColor:'#dc262655',borderColor:'#dc2626',borderWidth:1,borderRadius:4}
-    ]
-  },options:{...baseOpts(),plugins:{...baseOpts().plugins,legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}}});
-
-  // R8: Balance trend line
-  rptCharts.r8=new Chart(document.getElementById('chart-r8'),{type:'line',data:{
-    labels:bal10.map(b=>fmtDate(b.savedAt)),
-    datasets:[{
-      label:'الرصيد الكلي',
-      data:bal10.map(b=>(parseFloat(b.total)||0)+(parseFloat(b.pharm1)||0)+(parseFloat(b.pharm2)||0)+(parseFloat(b.pharm3)||0)),
-      borderColor:'#059669',backgroundColor:'#05966922',fill:true,tension:0.4,pointRadius:5,pointHoverRadius:7,borderWidth:2
-    }]
-  },options:{...baseOpts(),plugins:{...baseOpts().plugins},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:gridColor},ticks:{callback:tickFmt}}}}});
-
-  // R9: Residency donut
-  rptCharts.r9=new Chart(document.getElementById('chart-r9'),{type:'doughnut',data:{
-    labels:['سارية','تنتهي قريباً','منتهية'],
-    datasets:[{data:[resOk,resSoon,resExp],backgroundColor:['#05966988','#d9770688','#dc262688'],borderColor:['#059669','#d97706','#dc2626'],borderWidth:2,hoverOffset:6}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'55%'}});
-
-  // R10: P&L waterfall
-  rptCharts.r10=new Chart(document.getElementById('chart-r10'),{type:'bar',data:{
-    labels:['الإيرادات','المشتريات','المرافق','الإيجارات','صافي الربح'],
-    datasets:[{
-      data:[annIncome,annPurch,annUtil,annRent,Math.abs(netProfit)],
-      backgroundColor:[CHART_PALETTE[1]+'99',CHART_PALETTE[4]+'99',CHART_PALETTE[7]+'99',CHART_PALETTE[2]+'99',(netProfit>=0?CHART_PALETTE[1]:CHART_PALETTE[4])+'bb'],
-      borderColor:[CHART_PALETTE[1],CHART_PALETTE[4],CHART_PALETTE[7],CHART_PALETTE[2],(netProfit>=0?CHART_PALETTE[1]:CHART_PALETTE[4])],
-      borderWidth:2,borderRadius:6
-    }]
-  },options:{...baseOpts(),plugins:{...baseOpts().plugins,legend:{display:false}}}});
+  }
 }
 
-// ── Download functions ────────────────────────────────────────
-window.rptDownPDF = function(rptId){
-  try{
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-    const el=document.getElementById('rpt-'+rptId);
-    const cardEl=el?.closest('.table-card');
-    const title=cardEl?.querySelector('div>div>div')?.textContent?.trim()||rptId;
-    doc.setFontSize(14); doc.setFont(undefined,'bold');
-    doc.text(title,148,12,{align:'center'});
-    doc.setFontSize(9); doc.setFont(undefined,'normal');
-    doc.text(`${rptYear} — Generated: ${new Date().toLocaleDateString('en-US')}`,148,18,{align:'center'});
-    const canvas=el?.querySelector('canvas');
-    if(canvas){
-      const img=canvas.toDataURL('image/png',0.95);
-      doc.addImage(img,20,22,260,130);
-    }
-    const table=el?.querySelector('table');
-    if(table){
-      const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());
-      const rows=[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));
-      doc.autoTable({head:[headers],body:rows,startY:canvas?158:22,styles:{fontSize:8},headStyles:{fillColor:[26,110,216],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[245,247,250]}});
-    }
-    doc.save(`${title.replace(/\s+/g,'_')}_${rptYear}.pdf`);
-  }catch(e){showToast('PDF Error: '+e.message,'error');}
-}
+window.rptPrint = function(){
+  document.body.classList.add('rpt-printing');
+  const done = () => { document.body.classList.remove('rpt-printing'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  rptChart?.resize();
+  setTimeout(() => window.print(), 100);
+};
 
-window.rptDownXLS = function(rptId){
-  try{
-    const el=document.getElementById('rpt-'+rptId);
-    const cardEl=el?.closest('.table-card');
-    const title=cardEl?.querySelector('div>div>div')?.textContent?.trim()||rptId;
-    const table=el?.querySelector('table');
-    let data=table?[[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim()),
-      ...[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.textContent.trim()))]
-      :[[title+' — '+rptYear],['No table data']];
-    const ws=XLSX.utils.aoa_to_sheet(data);
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,title.slice(0,31));
-    XLSX.writeFile(wb,`${title.replace(/[^\w]/g,'_')}_${rptYear}.xlsx`);
-  }catch(e){showToast('Excel Error: '+e.message,'error');}
-}
+window.renderReports = renderReports;
 
 window.exportPharmaCompanyXLS = function(companyId){
   const co = parCompanies.find(c=>c.id===companyId);
