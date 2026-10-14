@@ -19,7 +19,7 @@
     --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
     --grid: #e6e9ef; --axis: #c9cfd8; --s1-light: #86b6ef; --s3: #1baf7a;
     /* Tab colors (dark enough for white text when the tab is open) */
-    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-names: #0e7490; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-users: #4b5563; --on-tab: #ffffff;
+    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-names: #0e7490; --t-income: #2f7d32; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-users: #4b5563; --on-tab: #ffffff;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -33,7 +33,7 @@
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
       --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
       --grid: #232b36; --axis: #36404d; --s1-light: #2c5a92; --s3: #199e70;
-      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-names: #4fc3dc; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-users: #c3cad5; --on-tab: #10142e;
+      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-names: #4fc3dc; --t-income: #7bc67e; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-users: #c3cad5; --on-tab: #10142e;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -105,6 +105,7 @@
   .tab[data-tab="analytics"] { --tc: var(--t-an); }
   .tab[data-tab="doctors"]   { --tc: var(--t-doc); }
   .tab[data-tab="edits"]     { --tc: var(--t-edit); }
+  .tab[data-tab="income"]    { --tc: var(--t-income); }
   .tab[data-tab="users"]     { --tc: var(--t-users); }
 
   /* Edits */
@@ -396,6 +397,7 @@
       <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 10h16M4 15h16M10 10v10"/></svg>Statistics</button>
       <button class="tab" role="tab" data-tab="analytics" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-9M3 20h18"/></svg>Analytics</button>
       <button class="tab" role="tab" data-tab="doctors" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Doctors</button>
+      <button class="tab" role="tab" data-tab="income" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM12 9a3 3 0 100 6 3 3 0 000-6zM6 9v.01M18 15v.01"/></svg>Income</button>
       <button class="tab" role="tab" data-tab="edits" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/></svg>Edits</button>
       <button class="tab hidden" role="tab" data-tab="users" aria-selected="false" id="usersTab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M17 8v6M14 11h6"/></svg>Users</button>
     </nav>
@@ -406,6 +408,7 @@
         <button data-range="day" aria-pressed="true">Day</button>
         <button data-range="week" aria-pressed="false">Week</button>
         <button data-range="month" aria-pressed="false">Month</button>
+        <button data-range="year" aria-pressed="false" id="yearBtn" class="hidden">Year</button>
         <button data-range="custom" aria-pressed="false">Custom</button>
       </div>
       <div class="group hidden" id="customRange">
@@ -671,6 +674,32 @@
       <div class="empty hidden" id="drEmpty">No written UCAF forms for this period yet.</div>
     </div>
 
+    <!-- Income -->
+    <div data-panel="income" class="hidden">
+      <div id="inBody">
+        <div class="controls">
+          <div class="seg" id="incomeMode" role="group" aria-label="Calculation">
+            <button data-mode="med" aria-pressed="true">Medical (without medicines)</button>
+            <button data-mode="all" aria-pressed="false">All (with medicines)</button>
+          </div>
+          <span class="muted small" id="inSync"></span>
+        </div>
+        <div class="kpis" id="inKpis"></div>
+        <div class="card">
+          <div class="card-head"><div><h2>Income by doctor</h2><div class="muted small">Net after discount, cancelled invoices excluded (same numbers as the doctors income report in the clinic program)</div></div></div>
+          <div class="table-wrap">
+            <table class="grid">
+              <thead><tr><th>Doctor</th><th class="num">Consultations</th><th class="num">Follow-ups</th><th class="num">Visits</th><th class="num">Services</th>
+                <th class="num">Cash</th><th class="num">Credit</th><th class="num">Total</th><th>Share</th></tr></thead>
+              <tbody id="inTbody"></tbody>
+              <tfoot id="inFoot"></tfoot>
+            </table>
+            <div class="empty hidden" id="inEmpty">No income data for this period yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Edits -->
     <div data-panel="edits" class="hidden">
       <div id="edBody">
@@ -786,6 +815,12 @@
     "Not written, or chief complaint empty / 0": "غير مكتوب، أو الشكوى الرئيسية فارغة / 0", "Form written without ICD-10 code": "نموذج مكتوب بدون كود ICD-10",
     "Complete": "مكتمل", "{p}% of visits": "{p}% من الزيارات", "UCAF not written": "UCAF غير مكتوب",
     "UCAF missing · chief complaint empty or 0": "UCAF ناقص · الشكوى الرئيسية فارغة أو 0", "No diagnosis code": "بدون كود تشخيص",
+    "Income": "الإيرادات", "Year": "سنة", "Medical (without medicines)": "الطبي (بدون الأدوية)", "All (with medicines)": "الجميع (بالأدوية)",
+    "Income by doctor": "الإيرادات حسب الطبيب", "Consultations": "الكشفيات", "Follow-ups": "الإعادة", "Credit": "الآجل",
+    "Total income": "إجمالي الإيرادات", "With medicines": "شامل الأدوية", "Without medicines": "بدون الأدوية",
+    "{p}% of income": "{p}% من الإيرادات", "{a} consultations · {b} follow-ups": "{a} كشفية · {b} إعادة", "Last income sync: {t}": "آخر تحديث للإيرادات: {t}",
+    "No income data for this period yet.": "لا توجد بيانات إيرادات لهذه الفترة بعد.", "{name} · year to date ({n} days)": "{name} · من أول السنة ({n} يوم)",
+    "Net after discount, cancelled invoices excluded (same numbers as the doctors income report in the clinic program)": "صافي بعد الخصم، بدون الفواتير الملغية (نفس أرقام تقرير دخل الأطباء في البرنامج)",
     "Names": "الأسماء", "Patient names to fix": "أسماء مرضى تحتاج تصحيح", "Name (English)": "الاسم (إنجليزي)", "Name (Arabic)": "الاسم (عربي)",
     "Name problems": "أسماء بها مشكلة", "Names OK": "أسماء سليمة", "All patient names are written correctly.": "كل أسماء المرضى مكتوبة صح.",
     "Arabic name missing or not in Arabic": "الاسم العربي ناقص أو مكتوب بغير العربي",
@@ -959,7 +994,7 @@
   // Long text columns get truncated with "…"; the full value shows on hover
   const TRUNCATE = { PatientName: 230, Doctor: 170, Clinic: 120, Insurer: 190 };
 
-  let rows = [], shown = [], sortKey = "VisitTime", sortDir = -1, tab = "visits", range = "day";
+  let rows = [], shown = [], sortKey = "VisitTime", sortDir = -1, tab = "visits", range = "day", incomeMode = "med", incomeDocs = [];
   let unsubVisits = null, unsubMeta = null, current = null;
   const rangeCache = new Map();
 
@@ -1108,7 +1143,8 @@
 
   // ---------- Period (shared by Statistics and Analytics) ----------
   const MAX_DAYS = 92; // keeps Firestore reads well inside the free quota
-  const PERIOD_TABS = ["stats", "analytics", "doctors", "edits"];
+  const PERIOD_TABS = ["stats", "analytics", "doctors", "income", "edits"];
+  const INCOME_MAX_DAYS = 366; // one small document per doctor per day, so a full year stays cheap
   const fmtDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(LOC(), { day: "2-digit", month: "short", year: "numeric" });
   const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5) + 1;
 
@@ -1116,6 +1152,11 @@
     const date = $("date").value;
     if (range === "day") return { from: date, to: date,
       label: new Date(date + "T12:00:00").toLocaleDateString(LOC(), { weekday: "long", day: "numeric", month: "long", year: "numeric" }) };
+    if (range === "year") {
+      const from = date.slice(0, 4) + "-01-01", end = date.slice(0, 4) + "-12-31", today = isoDate(new Date());
+      const to = end < today ? end : today;
+      return { from, to, label: to === end ? date.slice(0, 4) : t("{name} · year to date ({n} days)", { name: date.slice(0, 4), n: daysBetween(from, to) }) };
+    }
     if (range === "week") return { from: addDays(date, -6), to: date, label: t("{a} → {b} · last 7 days", { a: fmtDay(addDays(date, -6)), b: fmtDay(date) }) };
     if (range === "custom") {
       const from = $("rangeFrom").value || date, to = $("rangeTo").value || date;
@@ -1152,12 +1193,26 @@
     const p = currentPeriod();
     $("rangeLabel").textContent = p.label;
     if (daysBetween(p.from, p.to) < 1) return showError(t("The end date must be after the start date."));
-    if (daysBetween(p.from, p.to) > MAX_DAYS) return showError(t("Please choose {n} days or fewer.", { n: MAX_DAYS }));
+    const maxDays = tab === "income" ? INCOME_MAX_DAYS : MAX_DAYS;
+    if (daysBetween(p.from, p.to) > maxDays) return showError(t("Please choose {n} days or fewer.", { n: maxDays }));
     $("err").textContent = "";
     const token = ++periodToken;
-    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody"), edits: $("edBody") }[tab];
+    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody"), income: $("inBody"), edits: $("edBody") }[tab];
     body.classList.add("loading"); // keep the previous render visible while loading
     try {
+      if (tab === "income") {
+        // not cached: the sync refreshes the last days every hour
+        const [snap, meta] = await Promise.all([
+          getDocs(query(collection(db, "doctor_income"), where("Date", ">=", p.from), where("Date", "<=", p.to))),
+          getDoc(doc(db, "ucaf_meta", "incomeSync")).catch(() => null),
+        ]);
+        if (token !== periodToken) return;
+        incomeDocs = snap.docs.map((d) => d.data());
+        const at = meta?.exists() ? meta.data().at?.toDate?.() : null;
+        $("inSync").textContent = at ? t("Last income sync: {t}", { t: at.toLocaleString(LOC(), { dateStyle: "medium", timeStyle: "short" }) }) : "";
+        renderIncome();
+        return;
+      }
       if (tab === "edits") {
         // edits are filtered by the day the change was detected, and never cached (new ones arrive every hour)
         const snap = await getDocs(query(collection(db, "ucaf_changes"), where("DetectedDate", ">=", p.from), where("DetectedDate", "<=", p.to)));
@@ -1173,6 +1228,39 @@
     } finally {
       if (token === periodToken) body.classList.remove("loading");
     }
+  }
+
+  // ---------- Income ----------
+  const money = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function renderIncome() {
+    const dr = $("doctor").value;
+    const pre = incomeMode === "all" ? "All" : "Med";
+    const byDoc = new Map();
+    for (const d of incomeDocs) {
+      if (dr && d.DocName !== dr) continue;
+      const key = d.DocId || d.DocName;
+      const a = byDoc.get(key) ?? { name: d.DocName || d.DocId, cons: 0, rev: 0, serv: 0, cash: 0, credit: 0 };
+      a.cons += d.Cons || 0; a.rev += d.Revisits || 0; a.serv += d.Services || 0;
+      a.cash += d[pre + "Cash"] || 0; a.credit += d[pre + "Credit"] || 0;
+      byDoc.set(key, a);
+    }
+    const list = [...byDoc.values()].map((a) => ({ ...a, total: a.cash + a.credit, visits: a.cons + a.rev }))
+      .sort((a, b) => b.total - a.total);
+    const sum = (k) => list.reduce((s, a) => s + a[k], 0);
+    const T = { cons: sum("cons"), rev: sum("rev"), visits: sum("visits"), serv: sum("serv"), cash: sum("cash"), credit: sum("credit"), total: sum("total") };
+
+    $("inKpis").innerHTML = kpi(t("Total income"), money.format(T.total), t(incomeMode === "all" ? "With medicines" : "Without medicines")) +
+      kpi(t("Cash"), money.format(T.cash), t("{p}% of income", { p: pct(T.cash, T.total) })) +
+      kpi(t("Credit"), money.format(T.credit), t("{p}% of income", { p: pct(T.credit, T.total) })) +
+      kpi(t("Visits"), nf.format(T.visits), t("{a} consultations · {b} follow-ups", { a: nf.format(T.cons), b: nf.format(T.rev) }));
+    $("inTbody").innerHTML = list.map((a) => `<tr><td>${e(a.name)}</td>
+        <td class="num">${nf.format(a.cons)}</td><td class="num">${nf.format(a.rev)}</td><td class="num">${nf.format(a.visits)}</td>
+        <td class="num">${nf.format(a.serv)}</td><td class="num">${money.format(a.cash)}</td><td class="num">${money.format(a.credit)}</td>
+        <td class="num"><b>${money.format(a.total)}</b></td><td>${shareCell(a.total, T.total)}</td></tr>`).join("");
+    $("inFoot").innerHTML = list.length ? `<tr><td>${t("Total")}</td><td class="num">${nf.format(T.cons)}</td><td class="num">${nf.format(T.rev)}</td>
+        <td class="num">${nf.format(T.visits)}</td><td class="num">${nf.format(T.serv)}</td><td class="num">${money.format(T.cash)}</td>
+        <td class="num">${money.format(T.credit)}</td><td class="num">${money.format(T.total)}</td><td></td></tr>` : "";
+    $("inEmpty").classList.toggle("hidden", list.length > 0);
   }
 
   // ---------- Statistics ----------
@@ -2009,7 +2097,13 @@
     document.querySelectorAll("[data-panel]").forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== t));
     $("periodBar").classList.toggle("hidden", !PERIOD_TABS.includes(t));
     // the period controls take the open tab's color
-    const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", edits: "--t-edit" }[t];
+    // "Year" only fits the Income tab (the other period tabs read every visit, so they stay at 92 days)
+    $("yearBtn").classList.toggle("hidden", t !== "income");
+    if (t !== "income" && range === "year") {
+      range = "month";
+      document.querySelectorAll("#rangeSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.range === "month")));
+    }
+    const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", income: "--t-income", edits: "--t-edit" }[t];
     if (tabColor) {
       $("periodBar").style.setProperty("--accent", `var(${tabColor})`);
       $("periodBar").style.setProperty("--accent-hover", `var(${tabColor})`);
@@ -2031,6 +2125,11 @@
     renderPeriodViews().catch(showError);
   }));
   $("applyRange").onclick = () => renderPeriodViews().catch(showError);
+  document.querySelectorAll("#incomeMode button").forEach((b) => b.addEventListener("click", () => {
+    incomeMode = b.dataset.mode;
+    document.querySelectorAll("#incomeMode button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    renderIncome(); // same documents, only the columns change
+  }));
 
   $("visitHead").addEventListener("click", (ev) => {
     const k = ev.target.closest("th")?.dataset.key; if (!k) return;
