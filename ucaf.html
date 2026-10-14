@@ -109,6 +109,11 @@
   #clBody .two-col { margin-bottom: 16px; }
   #clBodyRows td:last-child { white-space: normal; min-width: 260px; }
   #clBodyRows .pill { margin: 1px 2px; }
+  .cl-results > summary { cursor: pointer; list-style: none; }
+  .cl-results > summary::-webkit-details-marker { display: none; }
+  .cl-results > summary h2::before { content: "▸ "; color: var(--muted); }
+  .cl-results[open] > summary h2::before { content: "▾ "; }
+  .cl-results:not([open]) > summary { border-bottom: 0; }
   .tab[data-tab="income"]    { --tc: var(--t-income); }
   .tab[data-tab="users"]     { --tc: var(--t-users); }
 
@@ -408,7 +413,7 @@
       <button class="tab" role="tab" data-tab="doctors" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Doctors</button>
       <button class="tab" role="tab" data-tab="income" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM12 9a3 3 0 100 6 3 3 0 000-6zM6 9v.01M18 15v.01"/></svg>Income</button>
       <button class="tab" role="tab" data-tab="edits" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/></svg>Edits</button>
-      <button class="tab" role="tab" data-tab="claims" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg>Insurance check</button>
+      <button class="tab" role="tab" data-tab="claims" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg>Insurance check<span class="badge hidden" id="claimsBadge">0</span></button>
       <button class="tab hidden" role="tab" data-tab="users" aria-selected="false" id="usersTab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M17 8v6M14 11h6"/></svg>Users</button>
     </nav>
 
@@ -771,13 +776,15 @@
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-head">
-            <div><h2>Claim results from insurers</h2><div class="muted small">Upload the ClaimReport Excel files from NPHIES · the period filters by claim date · uploading the same file again only updates it</div></div>
-            <div class="actions">
-              <input type="file" id="clFile" accept=".xlsx,.xls" multiple hidden>
-              <button class="btn primary" id="clUpload">Upload claim reports</button>
-            </div>
+        <!-- Optional: compare with what the insurers actually rejected (closed by default; the review above needs no upload) -->
+        <details class="card cl-results">
+          <summary class="card-head">
+            <div><h2>Compare with insurer results (optional)</h2><div class="muted small">Not needed for the review above · upload the ClaimReport Excel files from NPHIES to see what was rejected and whether the check catches it</div></div>
+          </summary>
+          <div class="controls" style="padding: 12px 16px 0">
+            <input type="file" id="clFile" accept=".xlsx,.xls" multiple hidden>
+            <button class="btn primary" id="clUpload">Upload claim reports</button>
+            <span class="muted small">The period filters by claim date · uploading the same file again only updates it</span>
           </div>
           <div class="user-msg" id="clMsg"></div>
           <div class="kpis" id="clResKpis" style="padding: 0 16px"></div>
@@ -787,7 +794,7 @@
           </div>
           <h3 class="sub-h" style="padding: 0 16px">Rejected claims</h3>
           <div class="table-wrap" id="clRejected"></div>
-        </div>
+        </details>
       </div>
     </div>
 
@@ -1038,7 +1045,10 @@
     "Claim results from insurers": "نتيجة المطالبات من شركات التأمين",
     "Upload the ClaimReport Excel files from NPHIES · the period filters by claim date · uploading the same file again only updates it":
       "ارفع ملفات ClaimReport (Excel) من نفيس · الفترة بتفلتر بتاريخ المطالبة · رفع نفس الملف تاني بيحدّثه بس",
-    "Upload claim reports": "رفع تقارير المطالبات", "Rejection reasons": "أسباب الرفض", "Lost amount by doctor": "المبلغ المفقود حسب الطبيب",
+    "Upload claim reports": "رفع تقارير المطالبات", "Compare with insurer results (optional)": "مقارنة بنتيجة شركات التأمين (اختياري)",
+    "Not needed for the review above · upload the ClaimReport Excel files from NPHIES to see what was rejected and whether the check catches it":
+      "مش مطلوب للمراجعة اللي فوق · ارفع ملفات ClaimReport من نفيس لو عاوز تشوف إيه اللي اترفض وهل الفحص بيمسكه",
+    "The period filters by claim date · uploading the same file again only updates it": "الفترة بتفلتر بتاريخ المطالبة · رفع نفس الملف تاني بيحدّثه بس", "Rejection reasons": "أسباب الرفض", "Lost amount by doctor": "المبلغ المفقود حسب الطبيب",
     "Rejected claims": "المطالبات المرفوضة", "Claims": "المطالبات", "Submitted": "المطلوب", "Approved": "المعتمد", "Lost": "المفقود", "SAR": "ريال",
     "{a} rejected · {b} partially approved": "{a} مرفوضة · {b} مقبولة جزئيًا", "{p}% of submitted": "{p}% من المطلوب",
     "{p}% of submitted · {r} from fully rejected claims": "{p}% من المطلوب · {r} من المطالبات المرفوضة بالكامل",
@@ -1170,6 +1180,7 @@
     renderInsurers();
     renderAlerts();
     renderNames();
+    updateClaimsBadge().catch(() => {});
     renderPeriodViews().catch(showError);
   }
 
@@ -2122,6 +2133,20 @@
     return out;
   }
 
+  // Tab badge: insured visits of the selected day that must be fixed before the claim goes out
+  let badgeToken = 0;
+  async function updateClaimsBadge() {
+    const badge = $("claimsBadge"), token = ++badgeToken;
+    if (!rows.length || document.querySelector('.tab[data-tab="claims"]').classList.contains("hidden")) { badge.classList.add("hidden"); return; }
+    const date = $("date").value;
+    const before = await loadPeriod({ from: addDays(date, -LOOKBACK_DAYS), to: addDays(date, -1) });
+    if (token !== badgeToken) return;
+    const idx = groupBy([...before, ...rows].filter((r) => r.PaymentCode === "R"), patientKey);
+    for (const l of idx.values()) l.sort(visitOrder);
+    const n = scope(rows).filter((r) => r.PaymentCode === "R" && insuranceIssues(r, idx).some((i) => i.level === "fix")).length;
+    badge.textContent = n; badge.classList.toggle("hidden", n === 0);
+  }
+
   const issuePills = (issues) => issues.map((i) => `<span class="pill ${i.level === "fix" ? "danger" : "warn"}">${e(i.text)}</span>`).join(" ");
   const fmtSar = (n) => money.format(n);
 
@@ -2573,6 +2598,12 @@
       range = "month";
       document.querySelectorAll("#rangeSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.range === "month")));
     }
+    // the review is a daily job: opening the tab shows the selected day (switch to Week / Month to review before sending)
+    if (t === "claims" && range !== "day") {
+      range = "day";
+      document.querySelectorAll("#rangeSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.range === "day")));
+      $("customRange").classList.add("hidden");
+    }
     const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", income: "--t-income", edits: "--t-edit", claims: "--t-claims" }[t];
     if (tabColor) {
       $("periodBar").style.setProperty("--accent", `var(${tabColor})`);
@@ -2679,7 +2710,7 @@
     if (tab === "users") setTab("visits");
     if (!user) return;
     $("userEmail").textContent = user.email;
-    checkAccess(user).then((a) => { isAdmin = a.admin; $("usersTab").classList.toggle("hidden", !a.admin); applyTabAccess(a.tabs); });
+    checkAccess(user).then((a) => { isAdmin = a.admin; $("usersTab").classList.toggle("hidden", !a.admin); applyTabAccess(a.tabs); updateClaimsBadge().catch(() => {}); });
     unsubMeta = onSnapshot(doc(db, "ucaf_meta", "lastSync"), (s) => {
       const m = s.data(); if (!m) return;
       lastSyncAt = m.at.toDate(); showLastSync();
