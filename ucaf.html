@@ -19,7 +19,7 @@
     --s1: #2a78d6; --s2: #eb6834; --heat-lo: #e3edfb; --heat-hi: #104281;
     --grid: #e6e9ef; --axis: #c9cfd8; --s1-light: #86b6ef; --s3: #1baf7a;
     /* Tab colors (dark enough for white text when the tab is open) */
-    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-names: #0e7490; --t-income: #2f7d32; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-users: #4b5563; --on-tab: #ffffff;
+    --t-visits: #3b48a8; --t-ins: #1f6cc4; --t-alerts: #c4321f; --t-names: #0e7490; --t-income: #2f7d32; --t-stats: #0f7f6f; --t-an: #c2501f; --t-doc: #5b3fb0; --t-edit: #b0306a; --t-claims: #8a5a00; --t-users: #4b5563; --on-tab: #ffffff;
     --warn: #a35a00; --warn-soft: #fdf1df; --danger: #b42318; --danger-soft: #fdecea;
     --ok: #1a7f37; --ok-soft: #e7f5ea; --info: #2f5fa7; --info-soft: #e8eff9;
     --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
@@ -33,7 +33,7 @@
       --brand-red: #f0576a; --brand-sky: #7cc6f0;
       --s1: #3987e5; --s2: #d95926; --heat-lo: #1d2a3d; --heat-hi: #9ec5f4;
       --grid: #232b36; --axis: #36404d; --s1-light: #2c5a92; --s3: #199e70;
-      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-names: #4fc3dc; --t-income: #7bc67e; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-users: #c3cad5; --on-tab: #10142e;
+      --t-visits: #8d98f0; --t-ins: #5aa2ee; --t-alerts: #f2837a; --t-names: #4fc3dc; --t-income: #7bc67e; --t-stats: #3cc4a8; --t-an: #f08a55; --t-doc: #a99cf2; --t-edit: #f07aae; --t-claims: #e0b04f; --t-users: #c3cad5; --on-tab: #10142e;
       --warn: #f0a640; --warn-soft: #33260f; --danger: #f2837a; --danger-soft: #3a1b19;
       --ok: #5cc97b; --ok-soft: #13301c; --info: #7fa8e8; --info-soft: #172438;
       --shadow: none;
@@ -105,6 +105,10 @@
   .tab[data-tab="analytics"] { --tc: var(--t-an); }
   .tab[data-tab="doctors"]   { --tc: var(--t-doc); }
   .tab[data-tab="edits"]     { --tc: var(--t-edit); }
+  .tab[data-tab="claims"]    { --tc: var(--t-claims); }
+  #clBody .two-col { margin-bottom: 16px; }
+  #clBodyRows td:last-child { white-space: normal; min-width: 260px; }
+  #clBodyRows .pill { margin: 1px 2px; }
   .tab[data-tab="income"]    { --tc: var(--t-income); }
   .tab[data-tab="users"]     { --tc: var(--t-users); }
 
@@ -404,6 +408,7 @@
       <button class="tab" role="tab" data-tab="doctors" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Doctors</button>
       <button class="tab" role="tab" data-tab="income" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM12 9a3 3 0 100 6 3 3 0 000-6zM6 9v.01M18 15v.01"/></svg>Income</button>
       <button class="tab" role="tab" data-tab="edits" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/></svg>Edits</button>
+      <button class="tab" role="tab" data-tab="claims" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg>Insurance check</button>
       <button class="tab hidden" role="tab" data-tab="users" aria-selected="false" id="usersTab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M17 8v6M14 11h6"/></svg>Users</button>
     </nav>
 
@@ -732,6 +737,60 @@
       <div class="empty hidden" id="edEmpty">No edits recorded in this period. Tracking starts from the first sync after this feature was installed.</div>
     </div>
 
+    <!-- Insurance check: catch the reasons insurers reject before the claims are sent -->
+    <div data-panel="claims" class="hidden">
+      <div id="clBody">
+        <div class="kpis" id="clKpis"></div>
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Before sending the claims</h2><div class="muted small">Insured visits in the selected period, checked against the reasons insurers rejected before · Must fix = the insurer will reject it · Review = check it with the doctor</div></div>
+            <div class="actions">
+              <div class="seg" id="clLevel" role="group" aria-label="Show">
+                <button data-level="" aria-pressed="true">All problems</button>
+                <button data-level="fix" aria-pressed="false">Must fix</button>
+                <button data-level="review" aria-pressed="false">Review</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="grid">
+              <thead><tr><th>Date</th><th>Time</th><th>Visit</th><th>File no</th><th>Patient</th><th>Doctor</th><th>Insurer</th><th>Problems</th></tr></thead>
+              <tbody id="clBodyRows"></tbody>
+            </table>
+            <div class="empty hidden" id="clRowsEmpty">No problems found in the insured visits of this period.</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head"><div><h2>Problems by type</h2><div class="muted small">Insured visits with each problem</div></div></div>
+            <div class="table-wrap" id="clTypes"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h2>Problems by doctor</h2><div class="muted small">Most problems first</div></div></div>
+            <div class="table-wrap" id="clDocs"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Claim results from insurers</h2><div class="muted small">Upload the ClaimReport Excel files from NPHIES · the period filters by claim date · uploading the same file again only updates it</div></div>
+            <div class="actions">
+              <input type="file" id="clFile" accept=".xlsx,.xls" multiple hidden>
+              <button class="btn primary" id="clUpload">Upload claim reports</button>
+            </div>
+          </div>
+          <div class="user-msg" id="clMsg"></div>
+          <div class="kpis" id="clResKpis" style="padding: 0 16px"></div>
+          <div class="two-col" style="padding: 0 16px">
+            <div><h3 class="sub-h">Rejection reasons</h3><div class="table-wrap" id="clReasons"></div></div>
+            <div><h3 class="sub-h">Lost amount by doctor</h3><div class="table-wrap" id="clLossDocs"></div></div>
+          </div>
+          <h3 class="sub-h" style="padding: 0 16px">Rejected claims</h3>
+          <div class="table-wrap" id="clRejected"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Users (admins only) -->
     <div data-panel="users" class="hidden">
       <div class="card">
@@ -770,7 +829,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, query, where, onSnapshot, getDocs, getDoc, doc, setDoc, deleteDoc, deleteField, serverTimestamp }
+  import { getFirestore, collection, query, where, onSnapshot, getDocs, getDoc, doc, setDoc, deleteDoc, deleteField, serverTimestamp, writeBatch }
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -946,6 +1005,60 @@
     "Password must be at least 6 characters.": "يجب أن تكون كلمة المرور 6 أحرف على الأقل.", "Invalid email address.": "البريد الإلكتروني غير صحيح.",
     "Remove access for {email}? They will no longer see any data.": "إزالة صلاحية {email}؟ لن يستطيع رؤية أي بيانات بعد ذلك.",
     "A password reset email was sent to {email}.": "تم إرسال رابط تغيير كلمة المرور إلى {email}.", "Could not complete: {msg}": "تعذّر التنفيذ: {msg}",
+    // insurance check
+    "Insurance check": "مراجعة التأمين", "Before sending the claims": "قبل إرسال المطالبات",
+    "Insured visits in the selected period, checked against the reasons insurers rejected before · Must fix = the insurer will reject it · Review = check it with the doctor":
+      "زيارات التأمين في الفترة المختارة، مفحوصة بأسباب الرفض اللي رجعت من شركات التأمين قبل كده · لازم يتصلّح = هيترفض أو يتخصم · مراجعة = راجعه مع الطبيب",
+    "Show": "عرض", "All problems": "كل المشاكل", "Must fix": "لازم يتصلّح", "Review": "مراجعة", "Problems": "المشاكل", "Problem": "المشكلة", "Level": "الدرجة",
+    "No problems found in the insured visits of this period.": "لا توجد مشاكل في زيارات التأمين في هذه الفترة.",
+    "Problems by type": "المشاكل حسب النوع", "Insured visits with each problem": "زيارات التأمين بكل مشكلة",
+    "Problems by doctor": "المشاكل حسب الطبيب", "Most problems first": "الأكثر مشاكل أولًا",
+    "Insured visits": "زيارات التأمين", "in the selected period": "في الفترة المختارة", "{p}% of insured visits": "{p}% من زيارات التأمين", "Ready to send": "جاهزة للإرسال",
+    "UCAF not written": "UCAF غير مكتوب", "UCAF not written or chief complaint empty": "UCAF غير مكتوب أو الشكوى الرئيسية فارغة",
+    "Insurance card expired": "كارت التأمين منتهي", "Insurance card expired on {d}": "كارت التأمين منتهي بتاريخ {d}",
+    "Membership number missing": "رقم العضوية غير مكتوب",
+    "Consultation within 14-day follow-up": "كشف جديد خلال فترة المتابعة 14 يوم",
+    "New consultation within 14 days of a consultation with the same doctor on {d} — the insurer counts it as a free follow-up":
+      "كشف جديد خلال 14 يوم من كشف عند نفس الطبيب بتاريخ {d} — شركة التأمين تعتبره متابعة مجانية",
+    "Same clinic within 14 days": "نفس العيادة خلال 14 يوم",
+    "New consultation within 14 days of a consultation in the same clinic ({doc}, {d})": "كشف جديد خلال 14 يوم من كشف في نفس العيادة ({doc}، {d})",
+    "Same service twice on one day": "نفس الخدمة مرتين في نفس اليوم", "Same service twice on the same day: {s}": "نفس الخدمة مكررة في نفس اليوم: {s}",
+    "Refill too soon": "صرف الدواء قبل موعده", "Medicine prescribed again within 14 days (refill too soon): {m}": "دواء اتصرف تاني خلال 14 يوم (صرف قبل الموعد): {m}",
+    "Vital signs missing": "علامات حيوية ناقصة", "Vital signs missing: {v}": "علامات حيوية ناقصة: {v}",
+    "blood pressure": "الضغط", "temperature": "الحرارة", "pulse": "النبض", "weight": "الوزن",
+    "Vital sign written wrong": "علامة حيوية مكتوبة غلط", "Vital sign written wrong: {v}": "علامة حيوية مكتوبة غلط: {v}",
+    "High blood pressure without diagnosis": "ضغط عالي بدون تشخيص ضغط",
+    "Blood pressure {bp} is high but there is no hypertension diagnosis (I10–I15 or R03.0)": "الضغط {bp} عالي ومفيش تشخيص ضغط (I10–I15 أو R03.0)",
+    "Fever without matching diagnosis": "حرارة بدون تشخيص مناسب",
+    "Temperature {v} (fever) but no infection or fever diagnosis": "الحرارة {v} (سخونية) ومفيش تشخيص عدوى أو حمى",
+    "Diagnosis does not fit sex or age": "التشخيص لا يناسب الجنس أو السن",
+    "Female-only diagnosis for a male patient: {c}": "تشخيص خاص بالسيدات لمريض ذكر: {c}",
+    "Male-only diagnosis for a female patient: {c}": "تشخيص خاص بالرجال لمريضة أنثى: {c}",
+    "Pregnancy diagnosis does not fit the age ({a} years)": "تشخيص حمل لا يناسب السن ({a} سنة)",
+    "Claim results from insurers": "نتيجة المطالبات من شركات التأمين",
+    "Upload the ClaimReport Excel files from NPHIES · the period filters by claim date · uploading the same file again only updates it":
+      "ارفع ملفات ClaimReport (Excel) من نفيس · الفترة بتفلتر بتاريخ المطالبة · رفع نفس الملف تاني بيحدّثه بس",
+    "Upload claim reports": "رفع تقارير المطالبات", "Rejection reasons": "أسباب الرفض", "Lost amount by doctor": "المبلغ المفقود حسب الطبيب",
+    "Rejected claims": "المطالبات المرفوضة", "Claims": "المطالبات", "Submitted": "المطلوب", "Approved": "المعتمد", "Lost": "المفقود", "SAR": "ريال",
+    "{a} rejected · {b} partially approved": "{a} مرفوضة · {b} مقبولة جزئيًا", "{p}% of submitted": "{p}% من المطلوب",
+    "{p}% of submitted · {r} from fully rejected claims": "{p}% من المطلوب · {r} من المطالبات المرفوضة بالكامل",
+    "Reason": "السبب", "Amount": "المبلغ", "Of submitted": "من المطلوب", "Caught by the check?": "الفحص كان هيمسكها؟",
+    "Visit not found": "الزيارة غير موجودة", "Yes": "نعم", "No": "لا", "Open": "فتح", "No reason given": "بدون سبب",
+    "No fully rejected claims in this period.": "لا توجد مطالبات مرفوضة بالكامل في هذه الفترة.",
+    "No claim reports uploaded for this period.": "لم يتم رفع تقارير مطالبات لهذه الفترة.",
+    "Reading {n} files…": "جاري قراءة {n} ملف…",
+    "Could not load the Excel reader. Check the internet connection.": "تعذّر تحميل قارئ ملفات Excel. تأكد من الاتصال بالإنترنت.",
+    "{f} is not a NPHIES claim report (no Claim Number / Status columns).": "{f} ليس تقرير مطالبات من نفيس (لا يوجد عمود Claim Number / Status).",
+    "{n} claims saved (claim dates {a} → {b}). Choose that period to see them.": "تم حفظ {n} مطالبة (تواريخ المطالبات {a} ← {b}). اختر هذه الفترة لعرضها.",
+    "Claim results need the new Firestore rules — publish firestore.rules in the Firebase console.": "نتيجة المطالبات محتاجة قواعد Firestore الجديدة — انشر firestore.rules من Firebase console.",
+    // NPHIES rejection reasons
+    "Inappropriate medication dose": "جرعة الدواء غير مناسبة", "Medication is not listed in formulary": "الدواء غير مدرج في قائمة الأدوية المعتمدة",
+    "Consultation is within 14-day follow up period": "الكشف خلال فترة المتابعة 14 يوم",
+    "Submission not compliant with contractual agreement between provider & payer": "الإرسال غير مطابق للعقد بين مقدم الخدمة وشركة التأمين",
+    "Diagnosis is not covered": "التشخيص غير مغطى", "Patient is not a covered member": "المريض غير مغطى بالتأمين",
+    "Diagnosis is inconsistent with service/procedure": "التشخيص لا يتناسب مع الخدمة / الإجراء",
+    "Service is not clinically justified based on clinical practice guideline, without additional supporting diagnosis": "الخدمة غير مبررة طبيًا حسب الإرشادات، بدون تشخيص داعم إضافي",
+    "Duplicate service/procedure code based on the date": "خدمة / إجراء مكرر في نفس التاريخ",
   };
   const WEEKDAYS_AR = ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"];
   const WEEKDAYS_LONG_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
@@ -1165,7 +1278,7 @@
 
   // ---------- Period (shared by Statistics and Analytics) ----------
   const MAX_DAYS = 92; // keeps Firestore reads well inside the free quota
-  const PERIOD_TABS = ["stats", "analytics", "doctors", "income", "edits"];
+  const PERIOD_TABS = ["stats", "analytics", "doctors", "income", "edits", "claims"];
   const INCOME_MAX_DAYS = 366; // one small document per doctor per day, so a full year stays cheap
   const fmtDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(LOC(), { day: "2-digit", month: "short", year: "numeric" });
   const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5) + 1;
@@ -1219,7 +1332,7 @@
     if (daysBetween(p.from, p.to) > maxDays) return showError(t("Please choose {n} days or fewer.", { n: maxDays }));
     $("err").textContent = "";
     const token = ++periodToken;
-    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody"), income: $("inBody"), edits: $("edBody") }[tab];
+    const body = { stats: $("statKpis"), analytics: $("anBody"), doctors: $("drBody"), income: $("inBody"), edits: $("edBody"), claims: $("clBody") }[tab];
     body.classList.add("loading"); // keep the previous render visible while loading
     try {
       if (tab === "income") {
@@ -1239,6 +1352,19 @@
         // edits are filtered by the day the change was detected, and never cached (new ones arrive every hour)
         const snap = await getDocs(query(collection(db, "ucaf_changes"), where("DetectedDate", ">=", p.from), where("DetectedDate", "<=", p.to)));
         if (token === periodToken) renderEdits(snap.docs.map((d) => d.data()));
+        return;
+      }
+      if (tab === "claims") {
+        // the 14 days before the period are needed for the follow-up and refill checks; claims are never cached (uploads change them)
+        const [list, before, snap] = await Promise.all([
+          loadPeriod(p), loadPeriod({ from: addDays(p.from, -LOOKBACK_DAYS), to: addDays(p.from, -1) }),
+          getDocs(query(collection(db, "ins_claims"), where("ClaimDate", ">=", p.from), where("ClaimDate", "<=", p.to))).catch((err) => { claimsErr = err; return null; }),
+        ]);
+        if (token !== periodToken) return;
+        clVisits = list; clHistory = [...before, ...list];
+        claimDocs = snap ? snap.docs.map((d) => d.data()) : [];
+        if (snap) claimsErr = null;
+        renderClaims();
         return;
       }
       const list = scope(await loadPeriod(p));
@@ -1912,6 +2038,259 @@
     if (snap.exists()) openForm(snap.data()); else alert(t("This visit is no longer in the system (it may have been cancelled)."));
   });
 
+  // ---------- Insurance check ----------
+  // Every check matches a reason the insurers gave in the NPHIES claim reports (or a gap in the form they deduct for).
+  // "fix" = rejected or deducted if sent as is; "review" = likely fine, but ask the doctor before sending.
+  const LOOKBACK_DAYS = 14;
+  let clVisits = [], clHistory = [], clChecked = [], claimDocs = [], claimsErr = null, clLevel = "";
+  const listSep = () => (lang === "ar" ? "، " : ", ");
+  const dxCodes = (r) => J(r.DiagnosesJson).map((d) => String(d.Code ?? "").toUpperCase().replace(/\s/g, "")).filter(Boolean);
+  const HTN_DX = /^(I1[0-6]|O1[0-6]|R03\.?0)/;  // hypertension, hypertension in pregnancy, raised BP reading
+  // infections and fever: what an insurer accepts as the reason for a temperature of 38+
+  const FEVER_DX = /^(A|B|J0|J1|J2[0-2]|J3[2-6]|J4[0-4]|H1[01]|H6[5-7]|N1[0-2]|N3[09]|N7[0-7]|L0|K3[5-7]|K5[0-2]|K6[01]|K8[01]|M86|G0[0-4]|R50|R68|O8[56]|U07|T81)/;
+  const FEMALE_DX = /^(O|Z3[2-79]|N7\d|N8\d|N9[0-8]|C5[1-8]|D2[5-8])/; // pregnancy, female genital organs
+  const MALE_DX = /^(N4\d|N5[0-3]|C6[0-3]|D29|D40)/;                   // prostate, male genital organs
+  const num = (v) => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
+  function parseBP(v) {
+    const s = String(v ?? "").trim();
+    if (!s || /^[0\s/.\\-]*$/.test(s)) return null; // not recorded
+    const m = s.match(/(?<!\d)(\d{2,4})\s*[/\\-]\s*(\d{2,4})(?!\d)/);
+    return m ? { sys: +m[1], dia: +m[2] } : { bad: true };
+  }
+  // Card expiry as ISO; Hijri or unreadable dates give "" so they never raise a false alarm
+  function isoFromAny(v) {
+    const s = String(v ?? "").trim();
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return +m[1] > 1900 ? `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}` : "";
+    m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})/);
+    return m && +m[3] > 1900 ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : "";
+  }
+  const visitOrder = (a, b) => String(a.VisitDate).localeCompare(String(b.VisitDate)) || (num(a.VisitId) - num(b.VisitId)) || String(a.VisitTime).localeCompare(String(b.VisitTime));
+  const ageOf = (r) => (typeof r.Age === "number" ? r.Age : String(r.Age ?? "").trim() !== "" && Number.isFinite(+r.Age) ? +r.Age : null);
+
+  // idx: the patient's insured visits (period + 14 days before), oldest first
+  function insuranceIssues(r, idx) {
+    const out = [];
+    const add = (level, type, text) => out.push({ level, type, text });
+    if (isMissing(r)) add("fix", "UCAF not written", t("UCAF not written or chief complaint empty"));
+    else if (!dxCodes(r).length) add("fix", "No diagnosis code", t("No diagnosis code"));
+    const exp = isoFromAny(r.ExpireDate);
+    if (exp && exp < r.VisitDate) add("fix", "Insurance card expired", t("Insurance card expired on {d}", { d: exp }));
+    if (!String(r.MembershipNo ?? "").trim()) add("fix", "Membership number missing", t("Membership number missing"));
+
+    const mine = idx.get(patientKey(r)) ?? [];
+    const prior = mine.filter((x) => x.VisitId !== r.VisitId && visitOrder(x, r) < 0 && daysBetween(x.VisitDate, r.VisitDate) - 1 <= LOOKBACK_DAYS);
+    if (r.VisitTypeCode === "V") {
+      const same = prior.filter((x) => x.VisitTypeCode === "V" && x.Doctor === r.Doctor).pop();
+      const clinic = !same && r.Clinic ? prior.filter((x) => x.VisitTypeCode === "V" && x.Clinic === r.Clinic).pop() : null;
+      if (same) add("fix", "Consultation within 14-day follow-up", t("New consultation within 14 days of a consultation with the same doctor on {d} — the insurer counts it as a free follow-up", { d: same.VisitDate }));
+      else if (clinic) add("review", "Same clinic within 14 days", t("New consultation within 14 days of a consultation in the same clinic ({doc}, {d})", { doc: clinic.Doctor, d: clinic.VisitDate }));
+    }
+    const seen = new Set(prior.filter((x) => x.VisitDate === r.VisitDate).flatMap((x) => J(x.ServicesJson).map((s) => s.Code)).filter(Boolean));
+    const dup = new Set();
+    for (const s of J(r.ServicesJson)) { if (!s.Code) continue; if (seen.has(s.Code)) dup.add(s.Description || s.Code); seen.add(s.Code); }
+    if (dup.size) add("fix", "Same service twice on one day", t("Same service twice on the same day: {s}", { s: [...dup].join(listSep()) }));
+    const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).map((m) => String(m.Code ?? ""))).filter(Boolean));
+    const again = J(r.MedsJson).filter((m) => m.Code && recentMeds.has(String(m.Code)));
+    if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
+
+    if (isMissing(r)) return out; // vital signs and codes only mean something on a written form
+    const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
+    const miss = [];
+    if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
+    if (!temp) miss.push(t("temperature"));
+    if (!pulse) miss.push(t("pulse"));
+    if (!weight && age != null && age < 14) miss.push(t("weight"));
+    if (miss.length) add("fix", "Vital signs missing", t("Vital signs missing: {v}", { v: miss.join(listSep()) }));
+    const bpOk = bp && !bp.bad && bp.sys >= 60 && bp.sys <= 260 && bp.dia >= 30 && bp.dia <= 160 && bp.sys > bp.dia;
+    const wrong = [];
+    if (bp && !bpOk) wrong.push(`${t("Blood pressure")} ${r.BP}`);
+    if (temp && (temp < 34 || temp > 43)) wrong.push(`${t("Temperature")} ${r.Temp}`);
+    if (pulse && (pulse < 30 || pulse > 220)) wrong.push(`${t("Pulse")} ${r.Pulse}`);
+    if (wrong.length) add("fix", "Vital sign written wrong", t("Vital sign written wrong: {v}", { v: wrong.join(listSep()) }));
+
+    const codes = dxCodes(r);
+    if (!codes.length) return out;
+    if (bpOk && (bp.sys >= 140 || bp.dia >= 90) && !codes.some((c) => HTN_DX.test(c)))
+      add("review", "High blood pressure without diagnosis", t("Blood pressure {bp} is high but there is no hypertension diagnosis (I10–I15 or R03.0)", { bp: r.BP }));
+    if (temp >= 38 && temp <= 43 && !codes.some((c) => FEVER_DX.test(c)))
+      add("review", "Fever without matching diagnosis", t("Temperature {v} (fever) but no infection or fever diagnosis", { v: r.Temp }));
+    const fem = codes.filter((c) => FEMALE_DX.test(c)), male = codes.filter((c) => MALE_DX.test(c));
+    if (r.Sex === "Male" && fem.length) add("fix", "Diagnosis does not fit sex or age", t("Female-only diagnosis for a male patient: {c}", { c: fem.join(", ") }));
+    if (r.Sex === "Female" && male.length) add("fix", "Diagnosis does not fit sex or age", t("Male-only diagnosis for a female patient: {c}", { c: male.join(", ") }));
+    if (age != null && (age < 10 || age > 55) && codes.some((c) => c.startsWith("O"))) add("fix", "Diagnosis does not fit sex or age", t("Pregnancy diagnosis does not fit the age ({a} years)", { a: age }));
+    return out;
+  }
+
+  const issuePills = (issues) => issues.map((i) => `<span class="pill ${i.level === "fix" ? "danger" : "warn"}">${e(i.text)}</span>`).join(" ");
+  const fmtSar = (n) => money.format(n);
+
+  function renderClaims() {
+    const idx = groupBy(clHistory.filter((r) => r.PaymentCode === "R"), patientKey);
+    for (const l of idx.values()) l.sort(visitOrder);
+    const insured = scope(clVisits).filter((r) => r.PaymentCode === "R");
+    clChecked = insured.map((r) => ({ r, issues: insuranceIssues(r, idx) }));
+    const hasFix = (c) => c.issues.some((i) => i.level === "fix");
+    const fix = clChecked.filter(hasFix).length, rev = clChecked.filter((c) => c.issues.length && !hasFix(c)).length;
+    const ok = clChecked.length - fix - rev;
+    $("clKpis").innerHTML = kpi(t("Insured visits"), nf.format(clChecked.length), t("in the selected period")) +
+      kpi(t("Must fix"), nf.format(fix), t("{p}% of insured visits", { p: pct(fix, clChecked.length) }), fix ? "poor" : "") +
+      kpi(t("Review"), nf.format(rev), t("{p}% of insured visits", { p: pct(rev, clChecked.length) }), rev ? "warn" : "") +
+      kpi(t("Ready to send"), nf.format(ok), t("{p}% of insured visits", { p: pct(ok, clChecked.length) }), "good");
+
+    const list = clChecked.filter((c) => (clLevel === "fix" ? hasFix(c) : clLevel === "review" ? c.issues.some((i) => i.level === "review") : c.issues.length))
+      .sort((a, b) => visitOrder(b.r, a.r));
+    $("clBodyRows").innerHTML = list.slice(0, 1000).map(({ r, issues }) => `<tr class="clickable" data-id="${e(r.VisitId)}">
+        <td>${e(r.VisitDate)}</td><td>${e(r.VisitTime)}</td><td>${e(r.VisitId)}</td><td>${e(r.FileNo)}</td>
+        <td><span class="cut" style="max-width:200px" title="${e(r.PatientName)}">${e(r.PatientName)}</span></td>
+        <td><span class="cut" style="max-width:160px" title="${e(r.Doctor)}">${e(r.Doctor)}</span></td>
+        <td><span class="cut" style="max-width:150px" title="${e(insurer(r))}">${e(insurer(r))}</span></td>
+        <td>${issuePills(clLevel ? issues.filter((i) => i.level === clLevel) : issues)}</td></tr>`).join("");
+    $("clRowsEmpty").classList.toggle("hidden", list.length > 0);
+
+    const types = new Map();
+    for (const c of clChecked) for (const type of new Set(c.issues.map((i) => i.type))) {
+      const lvl = c.issues.find((i) => i.type === type).level;
+      const x = types.get(type) ?? { type, lvl, n: 0 }; x.n++; types.set(type, x);
+    }
+    const typeRows = [...types.values()].sort((a, b) => (a.lvl === "fix" ? 0 : 1) - (b.lvl === "fix" ? 0 : 1) || b.n - a.n);
+    $("clTypes").innerHTML = typeRows.length ? `<table class="grid"><thead><tr><th>${t("Problem")}</th><th>${t("Level")}</th><th class="num">${t("Visits")}</th><th>${t("Share")}</th></tr></thead><tbody>
+      ${typeRows.map((x) => `<tr><td>${e(t(x.type))}</td><td><span class="pill ${x.lvl === "fix" ? "danger" : "warn"}">${t(x.lvl === "fix" ? "Must fix" : "Review")}</span></td>
+        <td class="num">${nf.format(x.n)}</td><td>${shareCell(x.n, clChecked.length)}</td></tr>`).join("")}</tbody></table>`
+      : `<div class="empty">${t("None in this period.")}</div>`;
+
+    const docs = [...groupBy(clChecked, (c) => c.r.Doctor || "—")].map(([name, l]) => ({
+      name, n: l.length, fix: l.filter(hasFix).length, rev: l.filter((c) => c.issues.length && !hasFix(c)).length,
+    })).sort((a, b) => b.fix - a.fix || b.rev - a.rev || b.n - a.n);
+    $("clDocs").innerHTML = docs.length ? `<table class="grid"><thead><tr><th>${t("Doctor")}</th><th class="num">${t("Insured visits")}</th><th class="num">${t("Must fix")}</th><th class="num">${t("Review")}</th><th>${t("Ready to send")}</th></tr></thead><tbody>
+      ${docs.map((d) => `<tr><td>${e(d.name)}</td><td class="num">${nf.format(d.n)}</td>
+        <td class="num">${d.fix ? `<span class="pill danger">${d.fix}</span>` : "0"}</td><td class="num">${d.rev ? `<span class="pill warn">${d.rev}</span>` : "0"}</td>
+        <td>${shareCell(d.n - d.fix - d.rev, d.n)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">${t("None in this period.")}</div>`;
+
+    renderClaimResults();
+  }
+
+  function renderClaimResults() {
+    if (claimsErr) { $("clMsg").textContent = claimsErr.code === "permission-denied" ? t("Claim results need the new Firestore rules — publish firestore.rules in the Firebase console.") : claimsErr.message; $("clMsg").className = "user-msg bad"; }
+    const cl = claimDocs;
+    const sum = (l, k) => l.reduce((s, c) => s + (Number(c[k]) || 0), 0);
+    const sub = sum(cl, "Submitted"), appr = sum(cl, "Approved"), lost = Math.max(0, sub - appr);
+    const rej = cl.filter((c) => c.Status === "Rejected");
+    $("clResKpis").innerHTML = !cl.length ? "" :
+      kpi(t("Claims"), nf.format(cl.length), t("{a} rejected · {b} partially approved", { a: nf.format(rej.length), b: nf.format(cl.filter((c) => c.Status === "Partially Approved").length) })) +
+      kpi(t("Submitted"), fmtSar(sub), t("SAR")) +
+      kpi(t("Approved"), fmtSar(appr), t("{p}% of submitted", { p: pct(appr, sub) }), "good") +
+      kpi(t("Lost"), fmtSar(lost), t("{p}% of submitted · {r} from fully rejected claims", { p: pct(lost, sub), r: fmtSar(sum(rej, "Submitted")) }), lost ? "poor" : "");
+
+    const reasons = new Map();
+    for (const c of rej) for (const r of (c.Reasons?.length ? c.Reasons : ["No reason given"])) {
+      const x = reasons.get(r) ?? { r, n: 0, amt: 0 }; x.n++; x.amt += Number(c.Submitted) || 0; reasons.set(r, x);
+    }
+    const rr = [...reasons.values()].sort((a, b) => b.n - a.n || b.amt - a.amt);
+    $("clReasons").innerHTML = rr.length ? `<table class="grid"><thead><tr><th>${t("Reason")}</th><th class="num">${t("Claims")}</th><th class="num">${t("Amount")}</th><th>${t("Share")}</th></tr></thead><tbody>
+      ${rr.map((x) => `<tr><td style="white-space: normal">${e(t(x.r))}</td><td class="num">${x.n}</td><td class="num">${fmtSar(x.amt)}</td><td>${shareCell(x.n, rej.length)}</td></tr>`).join("")}</tbody></table>`
+      : `<div class="empty">${t(cl.length ? "No fully rejected claims in this period." : "No claim reports uploaded for this period.")}</div>`;
+
+    const byDoc = [...groupBy(cl, (c) => c.Doctor || "—")].map(([name, l]) => ({ name, n: l.length, sub: sum(l, "Submitted"), lost: Math.max(0, sum(l, "Submitted") - sum(l, "Approved")) }))
+      .sort((a, b) => b.lost - a.lost);
+    $("clLossDocs").innerHTML = byDoc.length ? `<table class="grid"><thead><tr><th>${t("Doctor")}</th><th class="num">${t("Claims")}</th><th class="num">${t("Lost")}</th><th>${t("Of submitted")}</th></tr></thead><tbody>
+      ${byDoc.map((d) => `<tr><td>${e(d.name)}</td><td class="num">${d.n}</td><td class="num">${fmtSar(d.lost)}</td><td>${shareCell(d.lost, d.sub)}</td></tr>`).join("")}</tbody></table>`
+      : `<div class="empty">${t("No claim reports uploaded for this period.")}</div>`;
+
+    // Link each rejected claim to its visit (same file number and date) and show whether the checks above would have caught it
+    const checkedById = new Map(clChecked.map((c) => [c.r.VisitId, c]));
+    const visitFor = (c) => clVisits.filter((r) => String(r.FileNo) === String(c.FileNo) && r.VisitDate === c.ClaimDate);
+    $("clRejected").innerHTML = rej.length ? `<table class="grid"><thead><tr><th>${t("Date")}</th><th>${t("Insurer")}</th><th>${t("File no")}</th><th>${t("Patient")}</th><th>${t("Doctor")}</th>
+      <th class="num">${t("Amount")}</th><th>${t("Reason")}</th><th>${t("Caught by the check?")}</th><th>UCAF</th></tr></thead><tbody>
+      ${rej.sort((a, b) => String(b.ClaimDate).localeCompare(String(a.ClaimDate))).map((c) => {
+        const vs = visitFor(c), checks = vs.flatMap((v) => checkedById.get(v.VisitId)?.issues ?? []);
+        const caught = !vs.length ? `<span class="pill neutral">${t("Visit not found")}</span>`
+          : checks.length ? `<span class="pill ok" title="${e(checks.map((i) => i.text).join(" · "))}">${t("Yes")} · ${e(t(checks[0].type))}</span>` : `<span class="pill warn">${t("No")}</span>`;
+        return `<tr><td>${e(c.ClaimDate)}</td><td>${e(c.Payer)}</td><td>${e(c.FileNo)}</td>
+          <td><span class="cut" style="max-width:180px" title="${e(c.PatientName)}">${e(c.PatientName)}</span></td><td>${e(c.Doctor)}</td>
+          <td class="num">${fmtSar(Number(c.Submitted) || 0)}</td><td style="white-space: normal; min-width: 220px">${(c.Reasons ?? []).map((r) => e(t(r))).join("<br>")}</td>
+          <td>${caught}</td><td>${vs.length ? vs.map((v) => `<button class="btn sm" data-open="${e(v.VisitId)}">${t("Open")}</button>`).join(" ") : ""}</td></tr>`;
+      }).join("")}</tbody></table>` : `<div class="empty">${t(cl.length ? "No fully rejected claims in this period." : "No claim reports uploaded for this period.")}</div>`;
+  }
+
+  // ---------- Claim report upload (NPHIES "ClaimReport" Excel) ----------
+  async function loadXlsx() {
+    if (window.XLSX) return window.XLSX;
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+      s.onload = res; s.onerror = () => rej(new Error(t("Could not load the Excel reader. Check the internet connection.")));
+      document.head.appendChild(s);
+    });
+    return window.XLSX;
+  }
+  // NPHIES writes claim dates as MM/DD/YYYY hh:mm:ss
+  function claimDateIso(v) {
+    if (v instanceof Date) return isoDate(v);
+    const m = String(v ?? "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    return m ? `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}` : "";
+  }
+  // "Additional adjudication,-,Reason A,Reason B" → ["Reason A", "Reason B"] (a reason that itself has a comma is joined back)
+  function cleanReasons(s) {
+    const out = [];
+    for (let p of String(s ?? "").split(",")) {
+      p = p.trim();
+      if (!p || p === "-" || /^(Additional adjudication|Other)$/i.test(p)) continue;
+      if (/^without\b/i.test(p) && out.length) { out[out.length - 1] += ", " + p; continue; }
+      if (/^Diagnosis\(es\) is \(are\) not covered$/i.test(p)) p = "Diagnosis is not covered";
+      if (!out.includes(p)) out.push(p);
+    }
+    return out;
+  }
+  const clMsg = (text, ok) => { $("clMsg").textContent = text; $("clMsg").className = `user-msg ${ok ? "ok" : "bad"}`; };
+  $("clUpload").onclick = () => $("clFile").click();
+  $("clFile").addEventListener("change", async (ev) => {
+    const files = [...ev.target.files]; ev.target.value = "";
+    if (!files.length) return;
+    $("clUpload").disabled = true; clMsg(t("Reading {n} files…", { n: files.length }), true);
+    try {
+      const XLSX = await loadXlsx();
+      const claims = [];
+      for (const f of files) {
+        const wb = XLSX.read(await f.arrayBuffer());
+        const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: null, raw: true });
+        const rowsIn = raw.map((o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k.trim(), typeof v === "string" ? v.trim() : v])));
+        if (!rowsIn.length || !("Claim Number" in rowsIn[0]) || !("Status" in rowsIn[0])) throw new Error(t("{f} is not a NPHIES claim report (no Claim Number / Status columns).", { f: f.name }));
+        for (const r of rowsIn) {
+          if (!r["Claim Number"]) continue;
+          claims.push({
+            ClaimNo: String(r["Claim Number"]), Payer: String(r["Payer Name"] ?? ""), FileNo: String(r["File Number"] ?? ""),
+            PatientName: String(r["Patient Name"] ?? ""), ClaimDate: claimDateIso(r["Claim Date"]), ClaimDateTime: String(r["Claim Date"] ?? ""),
+            Speciality: String(r["Speciality"] ?? ""), Doctor: String(r["Doctor Name"] ?? "").replace(/[ً-ٟ]/g, "").replace(/\s+/g, " ").trim(),
+            Gross: num(r["Gross Amount"]), Discount: num(r["Discount"]), Net: num(r["NetAmount+Vat"]),
+            Submitted: num(r["Submitted Amount"]), Approved: num(r["Approved Amount"]), Status: String(r["Status"] ?? ""),
+            Reasons: cleanReasons(r["Rejection Reason"]), ReasonText: String(r["Rejection Reason"] ?? ""),
+            UploadedBy: auth.currentUser.email, UploadedAt: serverTimestamp(),
+          });
+        }
+      }
+      for (let i = 0; i < claims.length; i += 400) {
+        const batch = writeBatch(db);
+        for (const c of claims.slice(i, i + 400)) batch.set(doc(db, "ins_claims", c.ClaimNo.replace(/[/.#[\]]/g, "_")), c);
+        await batch.commit();
+      }
+      const dates = claims.map((c) => c.ClaimDate).filter(Boolean).sort();
+      clMsg(t("{n} claims saved (claim dates {a} → {b}). Choose that period to see them.", { n: nf.format(claims.length), a: dates[0] ?? "—", b: dates.at(-1) ?? "—" }), true);
+      renderPeriodViews().catch(showError);
+    } catch (err) {
+      clMsg(err?.code === "permission-denied" ? t("Claim results need the new Firestore rules — publish firestore.rules in the Firebase console.") : t("Could not complete: {msg}", { msg: err.message }), false);
+    } finally {
+      $("clUpload").disabled = false;
+    }
+  });
+  document.querySelectorAll("#clLevel button").forEach((b) => b.addEventListener("click", () => {
+    clLevel = b.dataset.level;
+    document.querySelectorAll("#clLevel button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    renderClaims();
+  }));
+  $("clBodyRows").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openForm(clVisits.find((r) => r.VisitId === tr.dataset.id)); });
+  $("clRejected").addEventListener("click", (ev) => { const b = ev.target.closest("[data-open]"); if (b) openForm(clVisits.find((r) => r.VisitId === b.dataset.open)); });
+
   // ---------- UCAF form ----------
   function ucafHtml(r, page, pages) {
     const tick = (b) => (b ? "✔" : "&nbsp;&nbsp;");
@@ -2194,7 +2573,7 @@
       range = "month";
       document.querySelectorAll("#rangeSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.range === "month")));
     }
-    const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", income: "--t-income", edits: "--t-edit" }[t];
+    const tabColor = { stats: "--t-stats", analytics: "--t-an", doctors: "--t-doc", income: "--t-income", edits: "--t-edit", claims: "--t-claims" }[t];
     if (tabColor) {
       $("periodBar").style.setProperty("--accent", `var(${tabColor})`);
       $("periodBar").style.setProperty("--accent-hover", `var(${tabColor})`);
