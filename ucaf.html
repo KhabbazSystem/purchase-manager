@@ -114,6 +114,9 @@
   .cl-results > summary h2::before { content: "▸ "; color: var(--muted); }
   .cl-results[open] > summary h2::before { content: "▾ "; }
   .cl-results:not([open]) > summary { border-bottom: 0; }
+  table.guide td { white-space: normal; vertical-align: top; }
+  table.guide td:first-child { font-weight: 600; min-width: 160px; }
+  table.guide td:last-child { min-width: 320px; line-height: 1.5; }
   .tab[data-tab="income"]    { --tc: var(--t-income); }
   .tab[data-tab="users"]     { --tc: var(--t-users); }
 
@@ -746,6 +749,29 @@
     <div data-panel="claims" class="hidden">
       <div id="clBody">
         <div class="kpis" id="clKpis"></div>
+        <!-- Guide: what the insurers deducted in August 2026 (NPHIES line reports) and how to avoid it -->
+        <details class="card cl-results">
+          <summary class="card-head">
+            <div><h2>How to avoid deductions</h2><div class="muted small">From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know</div></div>
+          </summary>
+          <div class="table-wrap">
+            <table class="grid guide">
+              <thead><tr><th>Reason the insurer gave</th><th class="num">Lost in August</th><th>What to do</th></tr></thead>
+              <tbody>
+                <tr><td>Diagnosis does not fit the test</td><td class="num">10,903</td><td>Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.</td></tr>
+                <tr><td>Not clinically justified</td><td class="num">4,476</td><td>HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code. IV paracetamol only when oral is not possible, with the reason written.</td></tr>
+                <tr><td>Same item twice on the same day</td><td class="num">2,800</td><td>Enter each medicine once with the full quantity. Ceftriaxone vials entered as 3–6 separate lines lost 2,202 SAR.</td></tr>
+                <tr><td>Not compliant with the contract</td><td class="num">2,496</td><td>Prices above the contract for some companies (Nesma, GC Interwell, Sepco…) and items outside the contract (Neodex drops). Management: check the price list with each insurer.</td></tr>
+                <tr><td>New consultation within 14 days</td><td class="num">1,085</td><td>Reception: a patient back to the same doctor within 14 days is registered as a free follow-up, not a new consultation.</td></tr>
+                <tr><td>Medicine not in the formulary</td><td class="num">872</td><td>Reparil, IV Panamol and Remox were rejected most. Prescribe a covered alternative.</td></tr>
+                <tr><td>Chief complaint missing or too short</td><td class="num">661</td><td>Ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them — even on a follow-up.</td></tr>
+                <tr><td>Included in another service</td><td class="num">303</td><td>Do not bill the IV injection fee together with IV fluids.</td></tr>
+                <tr><td>Co-pay not collected</td><td class="num">231</td><td>Reception: collect the patient's share before the visit.</td></tr>
+                <tr><td>Wrong medicine dose</td><td class="num">148</td><td>An injection given in the clinic is one day of supply, not 7 (ondansetron injections were rejected for this).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
         <div class="card">
           <div class="card-head">
             <div><h2>Before sending the claims</h2><div class="muted small">Insured visits in the selected period, checked against the reasons insurers rejected before · Must fix = the insurer will reject it · Review = check it with the doctor</div></div>
@@ -1032,6 +1058,60 @@
     "Same service twice on one day": "نفس الخدمة مرتين في نفس اليوم", "Same service twice on the same day: {s}": "نفس الخدمة مكررة في نفس اليوم: {s}",
     "Refill too soon": "صرف الدواء قبل موعده", "Medicine prescribed again within 14 days (refill too soon): {m}": "دواء اتصرف تاني خلال 14 يوم (صرف قبل الموعد): {m}",
     "Chief complaint too short": "الشكوى الرئيسية قصيرة",
+    // rules from the August line reports
+    "Same medicine entered twice on one day": "نفس الدواء مكتوب مرتين في نفس اليوم",
+    "Same medicine entered more than once on the same day: {m} — enter it once with the full quantity": "نفس الدواء مكتوب أكتر من مرة في نفس اليوم: {m} — اكتبه مرة واحدة بالكمية كلها",
+    "Injection fee with IV fluids": "رسوم حقن الوريد مع المحاليل",
+    "IV injection fee billed with IV fluids — the insurer counts it as included; remove the injection fee": "رسوم الحقن في الوريد متسجلة مع المحاليل — شركة التأمين بتعتبرها ضمنها؛ شيل رسوم الحقن",
+    "Chief complaint too short for the service": "الشكوى قصيرة على الخدمة المطلوبة",
+    "Chief complaint too short for {s}: \"{c}\" — write the symptoms that needed it": "الشكوى قصيرة على {s}: \"{c}\" — اكتب الأعراض اللي استدعتها",
+    "Test does not fit the patient": "التحليل لا يناسب المريض", "{s} for a male patient": "{s} لمريض ذكر",
+    "Test without a justifying diagnosis": "تحليل أو أشعة بدون تشخيص يبررها", "Test without a justifying diagnosis (rejected)": "تحليل بدون تشخيص يبرره (بيترفض)",
+    "{s} without a diagnosis that justifies it — needs {need}": "{s} بدون تشخيص يبرره — محتاج {need}",
+    "a diabetes (E10–E14) or prediabetes (R73) diagnosis": "تشخيص سكر (E10–E14) أو ما قبل السكر (R73)",
+    "more than a cold / URTI — e.g. anemia, infection with fever, bleeding": "تشخيص أكتر من برد / التهاب جهاز تنفسي علوي — زي أنيميا، أو عدوى مع حرارة، أو نزيف",
+    "a missed or irregular period, pregnancy, abdominal pain or vomiting": "تأخر أو اضطراب الدورة، أو حمل، أو ألم بطن، أو قيء",
+    "abdominal pain (R10), pancreas or gallbladder disease": "ألم بطن (R10) أو مرض في البنكرياس أو المرارة",
+    "hepatitis, liver disease, raised liver enzymes (R74) or pregnancy screening": "التهاب كبدي، أو مرض كبد، أو ارتفاع إنزيمات الكبد (R74)، أو فحص حمل",
+    "liver disease, jaundice, raised liver enzymes (R74) or abdominal pain": "مرض كبد، أو صفرا، أو ارتفاع إنزيمات الكبد (R74)، أو ألم بطن",
+    "anemia, fatigue (R53), hair loss or heavy periods": "أنيميا، أو إرهاق (R53)، أو تساقط شعر، أو دورة غزيرة",
+    "adrenal disease, fatigue, low blood pressure or weight change": "مرض الغدة الكظرية، أو إرهاق، أو ضغط واطي، أو تغير في الوزن",
+    "thyroid disease, fatigue, weight change, palpitations, hair loss or period problems": "مرض غدة درقية، أو إرهاق، أو تغير وزن، أو خفقان، أو تساقط شعر، أو مشاكل الدورة",
+    "dyslipidemia (E78), hypertension, diabetes, heart disease or obesity": "دهون (E78)، أو ضغط، أو سكر، أو مرض قلب، أو سمنة",
+    "gout, joint pain, kidney stones or hypertension": "نقرس، أو ألم مفاصل، أو حصوات كلى، أو ضغط",
+    "vitamin D deficiency (E55), osteoporosis, bone pain or fatigue": "نقص فيتامين د (E55)، أو هشاشة عظام، أو ألم عظام، أو إرهاق",
+    "an abdominal, urinary or gynecological diagnosis": "تشخيص في البطن أو المسالك أو أمراض النسا",
+    "a chest diagnosis, cough, chest pain or fever": "تشخيص صدر، أو كحة، أو ألم صدر، أو حرارة",
+    "kidney stones, renal colic, urinary symptoms or abdominal pain": "حصوات كلى، أو مغص كلوي، أو أعراض بولية، أو ألم بطن",
+    "Antibiotic without a bacterial diagnosis": "مضاد حيوي بدون تشخيص بكتيري",
+    "Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it": "مضاد حيوي مع تشخيص فيروسي بس (برد / التهاب تنفسي علوي / إنفلونزا): {m} — اكتب التشخيص البكتيري أو شيل المضاد",
+    "Antibiotic without an infection diagnosis: {m}": "مضاد حيوي بدون تشخيص عدوى: {m}",
+    "IV paracetamol": "باراسيتامول وريد",
+    "IV paracetamol is often rejected (formulary, dose, not justified) — use oral unless the patient cannot take it, and write why": "الباراسيتامول بالوريد بيترفض كتير (مش في القائمة، الجرعة، مش مبرر) — استخدم الفم إلا لو المريض مش قادر، واكتب السبب",
+    // guide card
+    "How to avoid deductions": "إزاي نتجنب الخصومات",
+    "From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know": "من مطالبات أغسطس 2026: ضاع 24,841 ريال من 74,559 (33%) · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
+    "Reason the insurer gave": "سبب شركة التأمين", "Lost in August": "المفقود في أغسطس", "What to do": "المطلوب",
+    "Diagnosis does not fit the test": "التشخيص لا يناسب التحليل",
+    "Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.": "كل تحليل لازم يكون معاه تشخيص يفسّره. صورة الدم (CBC) مع برد بس اترفضت 58 مرة (3,708 ريال)، وكمان السكر والفيروسات الكبدية والليبيز والفيريتين والكورتيزول ووظائف الكبد من غير تشخيص مناسب.",
+    "Not clinically justified": "غير مبرر طبيًا",
+    "HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code. IV paracetamol only when oral is not possible, with the reason written.": "السكر التراكمي (HbA1c) بس مع كود سكر (E10–E14) أو ما قبل السكر (R73) — ضاع 1,608 ريال. السيفترياكسون وأي مضاد حيوي بس مع كود عدوى. الباراسيتامول بالوريد بس لو الفم مش ممكن، مع كتابة السبب.",
+    "Same item twice on the same day": "نفس البند مرتين في نفس اليوم",
+    "Enter each medicine once with the full quantity. Ceftriaxone vials entered as 3–6 separate lines lost 2,202 SAR.": "اكتب كل دواء مرة واحدة بالكمية كلها. فيالات السيفترياكسون اللي اتكتبت 3–6 سطور منفصلة ضيّعت 2,202 ريال.",
+    "Not compliant with the contract": "غير مطابق للعقد",
+    "Prices above the contract for some companies (Nesma, GC Interwell, Sepco…) and items outside the contract (Neodex drops). Management: check the price list with each insurer.": "أسعار أعلى من العقد لبعض الشركات (نسما، GC Interwell، سيبكو…) وأصناف خارج العقد (قطرة نيوديكس). الإدارة: راجعوا قائمة الأسعار مع كل شركة تأمين.",
+    "New consultation within 14 days": "كشف جديد خلال 14 يوم",
+    "Reception: a patient back to the same doctor within 14 days is registered as a free follow-up, not a new consultation.": "الاستقبال: المريض اللي راجع لنفس الدكتور خلال 14 يوم يتسجل متابعة مجانية، مش كشف جديد.",
+    "Medicine not in the formulary": "دواء غير مدرج في قائمة شركة التأمين",
+    "Reparil, IV Panamol and Remox were rejected most. Prescribe a covered alternative.": "ريباريل وبانامول الوريد وريموكس أكتر حاجات اترفضت. اكتب بديل مغطى.",
+    "Chief complaint missing or too short": "الشكوى ناقصة أو قصيرة",
+    "Ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them — even on a follow-up.": "السونار والأشعة والمحاليل والحقن بالوريد محتاجة شكوى تفسّرها — حتى في المتابعة.",
+    "Included in another service": "داخل ضمن خدمة تانية",
+    "Do not bill the IV injection fee together with IV fluids.": "ما تسجّلش رسوم الحقن بالوريد مع المحاليل.",
+    "Co-pay not collected": "نسبة التحمل ما اتحصّلتش",
+    "Reception: collect the patient's share before the visit.": "الاستقبال: حصّل نسبة تحمّل المريض قبل الكشف.",
+    "Wrong medicine dose": "جرعة دواء غلط",
+    "An injection given in the clinic is one day of supply, not 7 (ondansetron injections were rejected for this).": "الحقنة اللي بتتاخد في العيادة مدتها يوم واحد مش 7 (حقن الأوندانسيترون اترفضت بسبب كده).",
     "Chief complaint too short: \"{c}\" — write the symptoms and their duration": "الشكوى الرئيسية قصيرة: \"{c}\" — اكتب الأعراض ومدتها",
     "Vital signs missing": "علامات حيوية ناقصة", "Vital signs missing: {v}": "علامات حيوية ناقصة: {v}",
     "blood pressure": "الضغط", "temperature": "الحرارة", "pulse": "النبض", "weight": "الوزن",
@@ -2065,7 +2145,34 @@
   const MALE_DX = /^(N4\d|N5[0-3]|C6[0-3]|D29|D40)/;                   // prostate, male genital organs
   // Given inside the clinic (injection course, nebulizer session, vaccine): repeating it on the next visits is treatment, not a refill
   const IN_CLINIC_MED = /INJECT|INFUS|AMPOUL|VIAL|NEBUL|RESPUL|FOR INHALATION|VACCIN|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
+  // "CEFTRIAXONE : powder for solution for injection : : 1" → "CEFTRIAXONE"
+  const shortMed = (m) => String(m.Name || m.Code || "").split(" : ")[0].trim();
   const dispensed = (m) => !IN_CLINIC_MED.test(`${m.Name ?? ""} ${m.Type ?? ""}`);
+  // Rules below come from the NPHIES line reports (ClaimServicesReport, August 2026): what was rejected, and why
+  const IV_FLUIDS = /INTRAVENOUS FLUIDS?|\bI\.?V\.? ?FLUIDS?/i;
+  const IV_INJECTION = /INJECTION[-\s]*INTRAVENOUS|\bI\.?V\.? INJECTION/i;
+  const NEEDS_COMPLAINT = /ULTRASOUND|X-?RAY|\bKUB\b|\bCT\b|\bMRI\b|INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
+  const COLD_ONLY = /^(J00|J06|J09|J1[01]|J20|J30|B34|R05|R07\.?0)/;                // cold, URTI, flu, bronchitis, cough
+  const VIRAL_ONLY = /^(J00|J06|J09|J1[01]|J20|J30|B34|R05|R07\.?0|R50|R51)/;       // …plus fever / headache alone
+  const IV_PARACETAMOL = /PARACETAMOL[^:]*:\s*INTRAVENOUS|PARACETAMOL.*INFUSION|PANAMOL\s*\(?\s*INC|PERFALGAN/i;
+  // Test → diagnoses that justify it. Matched on the service description from the clinic program (same text NPHIES shows).
+  const TEST_RULES = [
+    { svc: /HBA1C|GLYCOSYLATED|GLYCATED/i, dx: /^(E1[0-4]|R73|O24)/, level: "fix", need: "a diabetes (E10–E14) or prediabetes (R73) diagnosis" },
+    { svc: /\bCBC\b|COMPLETE BLOOD/i, viralOnly: true, level: "review", need: "more than a cold / URTI — e.g. anemia, infection with fever, bleeding" },
+    { svc: /PREGNANCY TEST|\bB?-?HCG\b|CHORIONIC/i, male: true, dx: /^(O|Z3[2-6]|N9[1-7]|R10|R11|N76|R52)/, level: "review", need: "a missed or irregular period, pregnancy, abdominal pain or vomiting" },
+    { svc: /LIPASE|AMYLASE/i, dx: /^(K8[0-6]|R10|R11)/, level: "review", need: "abdominal pain (R10), pancreas or gallbladder disease" },
+    { svc: /HEPATITIS|\bHBS\s*AG|\bHCV\b|ANTI-HB/i, dx: /^(B1[5-9]|K7[0-7]|R74|R17|Z11\.?5|Z20\.?5|Z3[2-6]|O)/, level: "review", need: "hepatitis, liver disease, raised liver enzymes (R74) or pregnancy screening" },
+    { svc: /\bGGT\b|LIVER|SGPT|SGOT|\bALT\b|\bAST\b|BILIRUBIN/i, dx: /^(K7[0-7]|K8[0-3]|B1[5-9]|R1[07]|R74|E66)/, level: "review", need: "liver disease, jaundice, raised liver enzymes (R74) or abdominal pain" },
+    { svc: /FERRITIN|\bIRON\b|\bTIBC\b|IRON BINDING/i, dx: /^(D5[0-3]|D6[0-4]|R53|E61|L6[3-5]|N9[2-5]|O99\.?0|K90|R63)/, level: "review", need: "anemia, fatigue (R53), hair loss or heavy periods" },
+    { svc: /CORTISOL/i, dx: /^(E2[4-7]|E16|R53|I95|E66|R63)/, level: "review", need: "adrenal disease, fatigue, low blood pressure or weight change" },
+    { svc: /\bTSH\b|FREE T[34]|\bFT[34]\b|THYROID/i, dx: /^(E0[0-7]|E28|E66|R00|R53|R6[13]|L6[3-5]|N9[1-7]|F4[1-3]|O)/, level: "review", need: "thyroid disease, fatigue, weight change, palpitations, hair loss or period problems" },
+    { svc: /LIPID|CHOLESTEROL|TRIGLYCERIDE|\bLDL\b|\bHDL\b/i, dx: /^(E78|E1[0-4]|E66|E03|I1[0-5]|I2[0-5]|I6[3-9]|N18|R73|Z82\.?4)/, level: "review", need: "dyslipidemia (E78), hypertension, diabetes, heart disease or obesity" },
+    { svc: /URIC/i, dx: /^(M10|M1[3-9]|M06|M25|M79|E79|N18|N20|I1[0-5])/, level: "review", need: "gout, joint pain, kidney stones or hypertension" },
+    { svc: /VITAMIN\s*D|25\s*-?\s*OH|VIT\.?\s*D\b/i, dx: /^(E55|E2[01]|M8[0-3]|M79|R53|N18|L6[3-5])/, level: "review", need: "vitamin D deficiency (E55), osteoporosis, bone pain or fatigue" },
+    { svc: /ULTRASOUND.*(ABD|PELV)|(ABD|PELV).*ULTRASOUND/i, dx: /^(K|N|O|C|R1[0-9]|R31|D1[2-3]|D2[5-8]|E66|Z3[2-6])/, level: "review", need: "an abdominal, urinary or gynecological diagnosis" },
+    { svc: /CHEST.*X-?RAY|X-?RAY.*CHEST|\bCXR\b/i, dx: /^(J|R0[5-7]|R50|A1[5-9]|I5[01]|C34|S2)/, level: "review", need: "a chest diagnosis, cough, chest pain or fever" },
+    { svc: /\bKUB\b/i, dx: /^(N1[3-9]|N2[0-3]|N3[09]|R10|R3[0-9])/, level: "review", need: "kidney stones, renal colic, urinary symptoms or abdominal pain" },
+  ];
   const num = (v) => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
   function parseBP(v) {
     const s = String(v ?? "").trim();
@@ -2109,10 +2216,25 @@
     const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).filter(dispensed).map((m) => String(m.Code ?? ""))).filter(Boolean));
     const again = J(r.MedsJson).filter((m) => m.Code && dispensed(m) && recentMeds.has(String(m.Code)));
     if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
+    // August: 78 medicine lines rejected as duplicates were the same item entered several times on one day (ceftriaxone vials above all)
+    const medKey = (m) => String(m.Code || m.Name || "");
+    const medSeen = new Set(prior.filter((x) => x.VisitDate === r.VisitDate).flatMap((x) => J(x.MedsJson).map(medKey)).filter(Boolean));
+    const medDup = new Set();
+    for (const m of J(r.MedsJson)) { const k = medKey(m); if (!k) continue; if (medSeen.has(k)) medDup.add(shortMed(m)); medSeen.add(k); }
+    if (medDup.size) add("fix", "Same medicine entered twice on one day", t("Same medicine entered more than once on the same day: {m} — enter it once with the full quantity", { m: [...medDup].join(listSep()) }));
+    const svcs = J(r.ServicesJson), svcText = (s) => String(s.Description ?? "");
+    // The IV injection fee is part of the IV fluids service (rejected as "included within another service")
+    if (svcs.some((s) => IV_FLUIDS.test(svcText(s))) && svcs.some((s) => IV_INJECTION.test(svcText(s))))
+      add("fix", "Injection fee with IV fluids", t("IV injection fee billed with IV fluids — the insurer counts it as included; remove the injection fee"));
 
     if (isMissing(r)) return out; // vital signs and codes only mean something on a written form
-    // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed
-    if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
+    // Imaging, IV fluids and injections were rejected for "chief complaint inadequate" — on any visit, follow-ups included
+    const bigSvc = svcs.find((s) => NEEDS_COMPLAINT.test(svcText(s)));
+    if (bigSvc && words(r.ChiefComplaint) < 3)
+      add("fix", "Chief complaint too short for the service", t("Chief complaint too short for {s}: \"{c}\" — write the symptoms that needed it", { s: svcText(bigSvc), c: String(r.ChiefComplaint ?? "").trim() }));
+    // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed.
+    // A follow-up continues the earlier visit, so a short complaint there ("follow up", "review") is fine.
+    else if (r.VisitTypeCode !== "R" && words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
     const miss = [];
     if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
@@ -2137,6 +2259,26 @@
     if (r.Sex === "Male" && fem.length) add("fix", "Diagnosis does not fit sex or age", t("Female-only diagnosis for a male patient: {c}", { c: fem.join(", ") }));
     if (r.Sex === "Female" && male.length) add("fix", "Diagnosis does not fit sex or age", t("Male-only diagnosis for a female patient: {c}", { c: male.join(", ") }));
     if (age != null && (age < 10 || age > 55) && codes.some((c) => c.startsWith("O"))) add("fix", "Diagnosis does not fit sex or age", t("Pregnancy diagnosis does not fit the age ({a} years)", { a: age }));
+
+    // Tests and imaging need a diagnosis that justifies them ("Diagnosis is inconsistent with service" — 10,903 SAR in August)
+    const hasDx = (re) => codes.some((c) => re.test(c));
+    for (const rule of TEST_RULES) {
+      const s = svcs.find((x) => rule.svc.test(svcText(x)));
+      if (!s) continue;
+      if (rule.male && r.Sex === "Male") { add("fix", "Test does not fit the patient", t("{s} for a male patient", { s: svcText(s) })); continue; }
+      const bad = rule.viralOnly ? codes.every((c) => COLD_ONLY.test(c)) : !hasDx(rule.dx);
+      if (bad) add(rule.level, rule.level === "fix" ? "Test without a justifying diagnosis (rejected)" : "Test without a justifying diagnosis",
+        t("{s} without a diagnosis that justifies it — needs {need}", { s: svcText(s), need: t(rule.need) }));
+    }
+    // Antibiotics: rejected with a viral-only diagnosis (cold, URTI, flu) or with no infection at all (ceftriaxone with anemia)
+    const meds = J(r.MedsJson), medName = (m) => String(m.Name ?? ""), medList = (l) => [...new Set(l.map(shortMed))].join(listSep());
+    const abx = meds.filter((m) => ANTIBIOTIC.test(medName(m)));
+    if (abx.length && codes.every((c) => VIRAL_ONLY.test(c)))
+      add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it", { m: medList(abx) }));
+    else if (abx.length && !hasDx(FEVER_DX))
+      add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic without an infection diagnosis: {m}", { m: medList(abx) }));
+    const ivPara = meds.find((m) => IV_PARACETAMOL.test(medName(m)));
+    if (ivPara) add("review", "IV paracetamol", t("IV paracetamol is often rejected (formulary, dose, not justified) — use oral unless the patient cannot take it, and write why"));
     return out;
   }
 
