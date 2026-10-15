@@ -1885,6 +1885,9 @@
   // ---------- Doctors: documentation quality, habits, antibiotics ----------
   const words = (s) => String(s ?? "").trim().split(/\s+/).filter((w) => w && !/^[0.\-]+$/.test(w)).length;
   const textLevel = (s) => { const n = words(s); return n === 0 ? "empty" : n < 3 ? "brief" : "detailed"; };
+  // Dental clinic: vital signs are not taken there, so they are never counted or flagged (clinic decision, Oct 2026)
+  const DENTAL = /DENT(AL|IST)|ORTHODON|أسنان|اسنان|إسنان/i;
+  const isDental = (r) => DENTAL.test(String(r.Clinic ?? ""));
   const hasVitals = (r) => String(r.BP ?? "").replace(/[0\s/.]/g, "") !== "" && Number(r.Temp) > 0 && Number(r.Pulse) > 0;
   const ANTIBIOTIC = /ENOXIRT|TRIAXON|ROCEPH|AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
   const VIRAL_RTI = /^(J00|J06|J20)/; // common cold, acute URTI, acute bronchitis
@@ -1896,7 +1899,7 @@
     const docs = new Map();
     for (const r of forms) {
       const name = r.Doctor || "—";
-      if (!docs.has(name)) docs.set(name, { name, forms: 0, cc: { detailed: 0, brief: 0, empty: 0 }, signsDetailed: 0, vitals: 0,
+      if (!docs.has(name)) docs.set(name, { name, forms: 0, cc: { detailed: 0, brief: 0, empty: 0 }, signsDetailed: 0, vitals: 0, vitalForms: 0,
         codes: 0, meds: 0, withSvc: 0, abx: 0, rti: 0, rtiAbx: 0, follow: 0, patients: new Set(), hours: new Map(),
         dx: new Map(), svc: new Map(), med: new Map() });
       const d = docs.get(name);
@@ -1904,7 +1907,7 @@
       d.forms++; d.patients.add(patientKey(r));
       d.cc[textLevel(r.ChiefComplaint)]++;
       if (textLevel(r.Signs) === "detailed") d.signsDetailed++;
-      if (hasVitals(r)) d.vitals++;
+      if (!isDental(r)) { d.vitalForms++; if (hasVitals(r)) d.vitals++; }
       d.codes += diags.length; d.meds += meds.length;
       if (svcs.length) d.withSvc++;
       if (r.VisitTypeCode === "R") d.follow++;
@@ -1924,8 +1927,8 @@
     for (const d of docs.values()) {
       d.ccDetailedPct = (d.cc.detailed / d.forms) * 100;
       d.signsPct = (d.signsDetailed / d.forms) * 100;
-      d.vitalsPct = (d.vitals / d.forms) * 100;
-      d.score = (d.ccDetailedPct + d.signsPct + d.vitalsPct) / 3;
+      d.vitalsPct = d.vitalForms ? (d.vitals / d.vitalForms) * 100 : null; // null = dentist only
+      d.score = d.vitalsPct == null ? (d.ccDetailedPct + d.signsPct) / 2 : (d.ccDetailedPct + d.signsPct + d.vitalsPct) / 3;
       d.abxPct = (d.abx / d.forms) * 100;
     }
     return [...docs.values()];
@@ -1959,7 +1962,7 @@
       kpi(t("Written forms"), nf.format(forms.length), t("{n} not written in period", { n: nf.format(list.length - forms.length) })) +
       kpi(t("Detailed chief complaint"), pctTxt(all.ccDetailedPct),
         t("{lvl} · {e} empty · {b} brief", { lvl: levelWord(levelOf(all.ccDetailedPct)), e: nf.format(all.cc.empty), b: nf.format(all.cc.brief) }), levelOf(all.ccDetailedPct)) +
-      kpi(t("Vital signs recorded"), pctTxt(all.vitalsPct), t("{lvl} · BP, temperature and pulse", { lvl: levelWord(levelOf(all.vitalsPct)) }), levelOf(all.vitalsPct)) +
+      (all.vitalsPct == null ? "" : kpi(t("Vital signs recorded"), pctTxt(all.vitalsPct), t("{lvl} · BP, temperature and pulse", { lvl: levelWord(levelOf(all.vitalsPct)) }), levelOf(all.vitalsPct))) +
       kpi(t("ICD codes per visit"), (all.codes / all.forms).toFixed(1), t("{n} medicines per visit", { n: (all.meds / all.forms).toFixed(1) })) +
       kpi(t("Antibiotic rate"), pctTxt(all.abxPct),
         `${levelWord(abxLevel(all.abxPct))}${all.rti ? t(" · {p}% of cold / URTI / bronchitis visits", { p: pct(all.rtiAbx, all.rti) }) : ""}`, abxLevel(all.abxPct));
@@ -1982,7 +1985,7 @@
     $("tbQuality").innerHTML = `<table class="grid"><thead><tr><th>${t("Doctor")}</th><th class="num">${t("Forms")}</th><th>${t("Chief complaint detailed")}</th>
         <th>${t("Signs detailed")}</th><th>${t("Vitals recorded")}</th><th class="num">${t("ICD codes / visit")}</th><th>${t("Score")}</th></tr></thead><tbody>${
       byScore.map((d) => `<tr><td><span class="cut sm" title="${e(d.name)}">${e(d.name)}</span></td><td class="num">${nf.format(d.forms)}</td>
-        <td>${meterCell(d.ccDetailedPct)}</td><td>${meterCell(d.signsPct)}</td><td>${meterCell(d.vitalsPct)}</td>
+        <td>${meterCell(d.ccDetailedPct)}</td><td>${meterCell(d.signsPct)}</td><td>${d.vitalsPct == null ? `<span class="muted">—</span>` : meterCell(d.vitalsPct)}</td>
         <td class="num">${(d.codes / d.forms).toFixed(1)}</td>
         <td>${levelPill(d.score)}</td></tr>`).join("")}</tbody></table>`;
 
@@ -2018,7 +2021,7 @@
       out.push(t("<b>{name}</b> writes the shortest chief complaints: only <b>{p}</b> detailed, {n} empty or 0.",
         { name: e(worstCc.name), p: pctTxt(worstCc.ccDetailedPct), n: nf.format(worstCc.cc.empty) }));
     if (bestScore) out.push(t("Best documentation score: <b>{name}</b> at <b>{p}</b>.", { name: e(bestScore.name), p: pctTxt(bestScore.score) }));
-    const lowVitals = drDocs.filter((d) => d.vitalsPct < 50);
+    const lowVitals = drDocs.filter((d) => d.vitalsPct != null && d.vitalsPct < 50);
     if (lowVitals.length) out.push(t("Vital signs are missing in most forms of <b>{names}</b>.", { names: lowVitals.map((d) => e(d.name)).join(lang === "ar" ? "، " : ", ") }));
     if (byAbx[0] && byAbx[0].abx) out.push(t("Highest antibiotic rate: <b>{name}</b> at <b>{p}</b> of visits.", { name: e(byAbx[0].name), p: pctTxt(byAbx[0].abxPct) }));
     if (all.rti) out.push(t("Antibiotics were prescribed in <b>{p}%</b> of cold / URTI / bronchitis visits ({a} of {b}) — a common reason for insurer rejections.",
@@ -2319,18 +2322,19 @@
     // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed.
     else if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
-    const miss = [];
-    if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
-    if (!temp) miss.push(t("temperature"));
-    if (!pulse) miss.push(t("pulse"));
-    if (!weight && age != null && age < 14) miss.push(t("weight"));
+    const miss = [], dental = isDental(r);
+    if (dental) { /* no vital signs in the dental clinic */ }
+    else if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
+    if (!dental && !temp) miss.push(t("temperature"));
+    if (!dental && !pulse) miss.push(t("pulse"));
+    if (!dental && !weight && age != null && age < 14) miss.push(t("weight"));
     if (miss.length) add("fix", "Vital signs missing", t("Vital signs missing: {v}", { v: miss.join(listSep()) }));
     const bpOk = bp && !bp.bad && bp.sys >= 60 && bp.sys <= 260 && bp.dia >= 30 && bp.dia <= 160 && bp.sys > bp.dia;
     const wrong = [];
     if (bp && !bpOk) wrong.push(`${t("Blood pressure")} ${r.BP}`);
     if (temp && (temp < 34 || temp > 43)) wrong.push(`${t("Temperature")} ${r.Temp}`);
     if (pulse && (pulse < 30 || pulse > 220)) wrong.push(`${t("Pulse")} ${r.Pulse}`);
-    if (wrong.length) add("fix", "Vital sign written wrong", t("Vital sign written wrong: {v}", { v: wrong.join(listSep()) }));
+    if (wrong.length && !dental) add("fix", "Vital sign written wrong", t("Vital sign written wrong: {v}", { v: wrong.join(listSep()) }));
 
     const codes = dxCodes(r);
     if (!codes.length) return out;
