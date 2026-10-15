@@ -1031,6 +1031,8 @@
     "New consultation within 14 days of a consultation in the same clinic ({doc}, {d})": "كشف جديد خلال 14 يوم من كشف في نفس العيادة ({doc}، {d})",
     "Same service twice on one day": "نفس الخدمة مرتين في نفس اليوم", "Same service twice on the same day: {s}": "نفس الخدمة مكررة في نفس اليوم: {s}",
     "Refill too soon": "صرف الدواء قبل موعده", "Medicine prescribed again within 14 days (refill too soon): {m}": "دواء اتصرف تاني خلال 14 يوم (صرف قبل الموعد): {m}",
+    "Chief complaint too short": "الشكوى الرئيسية قصيرة",
+    "Chief complaint too short: \"{c}\" — write the symptoms and their duration": "الشكوى الرئيسية قصيرة: \"{c}\" — اكتب الأعراض ومدتها",
     "Vital signs missing": "علامات حيوية ناقصة", "Vital signs missing: {v}": "علامات حيوية ناقصة: {v}",
     "blood pressure": "الضغط", "temperature": "الحرارة", "pulse": "النبض", "weight": "الوزن",
     "Vital sign written wrong": "علامة حيوية مكتوبة غلط", "Vital sign written wrong: {v}": "علامة حيوية مكتوبة غلط: {v}",
@@ -2061,6 +2063,9 @@
   const FEVER_DX = /^(A|B|J0|J1|J2[0-2]|J3[2-6]|J4[0-4]|H1[01]|H6[5-7]|N1[0-2]|N3[09]|N7[0-7]|L0|K3[5-7]|K5[0-2]|K6[01]|K8[01]|M86|G0[0-4]|R50|R68|O8[56]|U07|T81)/;
   const FEMALE_DX = /^(O|Z3[2-79]|N7\d|N8\d|N9[0-8]|C5[1-8]|D2[5-8])/; // pregnancy, female genital organs
   const MALE_DX = /^(N4\d|N5[0-3]|C6[0-3]|D29|D40)/;                   // prostate, male genital organs
+  // Given inside the clinic (injection course, nebulizer session, vaccine): repeating it on the next visits is treatment, not a refill
+  const IN_CLINIC_MED = /INJECT|INFUS|AMPOUL|VIAL|NEBUL|RESPUL|FOR INHALATION|VACCIN|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
+  const dispensed = (m) => !IN_CLINIC_MED.test(`${m.Name ?? ""} ${m.Type ?? ""}`);
   const num = (v) => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
   function parseBP(v) {
     const s = String(v ?? "").trim();
@@ -2101,11 +2106,13 @@
     const dup = new Set();
     for (const s of J(r.ServicesJson)) { if (!s.Code) continue; if (seen.has(s.Code)) dup.add(s.Description || s.Code); seen.add(s.Code); }
     if (dup.size) add("fix", "Same service twice on one day", t("Same service twice on the same day: {s}", { s: [...dup].join(listSep()) }));
-    const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).map((m) => String(m.Code ?? ""))).filter(Boolean));
-    const again = J(r.MedsJson).filter((m) => m.Code && recentMeds.has(String(m.Code)));
+    const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).filter(dispensed).map((m) => String(m.Code ?? ""))).filter(Boolean));
+    const again = J(r.MedsJson).filter((m) => m.Code && dispensed(m) && recentMeds.has(String(m.Code)));
     if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
 
     if (isMissing(r)) return out; // vital signs and codes only mean something on a written form
+    // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed
+    if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
     const miss = [];
     if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
