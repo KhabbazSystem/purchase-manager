@@ -1490,13 +1490,14 @@
         return;
       }
       if (tab === "claims") {
-        // the 14 days before the period are needed for the follow-up and refill checks; claims are never cached (uploads change them)
-        const [list, before, snap] = await Promise.all([
-          loadPeriod(p), loadPeriod({ from: addDays(p.from, -LOOKBACK_DAYS), to: addDays(p.from, -1) }),
+        // Only the selected period is loaded — the 14 days before it cost too many Firestore reads for the free plan (Oct 2026),
+        // so the follow-up / refill / repeated-test checks see earlier visits inside the period only. Claims are never cached (uploads change them).
+        const [list, snap] = await Promise.all([
+          loadPeriod(p),
           getDocs(query(collection(db, "ins_claims"), where("ClaimDate", ">=", p.from), where("ClaimDate", "<=", p.to))).catch((err) => { claimsErr = err; return null; }),
         ]);
         if (token !== periodToken) return;
-        clVisits = list; clHistory = [...before, ...list];
+        clVisits = list; clHistory = list;
         claimDocs = snap ? snap.docs.map((d) => d.data()) : [];
         if (snap) claimsErr = null;
         renderClaims();
@@ -2262,7 +2263,7 @@
   const visitOrder = (a, b) => String(a.VisitDate).localeCompare(String(b.VisitDate)) || (num(a.VisitId) - num(b.VisitId)) || String(a.VisitTime).localeCompare(String(b.VisitTime));
   const ageOf = (r) => (typeof r.Age === "number" ? r.Age : String(r.Age ?? "").trim() !== "" && Number.isFinite(+r.Age) ? +r.Age : null);
 
-  // idx: the patient's insured visits (period + 14 days before), oldest first
+  // idx: the patient's insured visits in the loaded period, oldest first
   function insuranceIssues(r, idx) {
     const out = [];
     const add = (level, type, text) => out.push({ level, type, text });
@@ -2385,15 +2386,12 @@
     return out;
   }
 
-  // Tab badge: insured visits of the selected day that must be fixed before the claim goes out
-  let badgeToken = 0;
+  // Tab badge: insured visits of the selected day that must be fixed before the claim goes out.
+  // Uses the day already on screen only — no extra Firestore reads (free plan).
   async function updateClaimsBadge() {
-    const badge = $("claimsBadge"), token = ++badgeToken;
+    const badge = $("claimsBadge");
     if (!rows.length || document.querySelector('.tab[data-tab="claims"]').classList.contains("hidden")) { badge.classList.add("hidden"); return; }
-    const date = $("date").value;
-    const before = await loadPeriod({ from: addDays(date, -LOOKBACK_DAYS), to: addDays(date, -1) });
-    if (token !== badgeToken) return;
-    const idx = groupBy([...before, ...rows].filter((r) => r.PaymentCode === "R"), patientKey);
+    const idx = groupBy(rows.filter((r) => r.PaymentCode === "R"), patientKey);
     for (const l of idx.values()) l.sort(visitOrder);
     const n = scope(rows).filter((r) => r.PaymentCode === "R" && insuranceIssues(r, idx).some((i) => i.level === "fix")).length;
     badge.textContent = n; badge.classList.toggle("hidden", n === 0);
