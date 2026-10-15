@@ -1159,7 +1159,7 @@
     "blood pressure": "الضغط", "temperature": "الحرارة", "pulse": "النبض", "weight": "الوزن",
     "Vital sign written wrong": "علامة حيوية مكتوبة غلط", "Vital sign written wrong: {v}": "علامة حيوية مكتوبة غلط: {v}",
     "High blood pressure without diagnosis": "ضغط عالي بدون تشخيص ضغط",
-    "Blood pressure {bp} is high but there is no hypertension diagnosis (I10–I15 or R03.0)": "الضغط {bp} عالي ومفيش تشخيص ضغط (I10–I15 أو R03.0)",
+    "Blood pressure {bp} is clearly high (160/100 or more) with no blood pressure code — if the patient is hypertensive add I10, if it is a single high reading add R03.0": "الضغط {bp} عالي بوضوح (160/100 أو أكتر) ومفيش كود ضغط — لو المريض عنده ضغط اكتب I10، ولو قراءة عالية مرة واحدة اكتب R03.0",
     "Fever without matching diagnosis": "حرارة بدون تشخيص مناسب",
     "Temperature {v} (fever) but no infection or fever diagnosis": "الحرارة {v} (سخونية) ومفيش تشخيص عدوى أو حمى",
     "Diagnosis does not fit sex or age": "التشخيص لا يناسب الجنس أو السن",
@@ -2343,8 +2343,11 @@
     }
     if (rxMissing.size) add("fix", "Prescription diagnosis not in the UCAF", t("Diagnosis in the prescription is not in the UCAF: {list} — add it to the UCAF or correct the prescription",
       { list: [...rxMissing].map(([c, m]) => `${c} (${[...m].join(listSep())})`).join(" · ") }));
-    if (bpOk && (bp.sys >= 140 || bp.dia >= 90) && !codes.some((c) => HTN_DX.test(c)))
-      add("review", "High blood pressure without diagnosis", t("Blood pressure {bp} is high but there is no hypertension diagnosis (I10–I15 or R03.0)", { bp: r.BP }));
+    // One clinic reading is not hypertension: ESC 2024 / ACC-AHA guidelines need repeated readings, and pain, fever or
+    // anxiety raise it for the visit (130–159 / 80–99 is common and the doctor is right not to code it).
+    // Only a clearly high reading — grade 2, 160/100 or more — is worth asking the doctor about (clinic decision, Oct 2026).
+    if (bpOk && (bp.sys >= 160 || bp.dia >= 100) && !codes.some((c) => HTN_DX.test(c)))
+      add("review", "High blood pressure without diagnosis", t("Blood pressure {bp} is clearly high (160/100 or more) with no blood pressure code — if the patient is hypertensive add I10, if it is a single high reading add R03.0", { bp: r.BP }));
     if (temp >= 38 && temp <= 43 && !codes.some((c) => FEVER_DX.test(c)))
       add("review", "Fever without matching diagnosis", t("Temperature {v} (fever) but no infection or fever diagnosis", { v: r.Temp }));
     const fem = codes.filter((c) => FEMALE_DX.test(c)), male = codes.filter((c) => MALE_DX.test(c));
