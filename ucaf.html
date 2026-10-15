@@ -334,6 +334,13 @@
   .ucaf .ar { direction: rtl; text-align: center; }
   .ucaf .note { color: #000; padding-left: 10px; }
   .ucaf .name-warn { background: #fdecea; color: #b42318; border: 1px solid #b42318; border-radius: 4px; padding: 2px 6px; margin: 2px 0; font-weight: bold; font-size: 12px; }
+  /* Insurance check notes for the doctor — always English, printed on the form; thick border + tags so it still stands out in black & white */
+  .ucaf .ins-notes { border: 3px solid #c00; background: #fff3f0; padding: 5px 8px; margin-bottom: 6px; font-size: 13px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ucaf .ins-notes h3 { color: #c00; font-size: 15px; margin-bottom: 3px; text-transform: uppercase; }
+  .ucaf .ins-notes ol { margin: 0; padding-left: 20px; }
+  .ucaf .ins-notes li { margin: 2px 0; font-weight: bold; }
+  .ucaf .ins-notes .tag { display: inline-block; border: 1.5px solid #000; padding: 0 4px; margin-right: 5px; font-size: 11px; }
+  .ucaf .ins-notes .tag.fix { background: #c00; color: #fff; border-color: #c00; }
   .ucaf table { width: 100%; border-collapse: collapse; margin-top: 3px; }
   .ucaf th, .ucaf td { border: 1px solid #000; padding: 2px 4px; text-align: left; vertical-align: top; white-space: normal; }
   .ucaf th { font-weight: normal; }
@@ -1219,7 +1226,7 @@
   const TRUNCATE = { PatientName: 230, Doctor: 170, Clinic: 120, Insurer: 190 };
 
   let rows = [], shown = [], sortKey = "VisitTime", sortDir = -1, tab = "visits", range = "day", incomeMode = "med", incomeDocs = [];
-  let unsubVisits = null, unsubMeta = null, current = null;
+  let unsubVisits = null, unsubMeta = null, current = null, currentNotes = null;
   const rangeCache = new Map();
 
   // ---------- Filters ----------
@@ -2132,7 +2139,13 @@
   // Every check matches a reason the insurers gave in the NPHIES claim reports (or a gap in the form they deduct for).
   // "fix" = rejected or deducted if sent as is; "review" = likely fine, but ask the doctor before sending.
   const LOOKBACK_DAYS = 14;
-  let clVisits = [], clHistory = [], clChecked = [], claimDocs = [], claimsErr = null, clLevel = "";
+  let clVisits = [], clHistory = [], clChecked = [], claimDocs = [], claimsErr = null, clLevel = "", clIdx = new Map();
+  // The notes printed on the UCAF go to the doctor, so they are always in English whatever the site language
+  function issuesEn(r) {
+    const was = lang;
+    lang = "en";
+    try { return insuranceIssues(r, clIdx); } finally { lang = was; }
+  }
   const listSep = () => (lang === "ar" ? "، " : ", ");
   const dxCodes = (r) => J(r.DiagnosesJson).map((d) => String(d.Code ?? "").toUpperCase().replace(/\s/g, "")).filter(Boolean);
   const HTN_DX = /^(I1[0-6]|O1[0-6]|R03\.?0)/;  // hypertension, hypertension in pregnancy, raised BP reading
@@ -2309,6 +2322,7 @@
     const idx = groupBy(clHistory.filter((r) => r.PaymentCode === "R"), patientKey);
     for (const l of idx.values()) l.sort(visitOrder);
     const insured = scope(clVisits).filter((r) => r.PaymentCode === "R");
+    clIdx = idx;
     clChecked = insured.map((r) => ({ r, issues: insuranceIssues(r, idx) }));
     const hasFix = (c) => c.issues.some((i) => i.level === "fix");
     const fix = clChecked.filter(hasFix).length, rev = clChecked.filter((c) => c.issues.length && !hasFix(c)).length;
@@ -2468,11 +2482,18 @@
     document.querySelectorAll("#clLevel button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     renderClaims();
   }));
-  $("clBodyRows").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openForm(clVisits.find((r) => r.VisitId === tr.dataset.id)); });
-  $("clRejected").addEventListener("click", (ev) => { const b = ev.target.closest("[data-open]"); if (b) openForm(clVisits.find((r) => r.VisitId === b.dataset.open)); });
+  const openWithNotes = (r) => r && openForm(r, issuesEn(r));
+  $("clBodyRows").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openWithNotes(clVisits.find((r) => r.VisitId === tr.dataset.id)); });
+  $("clRejected").addEventListener("click", (ev) => { const b = ev.target.closest("[data-open]"); if (b) openWithNotes(clVisits.find((r) => r.VisitId === b.dataset.open)); });
 
   // ---------- UCAF form ----------
-  function ucafHtml(r, page, pages) {
+  function ucafHtml(r, page, pages, notes) {
+    const insNotes = notes?.length ? `
+      <div class="ins-notes">
+        <h3>⚠ Insurance review — please correct before the claim is sent</h3>
+        <ol>${notes.slice().sort((a, b) => (a.level === "fix" ? 0 : 1) - (b.level === "fix" ? 0 : 1))
+          .map((i) => `<li><span class="tag ${i.level}">${i.level === "fix" ? "MUST FIX" : "REVIEW"}</span>${e(i.text)}</li>`).join("")}</ol>
+      </div>` : "";
     const tick = (b) => (b ? "✔" : "&nbsp;&nbsp;");
     const diags = J(r.DiagnosesJson), svcs = J(r.ServicesJson), meds = J(r.MedsJson);
     const code = (i) => e(diags[i]?.Code ?? "");
@@ -2491,6 +2512,7 @@
         <h2>UCAF 2.0</h2>
         <div class="pg">${pages ? `Page No ${page} From ${pages}` : ""}</div>
       </div>
+      ${insNotes}
       <div class="two">
         <div>
           <h3>To be completed &amp; ID verified by Reception/Nurse:</h3>
@@ -2573,21 +2595,21 @@
     </div>`;
   }
 
-  function openForm(r) {
+  function openForm(r, notes) {
     if (!r) return;
-    current = r;
-    $("mBody").innerHTML = ucafHtml(r);
+    current = r; currentNotes = notes ?? null;
+    $("mBody").innerHTML = ucafHtml(r, undefined, undefined, currentNotes);
     $("modal").classList.remove("hidden");
     document.body.style.overflow = "hidden";
   }
   function closeForm() {
     $("modal").classList.add("hidden");
     document.body.style.overflow = "";
-    current = null;
+    current = null; currentNotes = null;
   }
-  function printForms(list) {
+  function printForms(list, notes) {
     if (!list.length) return;
-    $("printArea").innerHTML = list.map((r, i) => ucafHtml(r, i + 1, list.length)).join("");
+    $("printArea").innerHTML = list.map((r, i) => ucafHtml(r, i + 1, list.length, notes)).join("");
     document.body.classList.add("printing-forms");
     window.print();
   }
@@ -2808,7 +2830,7 @@
   $("mClose").onclick = closeForm;
   $("modal").addEventListener("click", (ev) => { if (ev.target.id === "modal") closeForm(); });
   document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && current) closeForm(); });
-  $("mPrint").onclick = () => current && printForms([current]);
+  $("mPrint").onclick = () => current && printForms([current], currentNotes);
   $("printForms").onclick = () => {
     const list = shown.filter((r) => !isMissing(r));
     if (!list.length) return alert(t("No written UCAF forms in this list."));
