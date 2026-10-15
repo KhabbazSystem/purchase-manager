@@ -759,11 +759,11 @@
         <!-- Guide: what the insurers deducted in August 2026 (NPHIES line reports) and how to avoid it -->
         <details class="card cl-results">
           <summary class="card-head">
-            <div><h2>How to avoid deductions</h2><div class="muted small">From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know</div></div>
+            <div><h2>How to avoid deductions</h2><div class="muted small">From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know</div></div>
           </summary>
           <div class="table-wrap">
             <table class="grid guide">
-              <thead><tr><th>Reason the insurer gave</th><th class="num">Lost in August</th><th>What to do</th></tr></thead>
+              <thead><tr><th>Reason the insurer gave</th><th class="num">Lost (SAR)</th><th>What to do</th></tr></thead>
               <tbody>
                 <tr><td>Diagnosis does not fit the test</td><td class="num">10,903</td><td>Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.</td></tr>
                 <tr><td>Not clinically justified</td><td class="num">4,476</td><td>HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code.</td></tr>
@@ -771,9 +771,14 @@
                 <tr><td>Not compliant with the contract</td><td class="num">2,496</td><td>Prices above the contract for some companies (Nesma, GC Interwell, Sepco…) and items outside the contract (Neodex drops). Management: check the price list with each insurer.</td></tr>
                 <tr><td>New consultation within 14 days</td><td class="num">1,085</td><td>Reception: a patient back to the same doctor within 14 days is registered as a free follow-up, not a new consultation.</td></tr>
                 <tr><td>Medicine not in the formulary</td><td class="num">872</td><td>Reparil and Remox were rejected most. Prescribe a covered alternative.</td></tr>
-                <tr><td>Chief complaint missing or too short</td><td class="num">661</td><td>Ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them — even on a follow-up.</td></tr>
+                <tr><td>Chief complaint missing or too short</td><td class="num">661</td><td>On a new visit, ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them. On a follow-up, "for injection" or "for dressing" is enough.</td></tr>
                 <tr><td>Co-pay not collected</td><td class="num">231</td><td>Reception: collect the patient's share before the visit.</td></tr>
                 <tr><td>Wrong medicine dose</td><td class="num">148</td><td>An injection given in the clinic is one day of supply, not 7 (ondansetron injections were rejected for this).</td></tr>
+                <tr><td>Antibiotic injection not justified (July)</td><td class="num">4,561</td><td>Ceftriaxone (Enoxirt) injections were rejected 130 of 161 times with J22, J06, J03 or asthma. Give an injection only for pneumonia, UTI / pyelonephritis, cellulitis or abscess — otherwise an antibiotic by mouth.</td></tr>
+                <tr><td>Nebulizer without asthma (July)</td><td class="num">679</td><td>Nebulizer sessions and Pulmicort ampoules need asthma, wheeze (R06.2), bronchiolitis or COPD — cough or chest infection alone was rejected.</td></tr>
+                <tr><td>Test repeated too soon (July)</td><td class="num">568</td><td>Liver, lipids, glucose, urinalysis and X-ray repeated within days were rejected as too frequent.</td></tr>
+                <tr><td>Preauthorization not obtained (July)</td><td class="num">507</td><td>IV fluids and IV injections for Marine Innovation, Saudi Arabic Computer Systems and Zamil Central need approval first.</td></tr>
+                <tr><td>Result missing or wrong sex (July)</td><td class="num">752</td><td>Attach the ultrasound report to the claim. A pelvic ultrasound for a male patient was rejected.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1095,6 +1100,39 @@
     "Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it": "مضاد حيوي مع تشخيص فيروسي بس (برد / التهاب تنفسي علوي / إنفلونزا): {m} — اكتب التشخيص البكتيري أو شيل المضاد",
     "Antibiotic without an infection diagnosis: {m}": "مضاد حيوي بدون تشخيص عدوى: {m}",
     // guide card
+    "From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know": "من تقارير نفيس لشهري يوليو وأغسطس 2026 · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
+    "Lost (SAR)": "المفقود (ريال)",
+    "On a new visit, ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them. On a follow-up, \"for injection\" or \"for dressing\" is enough.": "في الكشف الجديد، السونار والأشعة والمحاليل والحقن بالوريد محتاجة شكوى تفسّرها. في المراجعة، \"for injection\" أو \"for dressing\" كفاية.",
+    "Antibiotic injection not justified (July)": "حقنة مضاد حيوي غير مبررة (يوليو)",
+    "Ceftriaxone (Enoxirt) injections were rejected 130 of 161 times with J22, J06, J03 or asthma. Give an injection only for pneumonia, UTI / pyelonephritis, cellulitis or abscess — otherwise an antibiotic by mouth.": "حقن السيفترياكسون (إنوكسيرت) اترفضت 130 مرة من 161 مع J22 وJ06 وJ03 والربو. الحقنة بس للالتهاب الرئوي أو التهاب المسالك/الكلى أو الالتهاب الخلوي أو الخراج — غير كده مضاد بالفم.",
+    "Nebulizer without asthma (July)": "جلسة بخار بدون ربو (يوليو)",
+    "Nebulizer sessions and Pulmicort ampoules need asthma, wheeze (R06.2), bronchiolitis or COPD — cough or chest infection alone was rejected.": "جلسات البخار وأمبولات بلميكورت محتاجة ربو أو صفير (R06.2) أو التهاب شعيبات أو انسداد رئوي مزمن — الكحة أو التهاب الصدر لوحده اترفض.",
+    "Test repeated too soon (July)": "تحليل متكرر بسرعة (يوليو)",
+    "Liver, lipids, glucose, urinalysis and X-ray repeated within days were rejected as too frequent.": "وظائف الكبد والدهون والسكر وتحليل البول والأشعة اللي اتكررت خلال أيام اترفضت لأنها متكررة.",
+    "Preauthorization not obtained (July)": "بدون موافقة مسبقة (يوليو)",
+    "IV fluids and IV injections for Marine Innovation, Saudi Arabic Computer Systems and Zamil Central need approval first.": "المحاليل والحقن بالوريد لشركات Marine Innovation وSaudi Arabic Computer Systems والزامل المركزية محتاجة موافقة قبلها.",
+    "Result missing or wrong sex (July)": "النتيجة ناقصة أو لا تناسب الجنس (يوليو)",
+    "Attach the ultrasound report to the claim. A pelvic ultrasound for a male patient was rejected.": "ارفق تقرير السونار مع المطالبة. سونار الحوض لمريض ذكر اترفض.",
+    "Test repeated too soon": "تحليل متكرر بسرعة",
+    "Same test done again within 14 days (insurers reject it as too frequent): {s}": "نفس التحليل اتعمل تاني خلال 14 يوم (التأمين بيرفضه لأنه متكرر): {s}",
+    "Preauthorization needed": "محتاج موافقة مسبقة",
+    "{s} for {p} needs preauthorization — this company rejected it without approval": "{s} لشركة {p} محتاج موافقة مسبقة — الشركة دي رفضته من غير موافقة",
+    "Antibiotic injection not justified": "حقنة مضاد حيوي غير مبررة",
+    "Antibiotic injection {m} with {dx} — insurers rejected 8 of 10 in July; it needs pneumonia, UTI / pyelonephritis, cellulitis or abscess, otherwise give it by mouth": "حقنة مضاد حيوي {m} مع {dx} — التأمين رفض 8 من 10 في يوليو؛ محتاجة التهاب رئوي أو التهاب مسالك/كلى أو التهاب خلوي أو خراج، غير كده اديه بالفم",
+    "Nebulizer without asthma or wheeze": "جلسة بخار بدون ربو أو صفير",
+    "{s} without asthma, wheeze (R06.2), bronchiolitis or COPD — rejected with cough / chest infection alone": "{s} بدون ربو أو صفير (R06.2) أو التهاب شعيبات أو انسداد رئوي مزمن — بيترفض مع الكحة أو التهاب الصدر لوحده",
+    "Ondansetron without vomiting": "أوندانسيترون بدون ترجيع",
+    "{m} without vomiting (R11) or gastroenteritis — add R11 if the patient vomited": "{m} بدون ترجيع (R11) أو نزلة معوية — اكتب R11 لو المريض كان بيرجّع",
+    "Stomach medicine without a stomach diagnosis": "دواء معدة بدون تشخيص معدة",
+    "{m} without gastritis, reflux, dyspepsia or abdominal pain": "{m} بدون التهاب معدة أو ارتجاع أو عسر هضم أو ألم بطن",
+    "dyspepsia, gastritis, ulcer or epigastric pain (R10.1)": "عسر هضم أو التهاب معدة أو قرحة أو ألم أعلى البطن (R10.1)",
+    "more than a cold / URTI — e.g. bacterial infection, arthritis or inflammation": "حاجة أكتر من برد / التهاب تنفسي علوي — زي عدوى بكتيرية أو التهاب مفاصل",
+    "fever (R50), typhoid or brucellosis": "حرارة (R50) أو تيفويد أو حمى مالطية",
+    "an injury (S/T codes), joint or bone disease (M codes) or limb pain": "إصابة (أكواد S/T) أو مرض مفاصل أو عظام (أكواد M) أو ألم في الطرف",
+    "chest pain, palpitations, hypertension, heart disease, dizziness or fainting": "ألم صدر أو خفقان أو ضغط أو مرض قلب أو دوخة أو إغماء",
+    "osteoporosis, vitamin D deficiency, cramps, numbness, fatigue or kidney disease": "هشاشة عظام أو نقص فيتامين د أو تقلصات أو تنميل أو إرهاق أو مرض كلى",
+    "diabetes, prediabetes, obesity, thirst / frequent urination, fatigue or pregnancy": "سكر أو ما قبل السكر أو سمنة أو عطش / كثرة تبول أو إرهاق أو حمل",
+    "urinary symptoms, abdominal or back pain, fever, diabetes or pregnancy": "أعراض بولية أو ألم بطن أو ظهر أو حرارة أو سكر أو حمل",
     "How to avoid deductions": "إزاي نتجنب الخصومات",
     "From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know": "من مطالبات أغسطس 2026: ضاع 24,841 ريال من 74,559 (33%) · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
     "Reason the insurer gave": "سبب شركة التأمين", "Lost in August": "المفقود في أغسطس", "What to do": "المطلوب",
@@ -1847,7 +1885,7 @@
   const words = (s) => String(s ?? "").trim().split(/\s+/).filter((w) => w && !/^[0.\-]+$/.test(w)).length;
   const textLevel = (s) => { const n = words(s); return n === 0 ? "empty" : n < 3 ? "brief" : "detailed"; };
   const hasVitals = (r) => String(r.BP ?? "").replace(/[0\s/.]/g, "") !== "" && Number(r.Temp) > 0 && Number(r.Pulse) > 0;
-  const ANTIBIOTIC = /AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
+  const ANTIBIOTIC = /ENOXIRT|TRIAXON|ROCEPH|AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
   const VIRAL_RTI = /^(J00|J06|J20)/; // common cold, acute URTI, acute bronchitis
   const topN = (counts, n) => [...counts].sort((a, b) => b[1].n - a[1].n).slice(0, n);
   function countInto(map, key, label) { if (!key) return; const c = map.get(key) ?? { label, n: 0 }; c.n++; map.set(key, c); }
@@ -2181,7 +2219,31 @@
     { svc: /ULTRASOUND.*(ABD|PELV)|(ABD|PELV).*ULTRASOUND/i, dx: /^(K|N|O|C|R1[0-9]|R31|D1[2-3]|D2[5-8]|E66|Z3[2-6])/, level: "review", need: "an abdominal, urinary or gynecological diagnosis" },
     { svc: /CHEST.*X-?RAY|X-?RAY.*CHEST|\bCXR\b/i, dx: /^(J|R0[5-7]|R50|A1[5-9]|I5[01]|C34|S2)/, level: "review", need: "a chest diagnosis, cough, chest pain or fever" },
     { svc: /\bKUB\b/i, dx: /^(N1[3-9]|N2[0-3]|N3[09]|R10|R3[0-9])/, level: "review", need: "kidney stones, renal colic, urinary symptoms or abdominal pain" },
+    // added from the July 2026 line reports
+    { svc: /ULTRASOUND\s+PELVI|PELVIC\s+ULTRASOUND|TRANS-?VAGINAL/i, male: true, dx: /./, level: "review", need: "" },
+    { svc: /UREA BREATH|\bUBT\b|PYLORI/i, dx: /^(K2[0-9]|K3[01]|R1[0-3]|B96\.?81|D50|C16)/, level: "review", need: "dyspepsia, gastritis, ulcer or epigastric pain (R10.1)" },
+    { svc: /C\s*-?\s*REACTIVE|\bCRP\b|SEDIMENTATION|\bESR\b/i, viralOnly: true, level: "review", need: "more than a cold / URTI — e.g. bacterial infection, arthritis or inflammation" },
+    { svc: /WIDAL|TYPHOID|BRUCELL/i, dx: /^(A0[1-4]|A23|R50|R10|A09|R19\.?7|R16)/, level: "review", need: "fever (R50), typhoid or brucellosis" },
+    { svc: /EXTREMITY|(HAND|WRIST|ANKLE|FOOT|KNEE|ELBOW|SHOULDER|FINGER|TOE|FOREARM|HUMERUS|FEMUR|TIBIA).*X-?RAY|X-?RAY.*(HAND|WRIST|ANKLE|FOOT|KNEE|ELBOW|SHOULDER|FINGER|TOE|FOREARM|HUMERUS|FEMUR|TIBIA)/i, dx: /^(S|T|M|R2[69]|R52|G5|Q6|Q7)/, level: "review", need: "an injury (S/T codes), joint or bone disease (M codes) or limb pain" },
+    { svc: /ELECTROCARDIO|\bECG\b|\bEKG\b/i, dx: /^(I|R0[0-7]|R5[3-5]|R42|E0[0-5]|E1[0-4]|E78|E87|F41|Z01\.?81)/, level: "review", need: "chest pain, palpitations, hypertension, heart disease, dizziness or fainting" },
+    { svc: /CALCIUM|MAGNESIUM/i, dx: /^(E83|E55|E2[01]|E87|M8[0-3]|M79|R25|R29|R20|R53|N18|N2[0-3]|G40|K90|D51)/, level: "review", need: "osteoporosis, vitamin D deficiency, cramps, numbness, fatigue or kidney disease" },
+    { svc: /^\s*GLUCOSE|BLOOD SUGAR|\bFBS\b|\bRBS\b/i, dx: /^(E1[0-6]|E66|E78|R73|R63|R53|R35|R42|R55|R81|O|Z3[2-6]|I1[0-5]|L0|N39|B37)/, level: "review", need: "diabetes, prediabetes, obesity, thirst / frequent urination, fatigue or pregnancy" },
+    { svc: /URINALYSIS|URINE ANALYSIS|URINE R\/?E|\bGUE\b/i, dx: /^(N|R3[0-9]|R1[01]|R50|R82|A09|O|Z3[2-6]|E1[0-4]|I1[0-5]|M54)/, level: "review", need: "urinary symptoms, abdominal or back pain, fever, diabetes or pregnancy" },
   ];
+  // July 2026: ceftriaxone injections were rejected 130 of 161 times (4,561 SAR) — mostly with J22 / J06 / J03 / J45.
+  // Insurers accept an antibiotic injection in the clinic only for a serious bacterial infection; otherwise oral.
+  const SERIOUS_INFECTION = /^(J1[2-8]|J85|J86|N1[0-2]|N30|N39\.?0|N70|N73|L0[2-38]|A0[0-8]|A4[01]|A5[0-6]|G0[0-4]|K35|K6[15]|K8[01]|K57|M86|H66|H70|T81\.?4|O23|O86)/;
+  // Nebulizer session / Pulmicort ampoules: rejected with J22, J06, R05 (cough) — approved with asthma
+  const NEBULIZED = /NEBUL|RESPUL|PULMICORT\s*AMP|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
+  const NEB_DX = /^(J4[4-6]|J21|J05|J38\.?5|J20|R06\.?2|J98\.?0)/;
+  const ONDANSETRON = /ONDANSET|DANSETRON|ZOFRAN/i, VOMIT_DX = /^(R11|A0[0-9]|K52|O21)/;
+  const PPI = /PANTOPRAZ|PANTOMAX|PANTOZOL|CONTROLOC|OMEPRAZ|ESOMEPRAZ|NEXIUM|LANSOPRAZ|RABEPRAZ/i;
+  const PPI_DX = /^(K2[0-9]|K3[01]|R1[0-3]|B96\.?81|M|S|T)/; // stomach, or with a painkiller for joint / injury pain
+  // Companies that rejected IV fluids / IV injections for "preauthorization not obtained" (July 2026)
+  const PREAUTH_IV = /MARINE INNOVATION|SAUDI ARABIC COMPUTER|ZAMIL CENTRAL/i;
+  const IV_SVC = /INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
+  // "Too frequent": labs and imaging repeated within the 14 days before (consultations, injections and dressings are not tests)
+  const IS_TEST = (d) => TEST_RULES.some((x) => x.svc.test(d)) || /X-?RAY|ULTRASOUND|\bCT\b|\bMRI\b|URINALYSIS|GLUCOSE|LIPID|LIVER|RENAL|CREAT|UREA|ELECTROLYTE|STOOL|\bGGT\b/i.test(d);
   const num = (v) => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
   function parseBP(v) {
     const s = String(v ?? "").trim();
@@ -2228,6 +2290,13 @@
     const dup = new Set();
     for (const s of J(r.ServicesJson)) { if (!s.Code) continue; if (seen.has(s.Code)) dup.add(s.Description || s.Code); seen.add(s.Code); }
     if (dup.size) add("fix", "Separate the services", t("Separate the services — same service twice on the same day: {s}", { s: [...dup].join(listSep()) }));
+    const earlierTests = new Map();
+    for (const x of prior) if (x.VisitDate !== r.VisitDate) for (const s of J(x.ServicesJson)) if (s.Code && IS_TEST(String(s.Description ?? ""))) earlierTests.set(s.Code, x.VisitDate);
+    const repeated = J(r.ServicesJson).filter((s) => earlierTests.has(s.Code)).map((s) => `${s.Description || s.Code} (${earlierTests.get(s.Code)})`);
+    if (repeated.length) add("review", "Test repeated too soon", t("Same test done again within 14 days (insurers reject it as too frequent): {s}", { s: [...new Set(repeated)].join(listSep()) }));
+    const iv = J(r.ServicesJson).find((s) => IV_SVC.test(String(s.Description ?? "")));
+    if (iv && PREAUTH_IV.test(String(r.PolicyHolder ?? "")) && !String(r.ApprovalNo ?? "").trim())
+      add("review", "Preauthorization needed", t("{s} for {p} needs preauthorization — this company rejected it without approval", { s: iv.Description, p: String(r.PolicyHolder).trim() }));
     const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).filter(dispensed).map((m) => String(m.Code ?? ""))).filter(Boolean));
     const again = J(r.MedsJson).filter((m) => m.Code && dispensed(m) && recentMeds.has(String(m.Code)));
     if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
@@ -2240,13 +2309,14 @@
     const svcs = J(r.ServicesJson), svcText = (s) => String(s.Description ?? "");
 
     if (isMissing(r)) return out; // vital signs and codes only mean something on a written form
-    // Imaging, IV fluids and injections were rejected for "chief complaint inadequate" — on any visit, follow-ups included
+    // Imaging, IV fluids and injections were rejected for "chief complaint inadequate" on new visits.
+    // A follow-up continues the earlier visit, so "for injection" / "for dressing" there is fine (clinic decision, Oct 2026).
     const bigSvc = svcs.find((s) => NEEDS_COMPLAINT.test(svcText(s)));
-    if (bigSvc && words(r.ChiefComplaint) < 3)
+    if (r.VisitTypeCode === "R") { /* follow-up: no short-complaint check */ }
+    else if (bigSvc && words(r.ChiefComplaint) < 3)
       add("fix", "Chief complaint too short for the service", t("Chief complaint too short for {s}: \"{c}\" — write the symptoms that needed it", { s: svcText(bigSvc), c: String(r.ChiefComplaint ?? "").trim() }));
     // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed.
-    // A follow-up continues the earlier visit, so a short complaint there ("follow up", "review") is fine.
-    else if (r.VisitTypeCode !== "R" && words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
+    else if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
     const miss = [];
     if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
@@ -2298,6 +2368,20 @@
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it", { m: medList(abx) }));
     else if (abx.length && !hasDx(FEVER_DX))
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic without an infection diagnosis: {m}", { m: medList(abx) }));
+    else {
+      const injAbx = abx.filter((m) => IN_CLINIC_MED.test(`${medName(m)} ${m.Type ?? ""}`));
+      if (injAbx.length && !hasDx(SERIOUS_INFECTION))
+        add("review", "Antibiotic injection not justified", t("Antibiotic injection {m} with {dx} — insurers rejected 8 of 10 in July; it needs pneumonia, UTI / pyelonephritis, cellulitis or abscess, otherwise give it by mouth", { m: medList(injAbx), dx: codes.join(", ") }));
+    }
+    const neb = [...svcs.map(svcText), ...meds.map(medName)].find((s) => NEBULIZED.test(s));
+    if (neb && !hasDx(NEB_DX))
+      add("review", "Nebulizer without asthma or wheeze", t("{s} without asthma, wheeze (R06.2), bronchiolitis or COPD — rejected with cough / chest infection alone", { s: neb.split(" : ")[0] }));
+    const ond = meds.filter((m) => ONDANSETRON.test(medName(m)));
+    if (ond.length && !hasDx(VOMIT_DX))
+      add("review", "Ondansetron without vomiting", t("{m} without vomiting (R11) or gastroenteritis — add R11 if the patient vomited", { m: medList(ond) }));
+    const ppi = meds.filter((m) => PPI.test(medName(m)));
+    if (ppi.length && !hasDx(PPI_DX))
+      add("review", "Stomach medicine without a stomach diagnosis", t("{m} without gastritis, reflux, dyspepsia or abdominal pain", { m: medList(ppi) }));
     return out;
   }
 
