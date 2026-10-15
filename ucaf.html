@@ -1057,6 +1057,10 @@
     "Separate the services": "فصل الخدمات — نفس الخدمة مرتين في نفس اليوم", "Separate the services — same service twice on the same day: {s}": "فصل الخدمات — نفس الخدمة مكررة في نفس اليوم: {s}",
     "Refill too soon": "صرف الدواء قبل موعده", "Medicine prescribed again within 14 days (refill too soon): {m}": "دواء اتصرف تاني خلال 14 يوم (صرف قبل الموعد): {m}",
     "Chief complaint too short": "الشكوى الرئيسية قصيرة",
+    "Mobile number missing or wrong": "رقم الجوال ناقص أو غلط", "Patient mobile number missing": "رقم جوال المريض غير مسجل",
+    "Patient mobile number written wrong: {m} — must start with 05 and be 10 digits": "رقم جوال المريض مكتوب غلط: {m} — لازم يبدأ بـ 05 ويكون 10 أرقام",
+    "Prescription diagnosis not in the UCAF": "تشخيص الوصفة مش موجود في الـ UCAF",
+    "Diagnosis in the prescription is not in the UCAF: {list} — add it to the UCAF or correct the prescription": "تشخيص مكتوب في الوصفة ومش موجود في الـ UCAF: {list} — ضيفه للـ UCAF أو صحّح الوصفة",
     // rules from the August line reports
     "Same medicine entered twice on one day": "نفس الدواء مكتوب مرتين في نفس اليوم",
     "Same medicine entered more than once on the same day: {m} — enter it once with the full quantity": "نفس الدواء مكتوب أكتر من مرة في نفس اليوم: {m} — اكتبه مرة واحدة بالكمية كلها",
@@ -2192,6 +2196,12 @@
     const exp = isoFromAny(r.ExpireDate);
     if (exp && exp < r.VisitDate) add("fix", "Insurance card expired", t("Insurance card expired on {d}", { d: exp }));
     if (!String(r.MembershipNo ?? "").trim()) add("fix", "Membership number missing", t("Membership number missing"));
+    // Saudi mobile: 05 + 8 digits. Visits synced before the Mobile column existed have no field at all — skip those.
+    if (r.Mobile !== undefined) {
+      const mob = String(r.Mobile ?? "").replace(/[\s-]/g, "");
+      if (!mob) add("fix", "Mobile number missing or wrong", t("Patient mobile number missing"));
+      else if (!/^05\d{8}$/.test(mob)) add("fix", "Mobile number missing or wrong", t("Patient mobile number written wrong: {m} — must start with 05 and be 10 digits", { m: String(r.Mobile).trim() }));
+    }
 
     const mine = idx.get(patientKey(r)) ?? [];
     const prior = mine.filter((x) => x.VisitId !== r.VisitId && visitOrder(x, r) < 0 && daysBetween(x.VisitDate, r.VisitDate) - 1 <= LOOKBACK_DAYS);
@@ -2240,6 +2250,15 @@
 
     const codes = dxCodes(r);
     if (!codes.length) return out;
+    // The diagnosis written next to each medicine in the prescription must also be on the UCAF (NPHIES links every medicine to a claim diagnosis)
+    const normDx = (c) => String(c).toUpperCase().replace(/[\s.]/g, "");
+    const ucafDx = new Set(codes.map(normDx)), rxMissing = new Map();
+    for (const x of J(r.RxDxJson)) for (const c of String(x.Icd ?? "").split(/[,;\s]+/).filter(Boolean)) {
+      if (ucafDx.has(normDx(c))) continue;
+      const k = c.toUpperCase(), l = rxMissing.get(k) ?? new Set(); l.add(shortMed(x)); rxMissing.set(k, l);
+    }
+    if (rxMissing.size) add("fix", "Prescription diagnosis not in the UCAF", t("Diagnosis in the prescription is not in the UCAF: {list} — add it to the UCAF or correct the prescription",
+      { list: [...rxMissing].map(([c, m]) => `${c} (${[...m].join(listSep())})`).join(" · ") }));
     if (bpOk && (bp.sys >= 140 || bp.dia >= 90) && !codes.some((c) => HTN_DX.test(c)))
       add("review", "High blood pressure without diagnosis", t("Blood pressure {bp} is high but there is no hypertension diagnosis (I10–I15 or R03.0)", { bp: r.BP }));
     if (temp >= 38 && temp <= 43 && !codes.some((c) => FEVER_DX.test(c)))
