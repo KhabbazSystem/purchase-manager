@@ -2140,7 +2140,9 @@
   const IN_CLINIC_MED = /INJECT|INFUS|AMPOUL|VIAL|NEBUL|RESPUL|FOR INHALATION|VACCIN|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
   // "CEFTRIAXONE : powder for solution for injection : : 1" → "CEFTRIAXONE"
   const shortMed = (m) => String(m.Name || m.Code || "").split(" : ")[0].trim();
-  const dispensed = (m) => !IN_CLINIC_MED.test(`${m.Name ?? ""} ${m.Type ?? ""}`);
+  const dispensed = (m) => !IN_CLINIC_MED.test(`${m.Name ?? ""} ${m.Type ?? ""}`) && !IV_PARACETAMOL.test(`${m.Name ?? ""}`);
+  // IV paracetamol (Panamol 100 ml bottle): the clinic decided no warnings for it — not as a refill, not as a repeat on the same day
+  const IV_PARACETAMOL = /PANAMOL|PARACETOL|PERFALGAN|PARACETAMOL.*(INFUS|INTRAVENOUS|100\s*ML)/i;
   // Rules below come from the NPHIES line reports (ClaimServicesReport, August 2026): what was rejected, and why
   const NEEDS_COMPLAINT = /ULTRASOUND|X-?RAY|\bKUB\b|\bCT\b|\bMRI\b|INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
   const COLD_ONLY = /^(J00|J06|J09|J1[01]|J20|J30|B34|R05|R07\.?0)/;                // cold, URTI, flu, bronchitis, cough
@@ -2210,7 +2212,7 @@
     const medKey = (m) => String(m.Code || m.Name || "");
     const medSeen = new Set(prior.filter((x) => x.VisitDate === r.VisitDate).flatMap((x) => J(x.MedsJson).map(medKey)).filter(Boolean));
     const medDup = new Set();
-    for (const m of J(r.MedsJson)) { const k = medKey(m); if (!k) continue; if (medSeen.has(k)) medDup.add(shortMed(m)); medSeen.add(k); }
+    for (const m of J(r.MedsJson)) { const k = medKey(m); if (!k || IV_PARACETAMOL.test(String(m.Name ?? ""))) continue; if (medSeen.has(k)) medDup.add(shortMed(m)); medSeen.add(k); }
     if (medDup.size) add("fix", "Same medicine entered twice on one day", t("Same medicine entered more than once on the same day: {m} — enter it once with the full quantity", { m: [...medDup].join(listSep()) }));
     const svcs = J(r.ServicesJson), svcText = (s) => String(s.Description ?? "");
 
