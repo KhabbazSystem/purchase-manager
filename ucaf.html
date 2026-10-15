@@ -759,11 +759,11 @@
               <thead><tr><th>Reason the insurer gave</th><th class="num">Lost in August</th><th>What to do</th></tr></thead>
               <tbody>
                 <tr><td>Diagnosis does not fit the test</td><td class="num">10,903</td><td>Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.</td></tr>
-                <tr><td>Not clinically justified</td><td class="num">4,476</td><td>HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code. IV paracetamol only when oral is not possible, with the reason written.</td></tr>
+                <tr><td>Not clinically justified</td><td class="num">4,476</td><td>HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code.</td></tr>
                 <tr><td>Same item twice on the same day</td><td class="num">2,800</td><td>Enter each medicine once with the full quantity. Ceftriaxone vials entered as 3–6 separate lines lost 2,202 SAR.</td></tr>
                 <tr><td>Not compliant with the contract</td><td class="num">2,496</td><td>Prices above the contract for some companies (Nesma, GC Interwell, Sepco…) and items outside the contract (Neodex drops). Management: check the price list with each insurer.</td></tr>
                 <tr><td>New consultation within 14 days</td><td class="num">1,085</td><td>Reception: a patient back to the same doctor within 14 days is registered as a free follow-up, not a new consultation.</td></tr>
-                <tr><td>Medicine not in the formulary</td><td class="num">872</td><td>Reparil, IV Panamol and Remox were rejected most. Prescribe a covered alternative.</td></tr>
+                <tr><td>Medicine not in the formulary</td><td class="num">872</td><td>Reparil and Remox were rejected most. Prescribe a covered alternative.</td></tr>
                 <tr><td>Chief complaint missing or too short</td><td class="num">661</td><td>Ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them — even on a follow-up.</td></tr>
                 <tr><td>Co-pay not collected</td><td class="num">231</td><td>Reception: collect the patient's share before the visit.</td></tr>
                 <tr><td>Wrong medicine dose</td><td class="num">148</td><td>An injection given in the clinic is one day of supply, not 7 (ondansetron injections were rejected for this).</td></tr>
@@ -1054,7 +1054,7 @@
       "كشف جديد خلال 14 يوم من كشف عند نفس الطبيب بتاريخ {d} — شركة التأمين تعتبره متابعة مجانية",
     "Same clinic within 14 days": "نفس العيادة خلال 14 يوم",
     "New consultation within 14 days of a consultation in the same clinic ({doc}, {d})": "كشف جديد خلال 14 يوم من كشف في نفس العيادة ({doc}، {d})",
-    "Same service twice on one day": "نفس الخدمة مرتين في نفس اليوم", "Same service twice on the same day: {s}": "نفس الخدمة مكررة في نفس اليوم: {s}",
+    "Separate the services": "فصل الخدمات — نفس الخدمة مرتين في نفس اليوم", "Separate the services — same service twice on the same day: {s}": "فصل الخدمات — نفس الخدمة مكررة في نفس اليوم: {s}",
     "Refill too soon": "صرف الدواء قبل موعده", "Medicine prescribed again within 14 days (refill too soon): {m}": "دواء اتصرف تاني خلال 14 يوم (صرف قبل الموعد): {m}",
     "Chief complaint too short": "الشكوى الرئيسية قصيرة",
     // rules from the August line reports
@@ -1083,8 +1083,6 @@
     "Antibiotic without a bacterial diagnosis": "مضاد حيوي بدون تشخيص بكتيري",
     "Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it": "مضاد حيوي مع تشخيص فيروسي بس (برد / التهاب تنفسي علوي / إنفلونزا): {m} — اكتب التشخيص البكتيري أو شيل المضاد",
     "Antibiotic without an infection diagnosis: {m}": "مضاد حيوي بدون تشخيص عدوى: {m}",
-    "IV paracetamol": "باراسيتامول وريد",
-    "IV paracetamol is often rejected (formulary, dose, not justified) — use oral unless the patient cannot take it, and write why": "الباراسيتامول بالوريد بيترفض كتير (مش في القائمة، الجرعة، مش مبرر) — استخدم الفم إلا لو المريض مش قادر، واكتب السبب",
     // guide card
     "How to avoid deductions": "إزاي نتجنب الخصومات",
     "From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know": "من مطالبات أغسطس 2026: ضاع 24,841 ريال من 74,559 (33%) · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
@@ -1092,7 +1090,7 @@
     "Diagnosis does not fit the test": "التشخيص لا يناسب التحليل",
     "Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.": "كل تحليل لازم يكون معاه تشخيص يفسّره. صورة الدم (CBC) مع برد بس اترفضت 58 مرة (3,708 ريال)، وكمان السكر والفيروسات الكبدية والليبيز والفيريتين والكورتيزول ووظائف الكبد من غير تشخيص مناسب.",
     "Not clinically justified": "غير مبرر طبيًا",
-    "HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code. IV paracetamol only when oral is not possible, with the reason written.": "السكر التراكمي (HbA1c) بس مع كود سكر (E10–E14) أو ما قبل السكر (R73) — ضاع 1,608 ريال. السيفترياكسون وأي مضاد حيوي بس مع كود عدوى. الباراسيتامول بالوريد بس لو الفم مش ممكن، مع كتابة السبب.",
+    "HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code.": "السكر التراكمي (HbA1c) بس مع كود سكر (E10–E14) أو ما قبل السكر (R73) — ضاع 1,608 ريال. السيفترياكسون وأي مضاد حيوي بس مع كود عدوى.",
     "Same item twice on the same day": "نفس البند مرتين في نفس اليوم",
     "Enter each medicine once with the full quantity. Ceftriaxone vials entered as 3–6 separate lines lost 2,202 SAR.": "اكتب كل دواء مرة واحدة بالكمية كلها. فيالات السيفترياكسون اللي اتكتبت 3–6 سطور منفصلة ضيّعت 2,202 ريال.",
     "Not compliant with the contract": "غير مطابق للعقد",
@@ -1100,7 +1098,7 @@
     "New consultation within 14 days": "كشف جديد خلال 14 يوم",
     "Reception: a patient back to the same doctor within 14 days is registered as a free follow-up, not a new consultation.": "الاستقبال: المريض اللي راجع لنفس الدكتور خلال 14 يوم يتسجل متابعة مجانية، مش كشف جديد.",
     "Medicine not in the formulary": "دواء غير مدرج في قائمة شركة التأمين",
-    "Reparil, IV Panamol and Remox were rejected most. Prescribe a covered alternative.": "ريباريل وبانامول الوريد وريموكس أكتر حاجات اترفضت. اكتب بديل مغطى.",
+    "Reparil and Remox were rejected most. Prescribe a covered alternative.": "ريباريل وريموكس أكتر حاجات اترفضت. اكتب بديل مغطى.",
     "Chief complaint missing or too short": "الشكوى ناقصة أو قصيرة",
     "Ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them — even on a follow-up.": "السونار والأشعة والمحاليل والحقن بالوريد محتاجة شكوى تفسّرها — حتى في المتابعة.",
     "Co-pay not collected": "نسبة التحمل ما اتحصّلتش",
@@ -2147,7 +2145,6 @@
   const NEEDS_COMPLAINT = /ULTRASOUND|X-?RAY|\bKUB\b|\bCT\b|\bMRI\b|INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
   const COLD_ONLY = /^(J00|J06|J09|J1[01]|J20|J30|B34|R05|R07\.?0)/;                // cold, URTI, flu, bronchitis, cough
   const VIRAL_ONLY = /^(J00|J06|J09|J1[01]|J20|J30|B34|R05|R07\.?0|R50|R51)/;       // …plus fever / headache alone
-  const IV_PARACETAMOL = /PARACETAMOL[^:]*:\s*INTRAVENOUS|PARACETAMOL.*INFUSION|PANAMOL\s*\(?\s*INC|PERFALGAN/i;
   // Test → diagnoses that justify it. Matched on the service description from the clinic program (same text NPHIES shows).
   const TEST_RULES = [
     { svc: /HBA1C|GLYCOSYLATED|GLYCATED/i, dx: /^(E1[0-4]|R73|O24)/, level: "fix", need: "a diabetes (E10–E14) or prediabetes (R73) diagnosis" },
@@ -2205,7 +2202,7 @@
     const seen = new Set(prior.filter((x) => x.VisitDate === r.VisitDate).flatMap((x) => J(x.ServicesJson).map((s) => s.Code)).filter(Boolean));
     const dup = new Set();
     for (const s of J(r.ServicesJson)) { if (!s.Code) continue; if (seen.has(s.Code)) dup.add(s.Description || s.Code); seen.add(s.Code); }
-    if (dup.size) add("fix", "Same service twice on one day", t("Same service twice on the same day: {s}", { s: [...dup].join(listSep()) }));
+    if (dup.size) add("fix", "Separate the services", t("Separate the services — same service twice on the same day: {s}", { s: [...dup].join(listSep()) }));
     const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).filter(dispensed).map((m) => String(m.Code ?? ""))).filter(Boolean));
     const again = J(r.MedsJson).filter((m) => m.Code && dispensed(m) && recentMeds.has(String(m.Code)));
     if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
@@ -2267,8 +2264,6 @@
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it", { m: medList(abx) }));
     else if (abx.length && !hasDx(FEVER_DX))
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic without an infection diagnosis: {m}", { m: medList(abx) }));
-    const ivPara = meds.find((m) => IV_PARACETAMOL.test(medName(m)));
-    if (ivPara) add("review", "IV paracetamol", t("IV paracetamol is often rejected (formulary, dose, not justified) — use oral unless the patient cannot take it, and write why"));
     return out;
   }
 
