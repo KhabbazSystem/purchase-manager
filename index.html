@@ -351,6 +351,18 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .bal-sheet .bs-del{border:none;background:none;color:#ef4444;cursor:pointer;font-size:13px;padding:2px 6px;opacity:.5}
 .bal-sheet .bs-del:hover{opacity:1}
 .bal-sheet tfoot td{background:#f0fdf4;font-weight:800;color:#166534;padding:7px 8px;font-size:13px;position:sticky;bottom:0}
+.bs-cal{border:1px solid var(--border2);border-radius:12px;padding:10px;margin-bottom:14px;max-width:360px}
+.bs-cal-head{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.bs-cal-head strong{flex:1;text-align:center;font-size:13px}
+.bs-cal-nav{border:1px solid var(--border2);background:transparent;border-radius:6px;padding:2px 9px;cursor:pointer;font-size:12px;color:var(--text)}
+.bs-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.bs-cal-wd{text-align:center;font-size:10px;color:var(--text3);padding:2px 0}
+.bs-cal-day{position:relative;border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text);font-family:inherit}
+.bs-cal-day:hover{background:#eff6ff}
+.bs-cal-day.today{border-color:#93c5fd}
+.bs-cal-day.has-data::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#16a34a}
+.bs-cal-day.selected{background:#1d4ed8;color:#fff}
+.bs-cal-day.selected::after{background:#fff}
 .close-btn{width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
 .close-btn:hover{border-color:var(--red);color:var(--red2)}
 
@@ -1730,10 +1742,12 @@ table { width: 100%; min-width: 0; }
   <div class="modal" style="max-width:960px">
     <div class="modal-head">
       <h2>📊 ملخص سريع</h2>
-      <button class="close-btn" onclick="closeModal('bal-sheet-modal')">×</button>
+      <button class="close-btn" onclick="closeBalSheet()">×</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <div id="bal-sheet-cal" class="bs-cal"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+        <strong id="bal-sheet-day" style="font-size:14px;color:#1d4ed8"></strong>
         <button class="btn btn-ghost btn-sm" onclick="balSheetAddRow()">➕ صف</button>
         <button class="btn btn-ghost btn-sm" onclick="balSheetAddCol()">➕ عمود</button>
         <span style="flex:1"></span>
@@ -1743,7 +1757,7 @@ table { width: 100%; min-width: 0; }
         <table id="bal-sheet-table" class="bal-sheet"></table>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="closeModal('bal-sheet-modal')">إغلاق</button>
+        <button class="btn btn-ghost" onclick="closeBalSheet()">إغلاق</button>
         <button class="btn btn-primary" onclick="saveBalSheet()">💾 حفظ</button>
       </div>
     </div>
@@ -8086,11 +8100,55 @@ async function saveNoteToFirebase(text){
 }
 
 // ── Quick summary sheet (balances) ───────────────────────────
-const BAL_SHEET_DOC_ID = 'balSheet';
-let balSheet = null;
+// Each day has its own doc: sharedNote/balSheet_YYYY-MM-DD
+const BAL_SHEET_LEGACY_ID = 'balSheet';
+const BAL_SHEET_PREFIX = 'balSheet_';
+let balSheet = null, balSheetDay = null, balSheetMonth = null, balSheetDays = {}, balSheetDirty = false;
+
+const balDayKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const balKeyDate = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const balFmtDay = k => balKeyDate(k).toLocaleDateString('ar-EG-u-nu-latn-ca-gregory', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
 function balSheetDefault(){
   return { cols:['البيان','المبلغ','ملاحظات','',''], rows:Array.from({length:10},()=>['','','','','']) };
+}
+
+// New day: same columns and row count as the latest saved day, empty cells
+function balSheetNewDay(){
+  const last = Object.keys(balSheetDays).sort().pop();
+  if(!last) return balSheetDefault();
+  const src = JSON.parse(balSheetDays[last].data);
+  return { cols:[...src.cols], rows:src.rows.map(()=>src.cols.map(()=>'')) };
+}
+
+// The old single sheet only stored a localized (Hijri) date string, so match it against recent days
+function balLegacyDayKey(dateStr){
+  const now = new Date();
+  for(let i=0;i<180;i++){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate()-i);
+    const s = d.toLocaleDateString('ar-SA-u-nu-latn', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
+    if(String(dateStr||'').includes(s)) return balDayKey(d);
+  }
+  return balDayKey(now);
+}
+
+async function balSheetLoadDays(){
+  const snap = await getDocs(collection(db, C.sharedNote));
+  balSheetDays = {};
+  let legacy = null;
+  snap.docs.forEach(d=>{
+    if(d.id.startsWith(BAL_SHEET_PREFIX)) balSheetDays[d.id.slice(BAL_SHEET_PREFIX.length)] = d.data();
+    else if(d.id === BAL_SHEET_LEGACY_ID) legacy = d.data();
+  });
+  if(legacy?.data && !Object.keys(balSheetDays).length){
+    const k = balLegacyDayKey(legacy.date);
+    await setDoc(doc(db, C.sharedNote, BAL_SHEET_PREFIX + k), legacy);
+    balSheetDays[k] = legacy;
+  }
+}
+
+function balSheetEnsureSaved(){
+  return !balSheetDirty || confirm('فيه تعديلات مش محفوظة في الملخص — تكمل من غير حفظ؟');
 }
 
 function balSheetNum(v){
@@ -8101,6 +8159,30 @@ function balSheetNum(v){
 
 function balSheetEsc(v){
   return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+function renderBalSheetCal(){
+  const el = document.getElementById('bal-sheet-cal');
+  if(!el || !balSheetMonth) return;
+  const y = balSheetMonth.getFullYear(), m = balSheetMonth.getMonth();
+  const title = balSheetMonth.toLocaleDateString('ar-EG-u-nu-latn-ca-gregory', { month:'long', year:'numeric' });
+  const lead = (new Date(y, m, 1).getDay() + 1) % 7; // week starts Saturday
+  const count = new Date(y, m+1, 0).getDate();
+  const today = balDayKey(new Date());
+  const wd = ['س','ح','ن','ث','ر','خ','ج'].map(w=>`<div class="bs-cal-wd">${w}</div>`).join('');
+  let cells = '<div></div>'.repeat(lead);
+  for(let d=1; d<=count; d++){
+    const k = balDayKey(new Date(y, m, d));
+    const cls = ['bs-cal-day', balSheetDays[k] ? 'has-data' : '', k===today ? 'today' : '', k===balSheetDay ? 'selected' : ''].join(' ');
+    cells += `<button class="${cls}" onclick="balSheetSelectDay('${k}')">${d}</button>`;
+  }
+  el.innerHTML = `<div class="bs-cal-head">
+      <button class="bs-cal-nav" onclick="balSheetShiftMonth(-1)" title="الشهر اللي قبله">▶</button>
+      <strong>${title}</strong>
+      <button class="bs-cal-nav" onclick="balSheetShiftMonth(1)" title="الشهر اللي بعده">◀</button>
+      <button class="bs-cal-nav" onclick="balSheetSelectDay('${today}')">اليوم</button>
+    </div>
+    <div class="bs-cal-grid">${wd}${cells}</div>`;
 }
 
 function renderBalSheet(){
@@ -8124,18 +8206,37 @@ function balSheetUpdateTotals(){
   });
 }
 
-window.balSheetSetCell = function(ri,ci,v){ balSheet.rows[ri][ci]=v; balSheetUpdateTotals(); };
-window.balSheetSetCol  = function(ci,v){ balSheet.cols[ci]=v; };
-window.balSheetAddRow  = function(){ balSheet.rows.push(balSheet.cols.map(()=>'')); renderBalSheet(); };
-window.balSheetAddCol  = function(){ balSheet.cols.push(''); balSheet.rows.forEach(r=>r.push('')); renderBalSheet(); };
+window.balSheetSetCell = function(ri,ci,v){ balSheet.rows[ri][ci]=v; balSheetDirty=true; balSheetUpdateTotals(); };
+window.balSheetSetCol  = function(ci,v){ balSheet.cols[ci]=v; balSheetDirty=true; };
+window.balSheetAddRow  = function(){ balSheet.rows.push(balSheet.cols.map(()=>'')); balSheetDirty=true; renderBalSheet(); };
+window.balSheetAddCol  = function(){ balSheet.cols.push(''); balSheet.rows.forEach(r=>r.push('')); balSheetDirty=true; renderBalSheet(); };
 window.balSheetDelRow  = function(ri){
   if(balSheet.rows[ri].some(v=>String(v??'').trim()) && !confirm('حذف الصف ده؟')) return;
-  balSheet.rows.splice(ri,1); renderBalSheet();
+  balSheet.rows.splice(ri,1); balSheetDirty=true; renderBalSheet();
 };
 window.balSheetDelCol  = function(ci){
   if(balSheet.cols.length<=1) return;
   if(balSheet.rows.some(r=>String(r[ci]??'').trim()) && !confirm('حذف العمود ده بكل بياناته؟')) return;
-  balSheet.cols.splice(ci,1); balSheet.rows.forEach(r=>r.splice(ci,1)); renderBalSheet();
+  balSheet.cols.splice(ci,1); balSheet.rows.forEach(r=>r.splice(ci,1)); balSheetDirty=true; renderBalSheet();
+};
+
+window.balSheetShiftMonth = function(n){
+  balSheetMonth = new Date(balSheetMonth.getFullYear(), balSheetMonth.getMonth()+n, 1);
+  renderBalSheetCal();
+};
+
+window.balSheetSelectDay = function(k){
+  if(k !== balSheetDay && !balSheetEnsureSaved()) return;
+  balSheetDay = k;
+  const e = balSheetDays[k];
+  balSheet = e?.data ? JSON.parse(e.data) : balSheetNewDay();
+  balSheetDirty = false;
+  const d = balKeyDate(k);
+  balSheetMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  document.getElementById('bal-sheet-day').textContent = '📅 ' + balFmtDay(k);
+  document.getElementById('bal-sheet-meta').textContent = e?.author ? `✍️ ${e.author} — ${e.date||''}` : 'يوم جديد — لسه ما اتحفظش';
+  renderBalSheetCal();
+  renderBalSheet();
 };
 
 window.openBalSheet = async function(){
@@ -8143,27 +8244,33 @@ window.openBalSheet = async function(){
   const meta = document.getElementById('bal-sheet-meta');
   meta.textContent = 'جاري التحميل...';
   try{
-    const snap = await getDoc(doc(db, C.sharedNote, BAL_SHEET_DOC_ID));
-    const d = snap.exists() ? snap.data() : null;
-    balSheet = d?.data ? JSON.parse(d.data) : balSheetDefault();
-    meta.textContent = d?.author ? `✍️ ${d.author} — ${d.date||''}` : '';
+    await balSheetLoadDays();
   }catch(e){
     console.error(e);
-    balSheet = balSheet || balSheetDefault();
-    meta.textContent = '';
     showToast('تعذر تحميل الملخص','error');
   }
-  renderBalSheet();
+  balSheetDirty = false;
+  balSheetSelectDay(balDayKey(new Date()));
+};
+
+window.closeBalSheet = function(){
+  if(!balSheetEnsureSaved()) return;
+  balSheetDirty = false;
+  closeModal('bal-sheet-modal');
 };
 
 window.saveBalSheet = async function(){
-  if(!balSheet) return;
+  if(!balSheet || !balSheetDay) return;
   const author = currentUser?.name || currentUser?.email?.split('@')[0] || 'المستخدم';
   const date = postitGetNow();
+  // Firestore doesn't allow nested arrays, so the grid is stored as JSON
+  const entry = { data: JSON.stringify(balSheet), author, date, savedAt: new Date().toISOString() };
   try{
-    // Firestore doesn't allow nested arrays, so the grid is stored as JSON
-    await setDoc(doc(db, C.sharedNote, BAL_SHEET_DOC_ID), { data: JSON.stringify(balSheet), author, date });
+    await setDoc(doc(db, C.sharedNote, BAL_SHEET_PREFIX + balSheetDay), entry);
+    balSheetDays[balSheetDay] = entry;
+    balSheetDirty = false;
     document.getElementById('bal-sheet-meta').textContent = `✍️ ${author} — ${date}`;
+    renderBalSheetCal();
     showToast('تم حفظ الملخص ✓','success');
   }catch(e){
     console.error(e);
