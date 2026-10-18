@@ -787,6 +787,7 @@
           <div class="card-head">
             <div><h2>Before sending the claims</h2><div class="muted small">Insured visits in the selected period, checked against the reasons insurers rejected before · Must fix = the insurer will reject it · Review = check it with the doctor</div></div>
             <div class="actions">
+              <input class="field search" id="clSearch" type="search" placeholder="File no, ID no or patient name…" style="min-width:230px">
               <div class="seg" id="clLevel" role="group" aria-label="Show">
                 <button data-level="" aria-pressed="true">All problems</button>
                 <button data-level="fix" aria-pressed="false">Must fix</button>
@@ -1099,6 +1100,14 @@
     "Antibiotic without a bacterial diagnosis": "مضاد حيوي بدون تشخيص بكتيري",
     "Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it": "مضاد حيوي مع تشخيص فيروسي بس (برد / التهاب تنفسي علوي / إنفلونزا): {m} — اكتب التشخيص البكتيري أو شيل المضاد",
     "Antibiotic without an infection diagnosis: {m}": "مضاد حيوي بدون تشخيص عدوى: {m}",
+    "Dental service without approval": "خدمة أسنان بدون موافقة",
+    "Dental service without an approval number: {s} — get the approval and write it on the service": "خدمة أسنان من غير رقم موافقة: {s} — خد الموافقة واكتب رقمها على الخدمة",
+    "Nebulizer without its medicine": "جلسة بخار من غير دواء البخار",
+    "{s} without a nebulizer medicine in the prescription — add the medicine used (e.g. Pulmicort, Ventolin, Atrovent, Combivent nebules)": "{s} من غير دواء بخار في الروشتة — اكتب الدواء اللي اتستخدم (زي بلميكورت أو فنتولين أو أتروفنت أو كومبيفنت)",
+    "Examination diagnosis — not covered": "تشخيص كشف عام — غير مغطى",
+    "Not covered by insurance: examination / check-up diagnosis {d}": "غير مغطى من التأمين: تشخيص كشف / فحص عام {d}",
+    "File no, ID no or patient name…": "رقم الملف أو الهوية أو اسم المريض…",
+    "No insured visit in this period matches the search.": "مفيش زيارة تأمين في الفترة دي مطابقة للبحث.",
     // guide card
     "From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know": "من تقارير نفيس لشهري يوليو وأغسطس 2026 · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
     "Lost (SAR)": "المفقود (ريال)",
@@ -1886,7 +1895,7 @@
   const words = (s) => String(s ?? "").trim().split(/\s+/).filter((w) => w && !/^[0.\-]+$/.test(w)).length;
   const textLevel = (s) => { const n = words(s); return n === 0 ? "empty" : n < 3 ? "brief" : "detailed"; };
   // Dental clinic: vital signs are not taken there, so they are never counted or flagged (clinic decision, Oct 2026)
-  const DENTAL = /DENT(AL|IST)|ORTHODON|أسنان|اسنان|إسنان/i;
+  const DENTAL = /DEN(T?AL|TIST)|ORTHODON|أسنان|اسنان|إسنان/i; // the program spells it "DENAL CLINIC"
   const isDental = (r) => DENTAL.test(String(r.Clinic ?? ""));
   const hasVitals = (r) => String(r.BP ?? "").replace(/[0\s/.]/g, "") !== "" && Number(r.Temp) > 0 && Number(r.Pulse) > 0;
   const ANTIBIOTIC = /ENOXIRT|TRIAXON|ROCEPH|AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
@@ -2240,6 +2249,10 @@
   // Nebulizer session / Pulmicort ampoules: rejected with J22, J06, R05 (cough) — approved with asthma
   const NEBULIZED = /NEBUL|RESPUL|PULMICORT\s*AMP|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
   const NEB_DX = /^(J4[4-6]|J21|J05|J38\.?5|J20|R06\.?2|J98\.?0)/;
+  // A nebulizer session (service) is claimed with the medicine used in it — the session alone is rejected (clinic rule, Oct 2026)
+  const NEB_SERVICE = /NEBUL/i, NEB_NOT_SERVICE = /COMPRESSOR|OMRON|DEVICE|MACHINE/i;
+  const NEB_MED = /PULMICORT|BUDESONIDE|VENTOLIN|SALBUTAMOL|ALBUTEROL|FARCOLIN|ATROVENT|IPRATROP|COMBIVENT|DUOLIN|IPRAMOL|LEVALBUTEROL|LEVOSALBUTAMOL|XOPENEX|NEBUL|RESPUL/i;
+  const NOT_NEB_FORM = /INHALER|EVOHALER|PRESSURI[SZ]ED|AEROSOL|\bHFA\b|\bMDI\b|TURBUHALER|DISKUS|ACCUHALER|POWDER|TAB|SYRUP|CAPS/i;
   const ONDANSETRON = /ONDANSET|DANSETRON|ZOFRAN/i, VOMIT_DX = /^(R11|A0[0-9]|K52|O21)/;
   const PPI = /PANTOPRAZ|PANTOMAX|PANTOZOL|CONTROLOC|OMEPRAZ|ESOMEPRAZ|NEXIUM|LANSOPRAZ|RABEPRAZ/i;
   const PPI_DX = /^(K2[0-9]|K3[01]|R1[0-3]|B96\.?81|M|S|T)/; // stomach, or with a painkiller for joint / injury pain
@@ -2311,6 +2324,15 @@
     for (const m of J(r.MedsJson)) { const k = medKey(m); if (!k || IV_PARACETAMOL.test(String(m.Name ?? ""))) continue; if (medSeen.has(k)) medDup.add(shortMed(m)); medSeen.add(k); }
     if (medDup.size) add("fix", "Same medicine entered twice on one day", t("Same medicine entered more than once on the same day: {m} — enter it once with the full quantity", { m: [...medDup].join(listSep()) }));
     const svcs = J(r.ServicesJson), svcText = (s) => String(s.Description ?? "");
+    // Dental: every service needs its own approval number on the same visit (synced since Oct 2026; older visits have no field)
+    if (isDental(r) && r.SvcApprovalJson !== undefined) {
+      const noAppr = J(r.SvcApprovalJson).filter((s) => !String(s.Approval ?? "").trim() && !/CONSULT/i.test(String(s.Description ?? "")));
+      if (noAppr.length) add("fix", "Dental service without approval", t("Dental service without an approval number: {s} — get the approval and write it on the service", { s: noAppr.map((s) => s.Description || s.Code).join(listSep()) }));
+    }
+
+    const nebSvc = svcs.find((s) => NEB_SERVICE.test(svcText(s)) && !NEB_NOT_SERVICE.test(svcText(s)));
+    if (nebSvc && !J(r.MedsJson).some((m) => { const n = `${m.Name ?? ""} ${m.Type ?? ""}`; return NEB_MED.test(n) && !NOT_NEB_FORM.test(n); }))
+      add("fix", "Nebulizer without its medicine", t("{s} without a nebulizer medicine in the prescription — add the medicine used (e.g. Pulmicort, Ventolin, Atrovent, Combivent nebules)", { s: svcText(nebSvc) }));
 
     if (isMissing(r)) return out; // vital signs and codes only mean something on a written form
     // Imaging, IV fluids and injections were rejected for "chief complaint inadequate" on new visits.
@@ -2336,6 +2358,9 @@
     if (pulse && (pulse < 30 || pulse > 220)) wrong.push(`${t("Pulse")} ${r.Pulse}`);
     if (wrong.length && !dental) add("fix", "Vital sign written wrong", t("Vital sign written wrong: {v}", { v: wrong.join(listSep()) }));
 
+    // Check-up / examination diagnoses (e.g. Z00 "general medical examination") are not covered by insurance (clinic rule, Oct 2026)
+    const exams = J(r.DiagnosesJson).filter((d) => /EXAMINATION/i.test(String(d.Name ?? "")));
+    if (exams.length) add("fix", "Examination diagnosis — not covered", t("Not covered by insurance: examination / check-up diagnosis {d}", { d: exams.map((d) => `${String(d.Code ?? "").toUpperCase()} ${d.Name}`.trim()).join(listSep()) }));
     const codes = dxCodes(r);
     if (!codes.length) return out;
     // The diagnosis written next to each medicine in the prescription must also be on the UCAF (NPHIES links every medicine to a claim diagnosis)
@@ -2421,15 +2446,20 @@
       kpi(t("Review"), nf.format(rev), t("{p}% of insured visits", { p: pct(rev, clChecked.length) }), rev ? "warn" : "") +
       kpi(t("Ready to send"), nf.format(ok), t("{p}% of insured visits", { p: pct(ok, clChecked.length) }), "good");
 
-    const list = clChecked.filter((c) => (clLevel === "fix" ? hasFix(c) : clLevel === "review" ? c.issues.some((i) => i.level === "review") : c.issues.length))
+    // search by file no, ID (iqama) no, visit no or name — when searching, visits with no problem are listed too
+    const q = $("clSearch").value.trim().toLowerCase();
+    const match = (r) => [r.FileNo, r.IdNo, r.VisitId, r.PatientName, r.PatientName2].some((v) => String(v ?? "").toLowerCase().includes(q));
+    const list = clChecked.filter((c) => (!q || match(c.r)) &&
+        (clLevel === "fix" ? hasFix(c) : clLevel === "review" ? c.issues.some((i) => i.level === "review") : (q ? true : c.issues.length)))
       .sort((a, b) => visitOrder(b.r, a.r));
     $("clBodyRows").innerHTML = list.slice(0, 1000).map(({ r, issues }) => `<tr class="clickable" data-id="${e(r.VisitId)}">
         <td>${e(r.VisitDate)}</td><td>${e(r.VisitTime)}</td><td>${e(r.VisitId)}</td><td>${e(r.FileNo)}</td>
         <td><span class="cut" style="max-width:200px" title="${e(r.PatientName)}">${e(r.PatientName)}</span></td>
         <td><span class="cut" style="max-width:160px" title="${e(r.Doctor)}">${e(r.Doctor)}</span></td>
         <td><span class="cut" style="max-width:150px" title="${e(insurer(r))}">${e(insurer(r))}</span></td>
-        <td>${issuePills(clLevel ? issues.filter((i) => i.level === clLevel) : issues)}</td></tr>`).join("");
+        <td>${issues.length ? issuePills(clLevel ? issues.filter((i) => i.level === clLevel) : issues) : `<span class="pill ok">${e(t("Ready to send"))}</span>`}</td></tr>`).join("");
     $("clRowsEmpty").classList.toggle("hidden", list.length > 0);
+    $("clRowsEmpty").textContent = q ? t("No insured visit in this period matches the search.") : t("No problems found in the insured visits of this period.");
 
     const types = new Map();
     for (const c of clChecked) for (const type of new Set(c.issues.map((i) => i.type))) {
@@ -2572,6 +2602,7 @@
     renderClaims();
   }));
   const openWithNotes = (r) => r && openForm(r, issuesEn(r));
+  $("clSearch").addEventListener("input", () => renderClaims());
   $("clBodyRows").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openWithNotes(clVisits.find((r) => r.VisitId === tr.dataset.id)); });
   $("clRejected").addEventListener("click", (ev) => { const b = ev.target.closest("[data-open]"); if (b) openWithNotes(clVisits.find((r) => r.VisitId === b.dataset.open)); });
 
