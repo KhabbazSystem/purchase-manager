@@ -70,6 +70,7 @@
   main { max-width: 1440px; margin: 0 auto; padding: 20px; }
 
   /* Controls */
+  .btn:disabled { opacity: .5; cursor: default; }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px;
          border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); cursor: pointer;
          font-weight: 500; white-space: nowrap; }
@@ -788,6 +789,7 @@
             <div><h2>Before sending the claims</h2><div class="muted small">Insured visits in the selected period, checked against the reasons insurers rejected before · Must fix = the insurer will reject it · Review = check it with the doctor</div></div>
             <div class="actions">
               <input class="field search" id="clSearch" type="search" placeholder="File no, ID no or patient name…" style="min-width:230px">
+              <button class="btn primary" id="clPrint" type="button" title="Choose the doctor from the Doctor filter at the top, then print all his forms at once">Print these UCAFs</button>
               <div class="seg" id="clLevel" role="group" aria-label="Show">
                 <button data-level="" aria-pressed="true">All problems</button>
                 <button data-level="fix" aria-pressed="false">Must fix</button>
@@ -1108,6 +1110,10 @@
     "Not covered by insurance: examination / check-up diagnosis {d}": "غير مغطى من التأمين: تشخيص كشف / فحص عام {d}",
     "File no, ID no or patient name…": "رقم الملف أو الهوية أو اسم المريض…",
     "No insured visit in this period matches the search.": "مفيش زيارة تأمين في الفترة دي مطابقة للبحث.",
+    "Print these UCAFs": "اطبع الـ UCAFs دي",
+    "Print these UCAFs ({n})": "اطبع الـ UCAFs دي ({n})",
+    "Print {n} UCAF forms?": "طباعة {n} نموذج UCAF؟",
+    "Choose the doctor from the Doctor filter at the top, then print all his forms at once": "اختار الدكتور من فلتر الأطباء فوق، وبعدين اطبع كل نماذجه مرة واحدة",
     // guide card
     "From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know": "من تقارير نفيس لشهري يوليو وأغسطس 2026 · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
     "Lost (SAR)": "المفقود (ريال)",
@@ -2190,7 +2196,7 @@
   // Every check matches a reason the insurers gave in the NPHIES claim reports (or a gap in the form they deduct for).
   // "fix" = rejected or deducted if sent as is; "review" = likely fine, but ask the doctor before sending.
   const LOOKBACK_DAYS = 14;
-  let clVisits = [], clHistory = [], clChecked = [], claimDocs = [], claimsErr = null, clLevel = "", clIdx = new Map();
+  let clVisits = [], clHistory = [], clChecked = [], claimDocs = [], claimsErr = null, clLevel = "", clIdx = new Map(), clShown = [];
   // The notes printed on the UCAF go to the doctor, so they are always in English whatever the site language
   function issuesEn(r) {
     const was = lang;
@@ -2344,12 +2350,13 @@
     // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed.
     else if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
-    const miss = [], dental = isDental(r);
+    // children under 14: only temperature and weight are asked for — blood pressure and pulse are not (clinic rule, Oct 2026)
+    const miss = [], dental = isDental(r), child = age != null && age < 14;
     if (dental) { /* no vital signs in the dental clinic */ }
-    else if (!bp && (age == null || age >= 12)) miss.push(t("blood pressure"));
+    else if (!bp && !child) miss.push(t("blood pressure"));
     if (!dental && !temp) miss.push(t("temperature"));
-    if (!dental && !pulse) miss.push(t("pulse"));
-    if (!dental && !weight && age != null && age < 14) miss.push(t("weight"));
+    if (!dental && !pulse && !child) miss.push(t("pulse"));
+    if (!dental && !weight && child) miss.push(t("weight"));
     if (miss.length) add("fix", "Vital signs missing", t("Vital signs missing: {v}", { v: miss.join(listSep()) }));
     const bpOk = bp && !bp.bad && bp.sys >= 60 && bp.sys <= 260 && bp.dia >= 30 && bp.dia <= 160 && bp.sys > bp.dia;
     const wrong = [];
@@ -2459,6 +2466,9 @@
         <td><span class="cut" style="max-width:150px" title="${e(insurer(r))}">${e(insurer(r))}</span></td>
         <td>${issues.length ? issuePills(clLevel ? issues.filter((i) => i.level === clLevel) : issues) : `<span class="pill ok">${e(t("Ready to send"))}</span>`}</td></tr>`).join("");
     $("clRowsEmpty").classList.toggle("hidden", list.length > 0);
+    clShown = list.map((c) => c.r);
+    $("clPrint").textContent = t("Print these UCAFs ({n})", { n: nf.format(clShown.length) });
+    $("clPrint").disabled = clShown.length === 0;
     $("clRowsEmpty").textContent = q ? t("No insured visit in this period matches the search.") : t("No problems found in the insured visits of this period.");
 
     const types = new Map();
@@ -2600,15 +2610,23 @@
     clLevel = b.dataset.level;
     document.querySelectorAll("#clLevel button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     renderClaims();
+    if (current && currentNotes) $("mBody").innerHTML = ucafHtml(current, undefined, undefined, currentNotes);   // open form follows the choice
   }));
   const openWithNotes = (r) => r && openForm(r, issuesEn(r));
   $("clSearch").addEventListener("input", () => renderClaims());
+  $("clPrint").addEventListener("click", () => {
+    if (!clShown.length) return;
+    if (clShown.length > 40 && !confirm(t("Print {n} UCAF forms?", { n: clShown.length }))) return;
+    const list = clShown.slice().sort((a, b) => String(a.VisitDate).localeCompare(String(b.VisitDate)) || String(a.VisitTime).localeCompare(String(b.VisitTime)));
+    printForms(list, (r) => issuesEn(r));
+  });
   $("clBodyRows").addEventListener("click", (ev) => { const tr = ev.target.closest("tr[data-id]"); if (tr) openWithNotes(clVisits.find((r) => r.VisitId === tr.dataset.id)); });
   $("clRejected").addEventListener("click", (ev) => { const b = ev.target.closest("[data-open]"); if (b) openWithNotes(clVisits.find((r) => r.VisitId === b.dataset.open)); });
 
   // ---------- UCAF form ----------
-  function ucafHtml(r, page, pages, notes) {
-    const insNotes = notes?.length ? `
+  function ucafHtml(r, page, pages, notesAll) {
+    const notes = (notesAll ?? []).filter((i) => !clLevel || i.level === clLevel);
+    const insNotes = notes.length ? `
       <div class="ins-notes">
         <h3>⚠ Insurance review — please correct before the claim is sent</h3>
         <ol>${notes.slice().sort((a, b) => (a.level === "fix" ? 0 : 1) - (b.level === "fix" ? 0 : 1))
@@ -2729,7 +2747,8 @@
   }
   function printForms(list, notes) {
     if (!list.length) return;
-    $("printArea").innerHTML = list.map((r, i) => ucafHtml(r, i + 1, list.length, notes)).join("");
+    const notesOf = typeof notes === "function" ? notes : () => notes;
+    $("printArea").innerHTML = list.map((r, i) => ucafHtml(r, i + 1, list.length, notesOf(r))).join("");
     document.body.classList.add("printing-forms");
     window.print();
   }
