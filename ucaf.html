@@ -2348,7 +2348,8 @@
     else if (bigSvc && words(r.ChiefComplaint) < 3)
       add("fix", "Chief complaint too short for the service", t("Chief complaint too short for {s}: \"{c}\" — write the symptoms that needed it", { s: svcText(bigSvc), c: String(r.ChiefComplaint ?? "").trim() }));
     // same rule as the Doctors tab: under 3 words is "brief" — too little for the insurer to see why the services were needed.
-    else if (words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
+    // ...and only when the visit has services: a consultation with no services does not need a longer complaint (clinic rule, Oct 2026)
+    else if (svcs.length && words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
     // children under 14: only temperature and weight are asked for — blood pressure and pulse are not (clinic rule, Oct 2026)
     const miss = [], dental = isDental(r), child = age != null && age < 14;
