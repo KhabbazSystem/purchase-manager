@@ -342,6 +342,7 @@
   .ucaf .ins-notes li { margin: 2px 0; font-weight: bold; }
   .ucaf .ins-notes .tag { display: inline-block; border: 1.5px solid #000; padding: 0 4px; margin-right: 5px; font-size: 11px; }
   .ucaf .ins-notes .tag.fix { background: #c00; color: #fff; border-color: #c00; }
+  .ucaf .ins-notes .tag.info { background: #0b5cad; color: #fff; border-color: #0b5cad; }
   .ucaf table { width: 100%; border-collapse: collapse; margin-top: 3px; }
   .ucaf th, .ucaf td { border: 1px solid #000; padding: 2px 4px; text-align: left; vertical-align: top; white-space: normal; }
   .ucaf th { font-weight: normal; }
@@ -760,12 +761,17 @@
         <!-- Guide: what the insurers deducted in August 2026 (NPHIES line reports) and how to avoid it -->
         <details class="card cl-results">
           <summary class="card-head">
-            <div><h2>How to avoid deductions</h2><div class="muted small">From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know</div></div>
+            <div><h2>How to avoid deductions</h2><div class="muted small">From the NPHIES line reports of July, August and September 2026 · open for the rules every doctor and receptionist should know</div></div>
           </summary>
           <div class="table-wrap">
             <table class="grid guide">
               <thead><tr><th>Reason the insurer gave</th><th class="num">Lost (SAR)</th><th>What to do</th></tr></thead>
               <tbody>
+                <tr><td>Same item twice on the same day (September)</td><td class="num">10,050</td><td>Enoxirt (ceftriaxone) vials lost 8,146 SAR: the insurer pays one vial per day and rejects every extra line with the same date. Enter only today's injection; each next day's injection goes on that day's visit.</td></tr>
+                <tr><td>Diagnosis does not fit the test (September)</td><td class="num">14,440</td><td>CBC alone lost 6,190 SAR (100 lines). Also uric acid, pregnancy test, lipase, HbA1c and urea breath test without a matching diagnosis.</td></tr>
+                <tr><td>Not clinically justified (September)</td><td class="num">6,111</td><td>TSH (1,208), HbA1c (705), lipids (593) and hepatitis B (439) without a diagnosis that explains them.</td></tr>
+                <tr><td>Medicine or device not in the formulary (September)</td><td class="num">4,414</td><td>The Omron nebulizer device lost 2,331 SAR (9 times) — insurers do not pay for the device. Also cefix 400, Reparil and the glucose meter kit.</td></tr>
+                <tr><td>Diagnosis not covered (September)</td><td class="num">2,005</td><td>Vaginal culture lost 1,202 SAR (9 times).</td></tr>
                 <tr><td>Diagnosis does not fit the test</td><td class="num">10,903</td><td>Every test needs a diagnosis that explains it. CBC with a cold only was rejected 58 times (3,708 SAR); also glucose, hepatitis, lipase, ferritin, cortisol and liver tests without a matching diagnosis.</td></tr>
                 <tr><td>Not clinically justified</td><td class="num">4,476</td><td>HbA1c only with a diabetes (E10–E14) or prediabetes (R73) code — 1,608 SAR lost. Ceftriaxone and other antibiotics only with an infection code.</td></tr>
                 <tr><td>Same item twice on the same day</td><td class="num">2,800</td><td>Enter each medicine once with the full quantity. Ceftriaxone vials entered as 3–6 separate lines lost 2,202 SAR.</td></tr>
@@ -1115,12 +1121,22 @@
     "Print {n} UCAF forms?": "طباعة {n} نموذج UCAF؟",
     "Choose the doctor from the Doctor filter at the top, then print all his forms at once": "اختار الدكتور من فلتر الأطباء فوق، وبعدين اطبع كل نماذجه مرة واحدة",
     // guide card
-    "From the NPHIES line reports of July and August 2026 · open for the rules every doctor and receptionist should know": "من تقارير نفيس لشهري يوليو وأغسطس 2026 · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
+    "From the NPHIES line reports of July, August and September 2026 · open for the rules every doctor and receptionist should know": "من تقارير نفيس لشهور يوليو وأغسطس وسبتمبر 2026 · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
     "Lost (SAR)": "المفقود (ريال)",
     "On a new visit, ultrasound, X-ray, IV fluids and IV injections need a complaint that explains them. On a follow-up, \"for injection\" or \"for dressing\" is enough.": "في الكشف الجديد، السونار والأشعة والمحاليل والحقن بالوريد محتاجة شكوى تفسّرها. في المراجعة، \"for injection\" أو \"for dressing\" كفاية.",
     "Antibiotic injection not justified (July)": "حقنة مضاد حيوي غير مبررة (يوليو)",
     "Ceftriaxone (Enoxirt) injections were rejected 130 of 161 times with J22, J06, J03 or asthma. Give an injection only for pneumonia, UTI / pyelonephritis, cellulitis or abscess — otherwise an antibiotic by mouth.": "حقن السيفترياكسون (إنوكسيرت) اترفضت 130 مرة من 161 مع J22 وJ06 وJ03 والربو. الحقنة بس للالتهاب الرئوي أو التهاب المسالك/الكلى أو الالتهاب الخلوي أو الخراج — غير كده مضاد بالفم.",
     "Nebulizer without asthma (July)": "جلسة بخار بدون ربو (يوليو)",
+    "Same item twice on the same day (September)": "نفس البند مرتين في نفس اليوم (سبتمبر)",
+    "Enoxirt (ceftriaxone) vials lost 8,146 SAR: the insurer pays one vial per day and rejects every extra line with the same date. Enter only today's injection; each next day's injection goes on that day's visit.": "فيالات إينوكسيرت (سيفترياكسون) خسرت 8,146 ريال: التأمين بيدفع فيال واحد في اليوم ويرفض أي سطر زيادة بنفس التاريخ. سجّل حقنة النهارده بس، وحقنة كل يوم بعد كده تتسجل على زيارة اليوم ده.",
+    "Diagnosis does not fit the test (September)": "التشخيص لا يناسب التحليل (سبتمبر)",
+    "CBC alone lost 6,190 SAR (100 lines). Also uric acid, pregnancy test, lipase, HbA1c and urea breath test without a matching diagnosis.": "صورة الدم لوحدها خسرت 6,190 ريال (100 سطر). وكمان حمض اليوريك واختبار الحمل والليباز والسكر التراكمي واختبار التنفس بدون تشخيص مناسب.",
+    "Not clinically justified (September)": "غير مبرر طبيًا (سبتمبر)",
+    "TSH (1,208), HbA1c (705), lipids (593) and hepatitis B (439) without a diagnosis that explains them.": "الغدة TSH ‏(1,208) والسكر التراكمي (705) والدهون (593) وفيروس B ‏(439) بدون تشخيص يفسرها.",
+    "Medicine or device not in the formulary (September)": "دواء أو جهاز خارج القائمة (سبتمبر)",
+    "The Omron nebulizer device lost 2,331 SAR (9 times) — insurers do not pay for the device. Also cefix 400, Reparil and the glucose meter kit.": "جهاز البخار أومرون خسر 2,331 ريال (9 مرات) — التأمين مش بيدفع تمن الجهاز. وكمان سيفكس 400 وريباريل وجهاز قياس السكر.",
+    "Diagnosis not covered (September)": "التشخيص غير مغطى (سبتمبر)",
+    "Vaginal culture lost 1,202 SAR (9 times).": "مزرعة المهبل خسرت 1,202 ريال (9 مرات).",
     "Nebulizer sessions and Pulmicort ampoules need asthma, wheeze (R06.2), bronchiolitis or COPD — cough or chest infection alone was rejected.": "جلسات البخار وأمبولات بلميكورت محتاجة ربو أو صفير (R06.2) أو التهاب شعيبات أو انسداد رئوي مزمن — الكحة أو التهاب الصدر لوحده اترفض.",
     "Test repeated too soon (July)": "تحليل متكرر بسرعة (يوليو)",
     "Liver, lipids, glucose, urinalysis and X-ray repeated within days were rejected as too frequent.": "وظائف الكبد والدهون والسكر وتحليل البول والأشعة اللي اتكررت خلال أيام اترفضت لأنها متكررة.",
@@ -1133,7 +1149,6 @@
     "Preauthorization needed": "محتاج موافقة مسبقة",
     "{s} for {p} needs preauthorization — this company rejected it without approval": "{s} لشركة {p} محتاج موافقة مسبقة — الشركة دي رفضته من غير موافقة",
     "Antibiotic injection not justified": "حقنة مضاد حيوي غير مبررة",
-    "Antibiotic injection {m} with {dx} — insurers rejected 8 of 10 in July; it needs pneumonia, UTI / pyelonephritis, cellulitis or abscess, otherwise give it by mouth": "حقنة مضاد حيوي {m} مع {dx} — التأمين رفض 8 من 10 في يوليو؛ محتاجة التهاب رئوي أو التهاب مسالك/كلى أو التهاب خلوي أو خراج، غير كده اديه بالفم",
     "Nebulizer without asthma or wheeze": "جلسة بخار بدون ربو أو صفير",
     "{s} without asthma, wheeze (R06.2), bronchiolitis or COPD — rejected with cough / chest infection alone": "{s} بدون ربو أو صفير (R06.2) أو التهاب شعيبات أو انسداد رئوي مزمن — بيترفض مع الكحة أو التهاب الصدر لوحده",
     "Ondansetron without vomiting": "أوندانسيترون بدون ترجيع",
@@ -1146,8 +1161,6 @@
     "an injury (S/T codes), joint or bone disease (M codes) or limb pain": "إصابة (أكواد S/T) أو مرض مفاصل أو عظام (أكواد M) أو ألم في الطرف",
     "chest pain, palpitations, hypertension, heart disease, dizziness or fainting": "ألم صدر أو خفقان أو ضغط أو مرض قلب أو دوخة أو إغماء",
     "osteoporosis, vitamin D deficiency, cramps, numbness, fatigue or kidney disease": "هشاشة عظام أو نقص فيتامين د أو تقلصات أو تنميل أو إرهاق أو مرض كلى",
-    "diabetes, prediabetes, obesity, thirst / frequent urination, fatigue or pregnancy": "سكر أو ما قبل السكر أو سمنة أو عطش / كثرة تبول أو إرهاق أو حمل",
-    "urinary symptoms, abdominal or back pain, fever, diabetes or pregnancy": "أعراض بولية أو ألم بطن أو ظهر أو حرارة أو سكر أو حمل",
     "How to avoid deductions": "إزاي نتجنب الخصومات",
     "From the August 2026 claims: 24,841 SAR lost out of 74,559 (33%) · open for the rules every doctor and receptionist should know": "من مطالبات أغسطس 2026: ضاع 24,841 ريال من 74,559 (33%) · افتحها للتعليمات اللي لازم كل دكتور وموظف استقبال يعرفها",
     "Reason the insurer gave": "سبب شركة التأمين", "Lost in August": "المفقود في أغسطس", "What to do": "المطلوب",
@@ -1903,6 +1916,8 @@
   // Dental clinic: vital signs are not taken there, so they are never counted or flagged (clinic decision, Oct 2026)
   const DENTAL = /DEN(T?AL|TIST)|ORTHODON|أسنان|اسنان|إسنان/i; // the program spells it "DENAL CLINIC"
   const isDental = (r) => DENTAL.test(String(r.Clinic ?? ""));
+  // ...and the same for orthopedics (clinic decision, Oct 2026) — "ORTHOP" so the orthodontist stays under dental
+  const noVitals = (r) => isDental(r) || /ORTHOP|عظام/i.test(String(r.Clinic ?? ""));
   const hasVitals = (r) => String(r.BP ?? "").replace(/[0\s/.]/g, "") !== "" && Number(r.Temp) > 0 && Number(r.Pulse) > 0;
   const ANTIBIOTIC = /ENOXIRT|TRIAXON|ROCEPH|AMOXI|AUGMENTIN|CLAVUL|AZITHRO|CLARITHRO|ERYTHRO|CEF|CEPH|CIPRO|LEVOFLOX|MOXIFLOX|OFLOX|DOXY|MINOCYC|TETRACYC|METRONID|CLINDAM|NITROFUR|SULFAMETH|TRIMETHOP|PENICIL|AMPICIL|FLUCLOX|LINEZOL|VANCOM|GENTAM|AMIKAC|FOSFOM/i;
   const VIRAL_RTI = /^(J00|J06|J20)/; // common cold, acute URTI, acute bronchitis
@@ -1922,7 +1937,7 @@
       d.forms++; d.patients.add(patientKey(r));
       d.cc[textLevel(r.ChiefComplaint)]++;
       if (textLevel(r.Signs) === "detailed") d.signsDetailed++;
-      if (!isDental(r)) { d.vitalForms++; if (hasVitals(r)) d.vitals++; }
+      if (!noVitals(r)) { d.vitalForms++; if (hasVitals(r)) d.vitals++; }
       d.codes += diags.length; d.meds += meds.length;
       if (svcs.length) d.withSvc++;
       if (r.VisitTypeCode === "R") d.follow++;
@@ -2246,12 +2261,11 @@
     { svc: /EXTREMITY|(HAND|WRIST|ANKLE|FOOT|KNEE|ELBOW|SHOULDER|FINGER|TOE|FOREARM|HUMERUS|FEMUR|TIBIA).*X-?RAY|X-?RAY.*(HAND|WRIST|ANKLE|FOOT|KNEE|ELBOW|SHOULDER|FINGER|TOE|FOREARM|HUMERUS|FEMUR|TIBIA)/i, dx: /^(S|T|M|R2[69]|R52|G5|Q6|Q7)/, level: "review", need: "an injury (S/T codes), joint or bone disease (M codes) or limb pain" },
     { svc: /ELECTROCARDIO|\bECG\b|\bEKG\b/i, dx: /^(I|R0[0-7]|R5[3-5]|R42|E0[0-5]|E1[0-4]|E78|E87|F41|Z01\.?81)/, level: "review", need: "chest pain, palpitations, hypertension, heart disease, dizziness or fainting" },
     { svc: /CALCIUM|MAGNESIUM/i, dx: /^(E83|E55|E2[01]|E87|M8[0-3]|M79|R25|R29|R20|R53|N18|N2[0-3]|G40|K90|D51)/, level: "review", need: "osteoporosis, vitamin D deficiency, cramps, numbness, fatigue or kidney disease" },
-    { svc: /^\s*GLUCOSE|BLOOD SUGAR|\bFBS\b|\bRBS\b/i, dx: /^(E1[0-6]|E66|E78|R73|R63|R53|R35|R42|R55|R81|O|Z3[2-6]|I1[0-5]|L0|N39|B37)/, level: "review", need: "diabetes, prediabetes, obesity, thirst / frequent urination, fatigue or pregnancy" },
-    { svc: /URINALYSIS|URINE ANALYSIS|URINE R\/?E|\bGUE\b/i, dx: /^(N|R3[0-9]|R1[01]|R50|R82|A09|O|Z3[2-6]|E1[0-4]|I1[0-5]|M54)/, level: "review", need: "urinary symptoms, abdominal or back pain, fever, diabetes or pregnancy" },
+    // glucose, urinalysis and stool tests: no notes at all — cheap tests, not worth troubling the doctor (clinic decision, Oct 2026)
   ];
-  // July 2026: ceftriaxone injections were rejected 130 of 161 times (4,561 SAR) — mostly with J22 / J06 / J03 / J45.
-  // Insurers accept an antibiotic injection in the clinic only for a serious bacterial infection; otherwise oral.
-  const SERIOUS_INFECTION = /^(J1[2-8]|J85|J86|N1[0-2]|N30|N39\.?0|N70|N73|L0[2-38]|A0[0-8]|A4[01]|A5[0-6]|G0[0-4]|K35|K6[15]|K8[01]|K57|M86|H66|H70|T81\.?4|O23|O86)/;
+  // Words in the chief complaint / signs that show a bacterial infection: with them an antibiotic needs no note even if the
+  // codes are only "URTI" (clinic decision, Oct 2026 — and in September no oral antibiotic was rejected for its diagnosis)
+  const BACTERIAL_TEXT = /TONSIL|EXUDAT|\bPUS\b|PURULENT|ABSCESS|PHARYNGIT|STREP|OTITIS|EAR DISCHARGE|DISCHARGING EAR|BULGING|SINUSIT|GREENISH|YELLOW(ISH)? (SPUTUM|DISCHARGE)|PRODUCTIVE|SPUTUM|CREPITATION|CREPS|RALES|CRACKLES|PNEUMONIA|DYSURIA|BURNING (MICTURITION|URINATION)|\bUTI\b|CELLULITIS|INFECTED|INFECTION|FEVER|HYPERTHERMIA|PYREXIA|حرار|صديد|اللوز/i;
   // Nebulizer session / Pulmicort ampoules: rejected with J22, J06, R05 (cough) — approved with asthma
   const NEBULIZED = /NEBUL|RESPUL|PULMICORT\s*AMP|(BUDESONIDE|IPRATROPIUM|SALBUTAMOL)[^:]*:\s*(SUSPENSION|SOLUTION)/i;
   const NEB_DX = /^(J4[4-6]|J21|J05|J38\.?5|J20|R06\.?2|J98\.?0)/;
@@ -2266,7 +2280,8 @@
   const PREAUTH_IV = /MARINE INNOVATION|SAUDI ARABIC COMPUTER|ZAMIL CENTRAL/i;
   const IV_SVC = /INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
   // "Too frequent": labs and imaging repeated within the 14 days before (consultations, injections and dressings are not tests)
-  const IS_TEST = (d) => TEST_RULES.some((x) => x.svc.test(d)) || /X-?RAY|ULTRASOUND|\bCT\b|\bMRI\b|URINALYSIS|GLUCOSE|LIPID|LIVER|RENAL|CREAT|UREA|ELECTROLYTE|STOOL|\bGGT\b/i.test(d);
+  const NO_NOTES_TEST = /GLUCOSE|BLOOD SUGAR|\bFBS\b|\bRBS\b|URIN|\bGUE\b|STOOL/i; // never flagged (see TEST_RULES)
+  const IS_TEST = (d) => !NO_NOTES_TEST.test(d) && (TEST_RULES.some((x) => x.svc.test(d)) || /X-?RAY|ULTRASOUND|\bCT\b|\bMRI\b|LIPID|LIVER|RENAL|CREAT|\bUREA\b|ELECTROLYTE|\bGGT\b/i.test(d));
   const num = (v) => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; };
   function parseBP(v) {
     const s = String(v ?? "").trim();
@@ -2288,7 +2303,7 @@
   // idx: the patient's insured visits in the loaded period, oldest first
   function insuranceIssues(r, idx) {
     const out = [];
-    const add = (level, type, text) => out.push({ level, type, text });
+    const add = (level, type, text, tone) => out.push({ level, type, text, tone });
     if (isMissing(r)) add("fix", "UCAF not written", t("UCAF not written or chief complaint empty"));
     else if (!dxCodes(r).length) add("fix", "No diagnosis code", t("No diagnosis code"));
     const exp = isoFromAny(r.ExpireDate);
@@ -2352,8 +2367,8 @@
     else if (svcs.length && words(r.ChiefComplaint) < 3) add("review", "Chief complaint too short", t("Chief complaint too short: \"{c}\" — write the symptoms and their duration", { c: String(r.ChiefComplaint ?? "").trim() }));
     const age = ageOf(r), bp = parseBP(r.BP), temp = num(r.Temp), pulse = num(r.Pulse), weight = num(r.Weight);
     // children under 14: only temperature and weight are asked for — blood pressure and pulse are not (clinic rule, Oct 2026)
-    const miss = [], dental = isDental(r), child = age != null && age < 14;
-    if (dental) { /* no vital signs in the dental clinic */ }
+    const miss = [], dental = noVitals(r), child = age != null && age < 14;
+    if (dental) { /* no vital signs in the dental and orthopedic clinics */ }
     else if (!bp && !child) miss.push(t("blood pressure"));
     if (!dental && !temp) miss.push(t("temperature"));
     if (!dental && !pulse && !child) miss.push(t("pulse"));
@@ -2379,7 +2394,7 @@
       const k = c.toUpperCase(), l = rxMissing.get(k) ?? new Set(); l.add(shortMed(x)); rxMissing.set(k, l);
     }
     if (rxMissing.size) add("fix", "Prescription diagnosis not in the UCAF", t("Diagnosis in the prescription is not in the UCAF: {list} — add it to the UCAF or correct the prescription",
-      { list: [...rxMissing].map(([c, m]) => `${c} (${[...m].join(listSep())})`).join(" · ") }));
+      { list: [...rxMissing].map(([c, m]) => `${c} (${[...m].join(listSep())})`).join(" · ") }), "info"); // blue: a typing mismatch, not a medical mistake
     // One clinic reading is not hypertension: ESC 2024 / ACC-AHA guidelines need repeated readings, and pain, fever or
     // anxiety raise it for the visit (130–159 / 80–99 is common and the doctor is right not to code it).
     // Only a clearly high reading — grade 2, 160/100 or more — is worth asking the doctor about (clinic decision, Oct 2026).
@@ -2405,15 +2420,13 @@
     // Antibiotics: rejected with a viral-only diagnosis (cold, URTI, flu) or with no infection at all (ceftriaxone with anemia)
     const meds = J(r.MedsJson), medName = (m) => String(m.Name ?? ""), medList = (l) => [...new Set(l.map(shortMed))].join(listSep());
     const abx = meds.filter((m) => ANTIBIOTIC.test(medName(m)));
-    if (abx.length && codes.every((c) => VIRAL_ONLY.test(c)))
+    const bacterialText = BACTERIAL_TEXT.test(`${r.ChiefComplaint ?? ""} ${r.Signs ?? ""} ${r.Notes ?? ""}`) || temp >= 38;
+    if (!abx.length || bacterialText) { /* no antibiotic, or the UCAF text already explains it */ }
+    else if (codes.every((c) => VIRAL_ONLY.test(c)))
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic with a viral diagnosis only (cold / URTI / flu): {m} — add the bacterial diagnosis or remove it", { m: medList(abx) }));
-    else if (abx.length && !hasDx(FEVER_DX))
+    else if (!hasDx(FEVER_DX))
       add("review", "Antibiotic without a bacterial diagnosis", t("Antibiotic without an infection diagnosis: {m}", { m: medList(abx) }));
-    else {
-      const injAbx = abx.filter((m) => IN_CLINIC_MED.test(`${medName(m)} ${m.Type ?? ""}`));
-      if (injAbx.length && !hasDx(SERIOUS_INFECTION))
-        add("review", "Antibiotic injection not justified", t("Antibiotic injection {m} with {dx} — insurers rejected 8 of 10 in July; it needs pneumonia, UTI / pyelonephritis, cellulitis or abscess, otherwise give it by mouth", { m: medList(injAbx), dx: codes.join(", ") }));
-    }
+    // the antibiotic-injection note was dropped at the clinic's request (Oct 2026)
     const neb = [...svcs.map(svcText), ...meds.map(medName)].find((s) => NEBULIZED.test(s));
     if (neb && !hasDx(NEB_DX))
       add("review", "Nebulizer without asthma or wheeze", t("{s} without asthma, wheeze (R06.2), bronchiolitis or COPD — rejected with cough / chest infection alone", { s: neb.split(" : ")[0] }));
@@ -2437,7 +2450,7 @@
     badge.textContent = n; badge.classList.toggle("hidden", n === 0);
   }
 
-  const issuePills = (issues) => issues.map((i) => `<span class="pill ${i.level === "fix" ? "danger" : "warn"}">${e(i.text)}</span>`).join(" ");
+  const issuePills = (issues) => issues.map((i) => `<span class="pill ${i.tone || (i.level === "fix" ? "danger" : "warn")}">${e(i.text)}</span>`).join(" ");
   const fmtSar = (n) => money.format(n);
 
   function renderClaims() {
@@ -2474,12 +2487,12 @@
 
     const types = new Map();
     for (const c of clChecked) for (const type of new Set(c.issues.map((i) => i.type))) {
-      const lvl = c.issues.find((i) => i.type === type).level;
-      const x = types.get(type) ?? { type, lvl, n: 0 }; x.n++; types.set(type, x);
+      const first = c.issues.find((i) => i.type === type), lvl = first.level;
+      const x = types.get(type) ?? { type, lvl, tone: first.tone, n: 0 }; x.n++; types.set(type, x);
     }
     const typeRows = [...types.values()].sort((a, b) => (a.lvl === "fix" ? 0 : 1) - (b.lvl === "fix" ? 0 : 1) || b.n - a.n);
     $("clTypes").innerHTML = typeRows.length ? `<table class="grid"><thead><tr><th>${t("Problem")}</th><th>${t("Level")}</th><th class="num">${t("Visits")}</th><th>${t("Share")}</th></tr></thead><tbody>
-      ${typeRows.map((x) => `<tr><td>${e(t(x.type))}</td><td><span class="pill ${x.lvl === "fix" ? "danger" : "warn"}">${t(x.lvl === "fix" ? "Must fix" : "Review")}</span></td>
+      ${typeRows.map((x) => `<tr><td>${e(t(x.type))}</td><td><span class="pill ${x.tone || (x.lvl === "fix" ? "danger" : "warn")}">${t(x.lvl === "fix" ? "Must fix" : "Review")}</span></td>
         <td class="num">${nf.format(x.n)}</td><td>${shareCell(x.n, clChecked.length)}</td></tr>`).join("")}</tbody></table>`
       : `<div class="empty">${t("None in this period.")}</div>`;
 
@@ -2631,7 +2644,7 @@
       <div class="ins-notes">
         <h3>⚠ Insurance review — please correct before the claim is sent</h3>
         <ol>${notes.slice().sort((a, b) => (a.level === "fix" ? 0 : 1) - (b.level === "fix" ? 0 : 1))
-          .map((i) => `<li><span class="tag ${i.level}">${i.level === "fix" ? "MUST FIX" : "REVIEW"}</span>${e(i.text)}</li>`).join("")}</ol>
+          .map((i) => `<li><span class="tag ${i.tone || i.level}">${i.tone === "info" ? "CHECK Rx" : i.level === "fix" ? "MUST FIX" : "REVIEW"}</span>${e(i.text)}</li>`).join("")}</ol>
       </div>` : "";
     const tick = (b) => (b ? "✔" : "&nbsp;&nbsp;");
     const diags = J(r.DiagnosesJson), svcs = J(r.ServicesJson), meds = J(r.MedsJson);
