@@ -293,6 +293,8 @@
   #chIncome .seg[data-part]:hover { filter: brightness(1.15); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px currentColor; }
   #inKpis .kpi[data-part]:hover, #inKpis .kpi[data-part]:focus-visible { border-color: var(--accent); outline: none; }
   #inTbody td[data-part]:hover, #inFoot td[data-part]:hover { color: var(--accent); text-decoration: underline; }
+  .click-hint { margin-top: 6px; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;
+                background: var(--accent-soft); color: var(--accent); display: inline-block; }
   .lines-panel { max-width: 1100px; margin: 0 auto; }
   .lines-panel .card-head h2 { font-size: 16px; }
   .lines-panel .kpis { padding: 12px 16px 0; margin-bottom: 4px; }
@@ -732,7 +734,8 @@
         <div class="kpis" id="inKpis"></div>
         <div class="card">
           <div class="card-head">
-            <div><h2>Income chart</h2><div class="muted small">Highest first · hover a doctor for the details</div></div>
+            <div><h2>Income chart</h2><div class="muted small">Highest first · hover a doctor for the details</div>
+              <div class="click-hint">👆 Click a doctor's blue (cash) or orange (credit) bar to see all the services, by patient file number</div></div>
             <div class="actions"><div class="legend" id="inLegend"></div></div>
           </div>
           <div class="chart" id="chIncome"></div>
@@ -989,6 +992,8 @@
     "total": "الإجمالي", "credit": "آجل", "services": "خدمات",
     "Cash services": "خدمات النقدي", "Credit services": "خدمات الآجل", "Files": "عدد الملفات", "Service": "الخدمة", "Qty": "الكمية",
     "Amount": "المبلغ", "Invoice": "الفاتورة", "Loading…": "جاري التحميل…", "Consultation": "كشف", "Lab": "تحاليل", "X-ray": "أشعة",
+    "👆 Click a doctor's blue (cash) or orange (credit) bar to see all the services, by patient file number":
+      "👆 اضغط على الجزء الأزرق (نقدي) أو البرتقالي (آجل) عند أي طبيب لعرض كل الخدمات برقم ملف المريض",
     "Other services": "خدمات أخرى", "Cash visits": "زيارات النقدي", "Insurance visits": "زيارات التأمين", "Price": "السعر",
     "services written on the visit, price before discount": "الخدمات المكتوبة على الزيارة، والسعر قبل الخصم", "{n} services": "{n} خدمة", "Show the services": "اعرض الخدمات",
     "{p}% of income · click for the services": "{p}% من الإيراد · اضغط لعرض الخدمات",
