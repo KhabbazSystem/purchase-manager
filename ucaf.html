@@ -288,6 +288,23 @@
   .three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 4px 16px 16px; }
   @media (max-width: 1000px) { .three-col { grid-template-columns: 1fr; } }
   #chIncome .hrow { grid-template-columns: minmax(0, 190px) 1fr 132px; }
+  /* Income: click Cash / Credit to list every service with its file number */
+  #chIncome .seg[data-part], #inKpis .kpi[data-part], #inTbody td[data-part], #inFoot td[data-part] { cursor: pointer; }
+  #chIncome .seg[data-part]:hover { filter: brightness(1.15); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px currentColor; }
+  #inKpis .kpi[data-part]:hover, #inKpis .kpi[data-part]:focus-visible { border-color: var(--accent); outline: none; }
+  #inTbody td[data-part]:hover, #inFoot td[data-part]:hover { color: var(--accent); text-decoration: underline; }
+  .lines-panel { max-width: 1100px; margin: 0 auto; }
+  .lines-panel .card-head h2 { font-size: 16px; }
+  .lines-panel .kpis { padding: 12px 16px 0; margin-bottom: 4px; }
+  .lines-panel .kpi { box-shadow: none; background: var(--surface-2); }
+  .lines-panel #lnSearch { min-width: 220px; }
+  .lines-panel tr.file td { background: var(--surface-2); border-top: 2px solid var(--line-strong); font-weight: 600; }
+  .lines-panel tbody tr.file:first-child td { border-top: 0; }
+  .lines-panel tr.svc td:first-child { padding-inline-start: 36px; }
+  .lines-panel .fileno { display: inline-block; min-width: 64px; padding: 2px 10px; border-radius: 6px; font-size: 15px; font-weight: 700;
+                         background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; text-align: center; }
+  .lines-panel .who { margin-inline-start: 10px; }
+  .lines-panel .meta { color: var(--muted); font-weight: 400; margin-inline-start: 10px; font-size: 12px; }
   .three-col .hrow { grid-template-columns: minmax(0, 1fr) 70px 56px; }
   .sub-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
   .profile-kpis { padding: 12px 16px 0; margin-bottom: 8px; }
@@ -876,6 +893,27 @@
   <div id="mBody"></div>
 </div>
 
+<div id="linesModal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="lnTitle">
+  <div class="card lines-panel">
+    <div class="card-head">
+      <div><h2 id="lnTitle"></h2><div class="muted small" id="lnSub"></div></div>
+      <div class="actions">
+        <input class="field" id="lnSearch" type="search" placeholder="Search file no, patient or service" aria-label="Search file no, patient or service">
+        <button class="btn" id="lnCsv">Export CSV</button>
+        <button class="btn" id="lnClose">Close</button>
+      </div>
+    </div>
+    <div class="kpis" id="lnKpis"></div>
+    <div class="table-wrap">
+      <table class="grid">
+        <thead><tr><th>File no</th><th>Service</th><th>Type</th><th>Doctor</th><th>Date</th><th class="num">Qty</th><th class="num" id="lnAmtHead">Amount</th></tr></thead>
+        <tbody id="lnBody"></tbody>
+      </table>
+      <div class="empty hidden" id="lnEmpty"></div>
+    </div>
+  </div>
+</div>
+
 <div id="printArea"></div>
 
 <script type="module">
@@ -949,6 +987,16 @@
     "No tabs are shared with you yet. Ask an admin for access.": "لا توجد تبويبات متاحة لك بعد. اطلب الصلاحية من المسؤول.",
     "Admins can add and remove people, and choose which tabs each person sees. Removing access hides all data from that person.": "يمكن للمسؤولين إضافة الأشخاص وإزالتهم وتحديد التبويبات التي يراها كل شخص. إزالة الصلاحية تخفي كل البيانات عن هذا الشخص.", "Income chart": "رسم الإيرادات", "Highest first · hover a doctor for the details": "الأعلى أولًا · مرّر على الطبيب لعرض التفاصيل",
     "total": "الإجمالي", "credit": "آجل", "services": "خدمات",
+    "Cash services": "خدمات النقدي", "Credit services": "خدمات الآجل", "Files": "عدد الملفات", "Service": "الخدمة", "Qty": "الكمية",
+    "Amount": "المبلغ", "Invoice": "الفاتورة", "Loading…": "جاري التحميل…", "Consultation": "كشف", "Lab": "تحاليل", "X-ray": "أشعة",
+    "Other services": "خدمات أخرى", "{n} services": "{n} خدمة", "Show the services": "اعرض الخدمات",
+    "{p}% of income · click for the services": "{p}% من الإيراد · اضغط لعرض الخدمات",
+    "Search file no, patient or service": "ابحث برقم الملف أو اسم المريض أو الخدمة",
+    "No service matches the search.": "مفيش خدمة مطابقة للبحث.", "No service details for this period yet.": "مفيش تفاصيل خدمات للفترة دي لسه.",
+    "Details total {a} vs income {b} — some days have no service details yet (run backfill-income.bat).":
+      "إجمالي التفاصيل {a} مقابل الإيراد {b} — في أيام لسه مالهاش تفاصيل خدمات (شغّل backfill-income.bat).",
+    "Service details are not allowed yet — publish the new Firestore rules (doctor_income_lines).":
+      "تفاصيل الخدمات لسه مش مسموحة — انشر قواعد Firestore الجديدة (doctor_income_lines).",
     "Only edits made more than 24 hours after the form was first written · Late = more than 72 hours": "التعديلات بعد أكثر من 24 ساعة من كتابة النموذج فقط · المتأخر = أكثر من 72 ساعة", "Year": "سنة", "Medical (without medicines)": "الطبي (بدون الأدوية)", "All (with medicines)": "الجميع (بالأدوية)",
     "Income by doctor": "الإيرادات حسب الطبيب", "Consultations": "الكشفيات", "Follow-ups": "الإعادة", "Credit": "الآجل",
     "Total income": "إجمالي الإيرادات", "With medicines": "شامل الأدوية", "Without medicines": "بدون الأدوية",
@@ -1506,6 +1554,7 @@
         ]);
         if (token !== periodToken) return;
         incomeDocs = snap.docs.map((d) => d.data());
+        incomePeriod = p; linesCache.clear();
         const at = meta?.exists() ? meta.data().at?.toDate?.() : null;
         $("inSync").textContent = at ? t("Last income sync: {t}", { t: at.toLocaleString(LOC(), { dateStyle: "medium", timeStyle: "short" }) }) : "";
         renderIncome();
@@ -1551,7 +1600,7 @@
     for (const d of incomeDocs) {
       if (dr && d.DocName !== dr) continue;
       const key = d.DocId || d.DocName;
-      const a = byDoc.get(key) ?? { name: d.DocName || d.DocId, cons: 0, rev: 0, serv: 0, cash: 0, credit: 0 };
+      const a = byDoc.get(key) ?? { key, name: d.DocName || d.DocId, cons: 0, rev: 0, serv: 0, cash: 0, credit: 0 };
       a.cons += d.Cons || 0; a.rev += d.Revisits || 0; a.serv += d.Services || 0;
       a.cash += d[pre + "Cash"] || 0; a.credit += d[pre + "Credit"] || 0;
       byDoc.set(key, a);
@@ -1562,21 +1611,25 @@
     const T = { cons: sum("cons"), rev: sum("rev"), visits: sum("visits"), serv: sum("serv"), cash: sum("cash"), credit: sum("credit"), total: sum("total") };
 
     $("inKpis").innerHTML = kpi(t("Total income"), money.format(T.total), t(incomeMode === "all" ? "With medicines" : "Without medicines")) +
-      kpi(t("Cash"), money.format(T.cash), t("{p}% of income", { p: pct(T.cash, T.total) })) +
-      kpi(t("Credit"), money.format(T.credit), t("{p}% of income", { p: pct(T.credit, T.total) })) +
+      kpi(t("Cash"), money.format(T.cash), t("{p}% of income · click for the services", { p: pct(T.cash, T.total) })) +
+      kpi(t("Credit"), money.format(T.credit), t("{p}% of income · click for the services", { p: pct(T.credit, T.total) })) +
       kpi(t("Visits"), nf.format(T.visits), t("{a} consultations · {b} follow-ups", { a: nf.format(T.cons), b: nf.format(T.rev) }));
+    // Cash = part 0, Credit = part 1 (same order as the chart segments)
+    const kp = $("inKpis").querySelectorAll(".kpi");
+    [[kp[1], 0], [kp[2], 1]].forEach(([el, part]) => { el.dataset.part = part; el.tabIndex = 0; el.setAttribute("role", "button"); });
+    const amt = (v, part, key = "") => `<td class="num" data-part="${part}" data-key="${e(key)}" title="${e(t("Show the services"))}">${money.format(v)}</td>`;
     $("inTbody").innerHTML = list.map((a) => `<tr><td>${e(a.name)}</td>
         <td class="num">${nf.format(a.cons)}</td><td class="num">${nf.format(a.rev)}</td><td class="num">${nf.format(a.visits)}</td>
-        <td class="num">${nf.format(a.serv)}</td><td class="num">${money.format(a.cash)}</td><td class="num">${money.format(a.credit)}</td>
+        <td class="num">${nf.format(a.serv)}</td>${amt(a.cash, 0, a.key)}${amt(a.credit, 1, a.key)}
         <td class="num"><b>${money.format(a.total)}</b></td><td>${shareCell(a.total, T.total)}</td></tr>`).join("");
     $("inFoot").innerHTML = list.length ? `<tr><td>${t("Total")}</td><td class="num">${nf.format(T.cons)}</td><td class="num">${nf.format(T.rev)}</td>
-        <td class="num">${nf.format(T.visits)}</td><td class="num">${nf.format(T.serv)}</td><td class="num">${money.format(T.cash)}</td>
-        <td class="num">${money.format(T.credit)}</td><td class="num">${money.format(T.total)}</td><td></td></tr>` : "";
+        <td class="num">${nf.format(T.visits)}</td><td class="num">${nf.format(T.serv)}</td>${amt(T.cash, 0)}
+        ${amt(T.credit, 1)}<td class="num">${money.format(T.total)}</td><td></td></tr>` : "";
     $("inEmpty").classList.toggle("hidden", list.length > 0);
 
     $("inLegend").innerHTML = legendHtml([["Cash", S1], ["Credit", S2]]);
     hbars($("chIncome"), "income", list.map((a) => ({
-      label: a.name, value: a.total, parts: [a.cash, a.credit], text: money.format(a.total), sub: `${pct(a.total, T.total)}%`,
+      key: a.key, label: a.name, value: a.total, parts: [a.cash, a.credit], text: money.format(a.total), sub: `${pct(a.total, T.total)}%`,
       tip: { title: a.name, lines: [
         { value: money.format(a.total), label: t("total") },
         { value: money.format(a.cash), label: t("cash"), color: S1 },
@@ -1586,6 +1639,88 @@
       ] },
     })), { parts: [S1, S2] });
     $("chIncome").closest(".card").classList.toggle("hidden", list.length === 0);
+  }
+
+  // ---------- Income lines: every cash / credit service with the patient's file number ----------
+  let incomePeriod = null, lnState = null;
+  const linesCache = new Map(); // cleared every time the income tab reloads, so it follows the hourly sync
+  const LINE_TYPES = { C: "Consultation", L: "Lab", X: "X-ray", O: "Other services", M: "Medicines" };
+  const lineType = (c) => (LINE_TYPES[c] ? t(LINE_TYPES[c]) : c || "—");
+
+  async function openIncomeLines(part, docKey = "") {
+    const p = incomePeriod; if (!p) return;
+    const names = new Map(incomeDocs.map((d) => [d.DocId || d.DocName, d.DocName || d.DocId]));
+    const dr = $("doctor").value;
+    lnState = { part, docKey, p, names, dr, lines: null };
+    $("lnSearch").value = "";
+    $("lnTitle").textContent = t(part === 0 ? "Cash services" : "Credit services") + " — " + (docKey ? names.get(docKey) ?? docKey : dr || t("All doctors"));
+    $("lnSub").textContent = t("Loading…");
+    $("lnKpis").innerHTML = ""; $("lnBody").innerHTML = ""; $("lnEmpty").classList.add("hidden");
+    $("linesModal").classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    try {
+      const key = `${p.from}|${p.to}`;
+      if (!linesCache.has(key)) {
+        const snap = await getDocs(query(collection(db, "doctor_income_lines"), where("Date", ">=", p.from), where("Date", "<=", p.to)));
+        linesCache.set(key, snap.docs.map((d) => d.data()));
+      }
+      if (lnState?.p !== p || lnState.part !== part || lnState.docKey !== docKey) return; // another click while loading
+      const amtKey = part === 0 ? "C" : "R";
+      lnState.lines = linesCache.get(key)
+        .filter((d) => (!docKey || (d.DocId || "") === docKey || names.get(d.DocId) === docKey) && (!dr || names.get(d.DocId) === dr))
+        .flatMap((d) => (d.Lines || []).map((l) => ({ ...l, Date: d.Date, Doctor: names.get(d.DocId) ?? d.DocId, Amt: +l[amtKey] || 0 })))
+        .filter((l) => l.Amt !== 0 && (incomeMode === "all" || l.T !== "M"));
+      renderIncomeLines();
+    } catch (err) {
+      $("lnSub").textContent = String(err?.code === "permission-denied"
+        ? t("Service details are not allowed yet — publish the new Firestore rules (doctor_income_lines).") : err?.message ?? err);
+    }
+  }
+
+  function lnFiltered() {
+    const q = $("lnSearch").value.trim().toLowerCase();
+    return lnState.lines.filter((l) => !q || [l.F, l.P, l.S, l.Doctor, l.I].some((v) => String(v ?? "").toLowerCase().includes(q)));
+  }
+
+  function renderIncomeLines() {
+    if (!lnState?.lines) return;
+    const { part, docKey, p, dr } = lnState;
+    const list = lnFiltered();
+    const sumOf = (l) => l.reduce((s, x) => s + x.Amt, 0);
+    const files = [...groupBy(list, (l) => l.F || "—")]
+      .map(([f, items]) => ({ f, items: items.sort((a, b) => `${a.Date} ${a.H}`.localeCompare(`${b.Date} ${b.H}`)), total: sumOf(items) }))
+      .sort((a, b) => (+a.f || Infinity) - (+b.f || Infinity) || a.f.localeCompare(b.f));
+    const total = sumOf(list), oneDay = p.from === p.to;
+
+    // Same filter on the totals: if they differ, some days were synced before the details existed
+    const pre = incomeMode === "all" ? "All" : "Med";
+    const expected = incomeDocs.filter((d) => (!docKey || (d.DocId || d.DocName) === docKey) && (!dr || d.DocName === dr))
+      .reduce((s, d) => s + (d[pre + (part === 0 ? "Cash" : "Credit")] || 0), 0);
+    const all = sumOf(lnState.lines);
+    const gap = !$("lnSearch").value.trim() && Math.abs(expected - all) > 0.5;
+    $("lnSub").textContent = `${p.label} · ${t(incomeMode === "all" ? "With medicines" : "Without medicines")}` +
+      (gap ? ` · ⚠ ${t("Details total {a} vs income {b} — some days have no service details yet (run backfill-income.bat).", { a: money.format(all), b: money.format(expected) })}` : "");
+
+    $("lnAmtHead").textContent = t(part === 0 ? "Cash" : "Credit");
+    $("lnKpis").innerHTML = kpi(t("Total"), money.format(total)) +
+      kpi(t("Services"), nf.format(list.length)) + kpi(t("Files"), nf.format(files.length));
+    $("lnBody").innerHTML = files.map((g) => `<tr class="file">
+        <td colspan="6"><span class="fileno">${e(g.f)}</span><span class="who">${e(g.items[0].P || "")}</span>
+          <span class="meta">${e(t("{n} services", { n: nf.format(g.items.length) }))}</span></td>
+        <td class="num">${money.format(g.total)}</td></tr>` +
+      g.items.map((l) => `<tr class="svc"><td class="muted">${e(l.F)}</td>
+        <td><span class="cut" style="max-width:320px" title="${e(l.S)}">${e(l.S)}</span></td>
+        <td>${e(lineType(l.T))}</td><td><span class="cut" style="max-width:170px" title="${e(l.Doctor)}">${e(l.Doctor)}</span></td>
+        <td>${oneDay ? "" : e(fmtDay(l.Date)) + " "}${e(l.H && l.H !== "00:00" ? l.H : "")}</td>
+        <td class="num">${nf.format(l.Q ?? 1)}</td><td class="num">${money.format(l.Amt)}</td></tr>`).join("")).join("");
+    $("lnEmpty").textContent = t(lnState.lines.length ? "No service matches the search." : "No service details for this period yet.");
+    $("lnEmpty").classList.toggle("hidden", list.length > 0);
+  }
+
+  function closeIncomeLines() {
+    $("linesModal").classList.add("hidden");
+    document.body.style.overflow = "";
+    lnState = null;
   }
 
   // ---------- Statistics ----------
@@ -1725,11 +1860,11 @@
     const top = max ?? Math.max(1, ...items.map((d) => d.value));
     tips.set(chart, items.map((d) => d.tip));
     el.innerHTML = `<div class="hbars">${items.map((d, i) => `
-      <div class="hrow${d.flag ? " flag" : ""}" ${tipAttr(chart, i)}>
+      <div class="hrow${d.flag ? " flag" : ""}" ${tipAttr(chart, i)}${d.key != null ? ` data-key="${e(d.key)}"` : ""}>
         <span class="name" title="${e(d.label)}">${e(d.label)}</span>
         ${d.meter != null ? `<div class="meter"><span style="width:${d.meter}%${d.color ? `;background:${d.color}` : ""}"></span></div>`
           : `<div class="htrack">${(parts ? d.parts : [d.value]).map((v, j) =>
-              v ? `<span class="seg" style="width:calc(${(v / top) * 100}% - 2px);background:${parts ? parts[j] : color}"></span>` : "").join("")}</div>`}
+              v ? `<span class="seg"${parts && d.key != null ? ` data-part="${j}"` : ""} style="width:calc(${(v / top) * 100}% - 2px);background:${parts ? parts[j] : color};color:${parts ? parts[j] : color}"></span>` : "").join("")}</div>`}
         <span class="val">${e(d.text)}${d.sub ? `<small>${e(d.sub)}</small>` : ""}</span>
       </div>`).join("")}</div>`;
   }
@@ -2276,9 +2411,6 @@
   const ONDANSETRON = /ONDANSET|DANSETRON|ZOFRAN/i, VOMIT_DX = /^(R11|A0[0-9]|K52|O21)/;
   const PPI = /PANTOPRAZ|PANTOMAX|PANTOZOL|CONTROLOC|OMEPRAZ|ESOMEPRAZ|NEXIUM|LANSOPRAZ|RABEPRAZ/i;
   const PPI_DX = /^(K2[0-9]|K3[01]|R1[0-3]|B96\.?81|M|S|T)/; // stomach, or with a painkiller for joint / injury pain
-  // Companies that rejected IV fluids / IV injections for "preauthorization not obtained" (July 2026)
-  const PREAUTH_IV = /MARINE INNOVATION|SAUDI ARABIC COMPUTER|ZAMIL CENTRAL/i;
-  const IV_SVC = /INTRAVENOUS FLUIDS?|INJECTION[-\s]*INTRAVENOUS/i;
   // "Too frequent": labs and imaging repeated within the 14 days before (consultations, injections and dressings are not tests)
   const NO_NOTES_TEST = /GLUCOSE|BLOOD SUGAR|\bFBS\b|\bRBS\b|URIN|\bGUE\b|STOOL/i; // never flagged (see TEST_RULES)
   const IS_TEST = (d) => !NO_NOTES_TEST.test(d) && (TEST_RULES.some((x) => x.svc.test(d)) || /X-?RAY|ULTRASOUND|\bCT\b|\bMRI\b|LIPID|LIVER|RENAL|CREAT|\bUREA\b|ELECTROLYTE|\bGGT\b/i.test(d));
@@ -2332,9 +2464,7 @@
     for (const x of prior) if (x.VisitDate !== r.VisitDate) for (const s of J(x.ServicesJson)) if (s.Code && IS_TEST(String(s.Description ?? ""))) earlierTests.set(s.Code, x.VisitDate);
     const repeated = J(r.ServicesJson).filter((s) => earlierTests.has(s.Code)).map((s) => `${s.Description || s.Code} (${earlierTests.get(s.Code)})`);
     if (repeated.length) add("review", "Test repeated too soon", t("Same test done again within 14 days (insurers reject it as too frequent): {s}", { s: [...new Set(repeated)].join(listSep()) }));
-    const iv = J(r.ServicesJson).find((s) => IV_SVC.test(String(s.Description ?? "")));
-    if (iv && PREAUTH_IV.test(String(r.PolicyHolder ?? "")) && !String(r.ApprovalNo ?? "").trim())
-      add("review", "Preauthorization needed", t("{s} for {p} needs preauthorization — this company rejected it without approval", { s: iv.Description, p: String(r.PolicyHolder).trim() }));
+    // the IV preauthorization note (Marine Innovation, Saudi Arabic Computer, Zamil Central) was dropped at the clinic's request (Oct 2026)
     const recentMeds = new Set(prior.flatMap((x) => J(x.MedsJson).filter(dispensed).map((m) => String(m.Code ?? ""))).filter(Boolean));
     const again = J(r.MedsJson).filter((m) => m.Code && dispensed(m) && recentMeds.has(String(m.Code)));
     if (again.length) add("review", "Refill too soon", t("Medicine prescribed again within 14 days (refill too soon): {m}", { m: again.map((m) => m.Name || m.Code).join(listSep()) }));
@@ -2979,6 +3109,34 @@
     const tr = ev.target.closest("tr[data-ins]"); if (!tr) return;
     $("insurer").value = tr.dataset.ins; render(); setTab("visits");
   });
+
+  // Income: Cash / Credit on the chart, the cards and the table open the services list
+  $("chIncome").addEventListener("click", (ev) => {
+    const seg = ev.target.closest(".seg[data-part]"); if (!seg) return;
+    openIncomeLines(+seg.dataset.part, seg.closest("[data-key]")?.dataset.key ?? "");
+  });
+  $("inKpis").addEventListener("click", (ev) => { const k = ev.target.closest(".kpi[data-part]"); if (k) openIncomeLines(+k.dataset.part); });
+  $("inKpis").addEventListener("keydown", (ev) => {
+    const k = ev.target.closest(".kpi[data-part]");
+    if (k && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); openIncomeLines(+k.dataset.part); }
+  });
+  ["inTbody", "inFoot"].forEach((id) => $(id).addEventListener("click", (ev) => {
+    const td = ev.target.closest("td[data-part]"); if (td) openIncomeLines(+td.dataset.part, td.dataset.key);
+  }));
+  $("lnClose").onclick = closeIncomeLines;
+  $("linesModal").addEventListener("click", (ev) => { if (ev.target.id === "linesModal") closeIncomeLines(); });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && lnState) closeIncomeLines(); });
+  $("lnSearch").addEventListener("input", renderIncomeLines);
+  $("lnCsv").onclick = () => {
+    if (!lnState?.lines) return;
+    const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const head = ["File no", "Patient", "Service", "Type", "Doctor", "Date", "Time", "Invoice", "Qty", lnState.part === 0 ? "Cash" : "Credit"].map((h) => esc(t(h)));
+    const body = lnFiltered().sort((a, b) => (+a.F || 0) - (+b.F || 0) || `${a.Date} ${a.H}`.localeCompare(`${b.Date} ${b.H}`))
+      .map((l) => [l.F, l.P, l.S, lineType(l.T), l.Doctor, l.Date, l.H, l.I, l.Q ?? 1, (l.Amt).toFixed(2)].map(esc).join(","));
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + [head.join(","), ...body].join("\r\n")], { type: "text/csv;charset=utf-8" }));
+    a.download = `${lnState.part === 0 ? "cash" : "credit"}-services-${lnState.p.from}_${lnState.p.to}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  };
 
   $("mClose").onclick = closeForm;
   $("modal").addEventListener("click", (ev) => { if (ev.target.id === "modal") closeForm(); });
