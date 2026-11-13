@@ -305,7 +305,7 @@
   .lines-panel tr.svc td:first-child { padding-inline-start: 36px; }
   .lines-panel .fileno { display: inline-block; min-width: 64px; padding: 2px 10px; border-radius: 6px; font-size: 15px; font-weight: 700;
                          background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; text-align: center; }
-  .lines-panel .who { margin-inline-start: 10px; }
+  .lines-panel .who { margin-inline-start: 10px; margin-inline-end: 8px; }
   .lines-panel .meta { color: var(--muted); font-weight: 400; margin-inline-start: 10px; font-size: 12px; }
   .three-col .hrow { grid-template-columns: minmax(0, 1fr) 70px 56px; }
   .sub-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
@@ -994,7 +994,8 @@
     "Amount": "المبلغ", "Invoice": "الفاتورة", "Loading…": "جاري التحميل…", "Consultation": "كشف", "Lab": "تحاليل", "X-ray": "أشعة",
     "👆 Click a doctor's blue (cash) or orange (credit) bar to see all the services, by patient file number":
       "👆 اضغط على الجزء الأزرق (نقدي) أو البرتقالي (آجل) عند أي طبيب لعرض كل الخدمات برقم ملف المريض",
-    "Other services": "خدمات أخرى", "Cash visits": "زيارات النقدي", "Insurance visits": "زيارات التأمين", "Price": "السعر",
+    "Other services": "خدمات أخرى", "Cash visits": "زيارات النقدي", "Cash patients": "مرضى نقدي", "Insurance deductible": "تحمل التأمين", "deductible": "تحمل",
+    "Insured patient's share, paid in cash": "نصيب مريض التأمين، مدفوع كاش", "{n} files": "{n} ملف", "Insurance visits": "زيارات التأمين", "Price": "السعر",
     "services written on the visit, price before discount": "الخدمات المكتوبة على الزيارة، والسعر قبل الخصم", "{n} services": "{n} خدمة", "Show the services": "اعرض الخدمات",
     "{p}% of income · click for the services": "{p}% من الإيراد · اضغط لعرض الخدمات",
     "Search file no, patient or service": "ابحث برقم الملف أو اسم المريض أو الخدمة",
@@ -1674,8 +1675,11 @@
       const amtKey = part === 0 ? "C" : "R";
       const synced = linesCache.get(key)
         .filter((d) => (!docKey || (d.DocId || "") === docKey || names.get(d.DocId) === docKey) && (!dr || names.get(d.DocId) === dr));
+      // An invoice with any credit line is an insured patient: its cash is the patient's share (deductible), not a cash patient
+      const insuredInv = new Set(synced.flatMap((d) => (d.Lines || []).filter((l) => +l.R).map((l) => `${d.Date}|${l.I}`)));
       const fromIncome = synced
-        .flatMap((d) => (d.Lines || []).map((l) => ({ ...l, Date: d.Date, Doctor: names.get(d.DocId) ?? d.DocId, Amt: +l[amtKey] || 0 })))
+        .flatMap((d) => (d.Lines || []).map((l) => ({ ...l, Date: d.Date, Doctor: names.get(d.DocId) ?? d.DocId, Amt: +l[amtKey] || 0,
+          Ins: insuredInv.has(`${d.Date}|${l.I}`) })))
         .filter((l) => l.Amt !== 0 && (incomeMode === "all" || l.T !== "M"));
       if (fromIncome.length) {
         lnState.source = "income";
@@ -1730,15 +1734,22 @@
         (gap ? ` · ⚠ ${t("Details total {a} vs income {b} — some days have no service details yet (run backfill-income.bat).", { a: money.format(all), b: money.format(expected) })}` : "");
 
     $("lnAmtHead").textContent = fromVisits ? t("Price") : t(part === 0 ? "Cash" : "Credit");
+    // Cash = cash patients + the insured patients' share (deductible); shown apart so the odd amounts are clear
+    const split = part === 0 && !fromVisits;
+    const ded = split ? sumOf(list.filter((l) => l.Ins)) : 0;
     $("lnKpis").innerHTML = kpi(t("Total"), money.format(total)) +
+      (split ? kpi(t("Cash patients"), money.format(total - ded), t("{n} files", { n: nf.format(files.filter((g) => !g.items.some((l) => l.Ins)).length) })) +
+               kpi(t("Insurance deductible"), money.format(ded), t("Insured patient's share, paid in cash"), ded ? "warn" : "") : "") +
       kpi(t("Services"), nf.format(list.length)) + kpi(t("Files"), nf.format(files.length));
+    const dedPill = `<span class="pill warn">${t("Insurance deductible")}</span>`;
     $("lnBody").innerHTML = files.map((g) => `<tr class="file">
         <td colspan="6"><span class="fileno">${e(g.f)}</span><span class="who">${e(g.items[0].P || "")}</span>
+          ${split && g.items.some((l) => l.Ins) ? dedPill : ""}
           <span class="meta">${e(t("{n} services", { n: nf.format(g.items.length) }))}</span></td>
         <td class="num">${money.format(g.total)}</td></tr>` +
       g.items.map((l) => `<tr class="svc"><td class="muted">${e(l.F)}</td>
         <td><span class="cut" style="max-width:320px" title="${e(l.S)}">${e(l.S)}</span></td>
-        <td>${e(lineType(l.T))}</td><td><span class="cut" style="max-width:170px" title="${e(l.Doctor)}">${e(l.Doctor)}</span></td>
+        <td>${e(lineType(l.T))}${split && l.Ins ? ` <span class="pill warn">${t("deductible")}</span>` : ""}</td><td><span class="cut" style="max-width:170px" title="${e(l.Doctor)}">${e(l.Doctor)}</span></td>
         <td>${oneDay ? "" : e(fmtDay(l.Date)) + " "}${e(l.H && l.H !== "00:00" ? l.H : "")}</td>
         <td class="num">${nf.format(l.Q ?? 1)}</td><td class="num">${money.format(l.Amt)}</td></tr>`).join("")).join("");
     $("lnEmpty").textContent = t(lnState.lines.length ? "No service matches the search." : "No service details for this period yet.");
@@ -3158,9 +3169,9 @@
   $("lnCsv").onclick = () => {
     if (!lnState?.lines) return;
     const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const head = ["File no", "Patient", "Service", "Type", "Doctor", "Date", "Time", "Invoice", "Qty", lnState.part === 0 ? "Cash" : "Credit"].map((h) => esc(t(h)));
+    const head = ["File no", "Patient", "Service", "Type", "Doctor", "Date", "Time", "Invoice", "Qty", lnState.part === 0 ? "Cash" : "Credit", "Insurance deductible"].map((h) => esc(t(h)));
     const body = lnFiltered().sort((a, b) => (+a.F || 0) - (+b.F || 0) || `${a.Date} ${a.H}`.localeCompare(`${b.Date} ${b.H}`))
-      .map((l) => [l.F, l.P, l.S, lineType(l.T), l.Doctor, l.Date, l.H, l.I, l.Q ?? 1, (l.Amt).toFixed(2)].map(esc).join(","));
+      .map((l) => [l.F, l.P, l.S, lineType(l.T), l.Doctor, l.Date, l.H, l.I, l.Q ?? 1, (l.Amt).toFixed(2), lnState.part === 0 && l.Ins ? t("deductible") : ""].map(esc).join(","));
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["﻿" + [head.join(","), ...body].join("\r\n")], { type: "text/csv;charset=utf-8" }));
     a.download = `${lnState.part === 0 ? "cash" : "credit"}-services-${lnState.p.from}_${lnState.p.to}.csv`; a.click(); URL.revokeObjectURL(a.href);
