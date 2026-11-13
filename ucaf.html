@@ -989,7 +989,8 @@
     "total": "الإجمالي", "credit": "آجل", "services": "خدمات",
     "Cash services": "خدمات النقدي", "Credit services": "خدمات الآجل", "Files": "عدد الملفات", "Service": "الخدمة", "Qty": "الكمية",
     "Amount": "المبلغ", "Invoice": "الفاتورة", "Loading…": "جاري التحميل…", "Consultation": "كشف", "Lab": "تحاليل", "X-ray": "أشعة",
-    "Other services": "خدمات أخرى", "{n} services": "{n} خدمة", "Show the services": "اعرض الخدمات",
+    "Other services": "خدمات أخرى", "Cash visits": "زيارات النقدي", "Insurance visits": "زيارات التأمين", "Price": "السعر",
+    "services written on the visit, price before discount": "الخدمات المكتوبة على الزيارة، والسعر قبل الخصم", "{n} services": "{n} خدمة", "Show the services": "اعرض الخدمات",
     "{p}% of income · click for the services": "{p}% من الإيراد · اضغط لعرض الخدمات",
     "Search file no, patient or service": "ابحث برقم الملف أو اسم المريض أو الخدمة",
     "No service matches the search.": "مفيش خدمة مطابقة للبحث.", "No service details for this period yet.": "مفيش تفاصيل خدمات للفترة دي لسه.",
@@ -1666,10 +1667,29 @@
       }
       if (lnState?.p !== p || lnState.part !== part || lnState.docKey !== docKey) return; // another click while loading
       const amtKey = part === 0 ? "C" : "R";
-      lnState.lines = linesCache.get(key)
-        .filter((d) => (!docKey || (d.DocId || "") === docKey || names.get(d.DocId) === docKey) && (!dr || names.get(d.DocId) === dr))
+      const synced = linesCache.get(key)
+        .filter((d) => (!docKey || (d.DocId || "") === docKey || names.get(d.DocId) === docKey) && (!dr || names.get(d.DocId) === dr));
+      const fromIncome = synced
         .flatMap((d) => (d.Lines || []).map((l) => ({ ...l, Date: d.Date, Doctor: names.get(d.DocId) ?? d.DocId, Amt: +l[amtKey] || 0 })))
         .filter((l) => l.Amt !== 0 && (incomeMode === "all" || l.T !== "M"));
+      if (fromIncome.length) {
+        lnState.source = "income";
+        lnState.lines = fromIncome;
+      } else {
+        // No income details from the server yet: take the services written on the visits (cash visits / insurance visits)
+        if (daysBetween(p.from, p.to) > MAX_DAYS) throw new Error(t("Please choose {n} days or fewer.", { n: MAX_DAYS }));
+        const visits = await loadPeriod(p);
+        if (lnState?.p !== p || lnState.part !== part || lnState.docKey !== docKey) return;
+        const norm = (s) => String(s ?? "").trim().toUpperCase();
+        const wantDoc = norm(docKey ? names.get(docKey) ?? docKey : dr);
+        lnState.source = "visits";
+        lnState.lines = visits
+          .filter((r) => r.PaymentCode === (part === 0 ? "C" : "R") && (!wantDoc || norm(r.Doctor) === wantDoc))
+          .flatMap((r) => J(r.ServicesJson).map((s) => ({
+            F: r.FileNo, P: r.PatientName, S: s.Description || s.Code, T: s.Type, H: r.VisitTime, I: r.VisitId,
+            Q: s.Qty, Amt: Number(s.Cost) || 0, Date: r.VisitDate, Doctor: r.Doctor,
+          })));
+      }
       renderIncomeLines();
     } catch (err) {
       $("lnSub").textContent = String(err?.code === "permission-denied"
@@ -1697,11 +1717,14 @@
     const expected = incomeDocs.filter((d) => (!docKey || (d.DocId || d.DocName) === docKey) && (!dr || d.DocName === dr))
       .reduce((s, d) => s + (d[pre + (part === 0 ? "Cash" : "Credit")] || 0), 0);
     const all = sumOf(lnState.lines);
-    const gap = !$("lnSearch").value.trim() && Math.abs(expected - all) > 0.5;
-    $("lnSub").textContent = `${p.label} · ${t(incomeMode === "all" ? "With medicines" : "Without medicines")}` +
-      (gap ? ` · ⚠ ${t("Details total {a} vs income {b} — some days have no service details yet (run backfill-income.bat).", { a: money.format(all), b: money.format(expected) })}` : "");
+    const fromVisits = lnState.source === "visits";
+    const gap = !fromVisits && !$("lnSearch").value.trim() && Math.abs(expected - all) > 0.5;
+    $("lnSub").textContent = fromVisits
+      ? `${p.label} · ${t(part === 0 ? "Cash visits" : "Insurance visits")} · ${t("services written on the visit, price before discount")}`
+      : `${p.label} · ${t(incomeMode === "all" ? "With medicines" : "Without medicines")}` +
+        (gap ? ` · ⚠ ${t("Details total {a} vs income {b} — some days have no service details yet (run backfill-income.bat).", { a: money.format(all), b: money.format(expected) })}` : "");
 
-    $("lnAmtHead").textContent = t(part === 0 ? "Cash" : "Credit");
+    $("lnAmtHead").textContent = fromVisits ? t("Price") : t(part === 0 ? "Cash" : "Credit");
     $("lnKpis").innerHTML = kpi(t("Total"), money.format(total)) +
       kpi(t("Services"), nf.format(list.length)) + kpi(t("Files"), nf.format(files.length));
     $("lnBody").innerHTML = files.map((g) => `<tr class="file">
